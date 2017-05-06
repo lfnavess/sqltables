@@ -25,10 +25,8 @@ if (!Array.prototype.indexOf2) {
 if (!Array.prototype.orderBy) {
     Array.prototype.orderBy = function(datamap) {
         var rows = this;
-        if (rows.length < 2) { return this; }
-        for (var i = 1, row, j, data = [], insertAt; i < rows.length; i++) {
-            for (row = rows[i], j = 0; j < datamap.length; j++) { data[j] = datamap[j](row); }
-            rows.move(i, rows.indexOf2(data, datamap, 0, i - 1)[1]);
+        for (var i = 2; i < rows.length; i++) {
+            rows.move(i, rows.indexOf2(datamap.map(function(map) { return map(rows[i]); }), datamap, 1, i - 1)[1]);
         }
         return this;
     };
@@ -45,14 +43,18 @@ if (!Array.prototype.move) {
         return this; // for testing purposes
     };
 }
+if (!Array.prototype.insert2) {
+    Array.prototype.insert2 = function(value, datamaps) {
+        var rows = this;
+        return rows.insertAt(rows.indexOf2(datamaps.map(function(map) { return map(row); }), datamaps)[1], value);
+    };
+}
 
-var results = [
-    ['Columna', '', ''],
-    ['', 'Valor', ''],
-    ['', '', []]
+var resultados = [
+    ['Columna', 'Valor', 'Totales']
 ];
 
-var data = [
+var reporte = [
     ['Estado', 'Lugar'],
     ['Completado', 'PARCAR'],
     ['Completado', 'PARCAR'],
@@ -61,6 +63,7 @@ var data = [
 ];
 
 var estados = [
+    ['Estado', '*Orden', '*Color'],
     ['Completado', 1, '#00B050'],
     ['Reprobado', 2, '#FF0000'],
     ['Fuga', 3, '#003300'],
@@ -72,52 +75,112 @@ var estados = [
     ['Sin iniciar', 9, '#A6A6A6'],
     ['Programado', 10, '#4472C4']
 ];
-estados.orderBy([function(row) { return row[0]; }]);
-
-var row_total = results[2];
-var total_cell = results[2][2];
+estados.orderBy([function(row) { return row[0]; }])
+//var row_total = resultados[2];
+//var total_cell = resultados[2][2];
 var extracts = [
-    function(row) { return row[0][1]; },
-    function(row) { return row[1]; }
+    function(row) { return row[0]; },
+    function(row) { return row[1][1]; }
 ];
 var extractsh = [
     function(cell, index) { return results[0][index]; },
     function(cell, index) { return results[1][index]; }
 ];
-for (var data_i = 1, data_row, result_row, result_col, tmp; data_i < data.length; data_i++) {
-    data_row = data[data_i];
-    data_row[0] = estados.indexOf2(data_row, [function(row) { return row[0]; }])[0];
-
-    total_cell.push(data_row);
-
-    tmp = results.indexOf2(['Estado', data_row[0][1]], extracts, 3);
-    if (tmp[0]) { result_row = tmp[0]; }
-    else {
-        result_row = ['Estado', data_row[0], []];
-        for (var i = 3; i < row_total.length; i++) { result_row[i] = []; }
-        results.insertAt(tmp[1], result_row);
+var from = {};
+from.data = function(table, row, col) {
+    return row[table[0].indexOf(col)];
+}
+from.equal = function(tablea, tableb) {
+    var indexOfCol = table[0].indexOf(col);
+    return table.indexOf2([data], function(row) { return row[indexOfCol]; })
+}
+var tsqlfuncs = {
+    "=": function(left, right) {
+        return tables[left[0]]
+            .indexOf2(tables[right[0]][3], function(row) { return row[left[1]]; })[0];
     }
-    result_row[2].push(data_row);
+}
+var select = [
+    ["Estado", [0, 0]],
+    ["Lugar", [0,1]]
+]
+var tables = [//FROM
+    ["reporte", reporte, null],                                                 //reporte
+    ["reporte >estado", estados, ["LJ", [[[1, 0], tsqlfuncs["="], [0, 0]]]]],   //LEFT JOIN estados AS "reporte >estado" ON "reporte >estado"Eestado = reporte.Estado
+];
+var orderby = [
+    [[1, 1], 1],    //"reporte >estado"."*Orden"
+    [[0, 2], 1]     //reporte.Lugar
+];
+var resrows = [];
 
-    tmp = result_row.indexOf2(['Lugar', data_row[1]], extractsh, 3);
-    if (tmp[0]) { result_col = tmp[1]; }
-    else {
-        result_col = tmp[1];
-        results[0].insertAt(result_col, 'Lugar');
-        results[1].insertAt(result_col, data_row[1]);
-        results[2].insertAt(result_col, []);
-        for (var i = 3; i < results.length; i++) { results[i].insertAt(result_col, []); }
+function parsedata(s) { return typeof s === "string" ? s : tables[s[0]][3][s[1]]; }
+orderby = orderby.map(function(or) { return [function(row) { return row[or[1]]; }, or[2]]; });
+for (var table = tables[0], row_i = 1, resrow = []; row_i < table.length; row_i++) {
+    resrow[0] = table[1][row_i];
+    for (var t2i = 1, t2, rms, funcs, data, res; t2i < tables.length; t2i++) {
+        t2 = tables[t2i];
+        rms = tables[t2i][2][1];
+        funcs = rms.map(function(rm) { return function(row) { return row[rm[0][1]]; } });
+        data = rms.map(function(rm) { return parsedata(rm[2]); });
+        res = t2[1].indexOf2(data, funcs);
+        if (res[0] === null) {
+            res[0] = t2[1][0].map(function() { null; });
+            for (var rmi = 0, rm; rmi < rms.length; rmi++) {
+                rm = rms[rmi];
+                res[0][rm[0][1]] = parsedata(rm[2]);
+            }
+            t2[1].insertAt(res[1], res[0]);
+        }
+        resrow[t2i] = res[0];
+        if (rms.length === 1) { tables[rms[0][2][0]][3][rms[0][2][1]] = t2[3]; }
     }
-    row_total[result_col].push(data_row);
-    result_row[result_col].push(data_row);
+    if (orderby) {
+        restrows.insert2(restrow, orderbymaps);
+    } else { restrows.push(resrow); }
+
+    //FROM 
+    //  reporte
+    //  LEFT JOIN estados AS "reporte >estado" ON "reporte >estado".estado = reporte.Estado
+    //  LEFT JOIN resultados AS "reporte >resultado" ON
+    //      "reporte >resultado"."columna" = 'Estado'
+    //      AND "reporte >resultado"."valor" = reporte.Estado
+
+    //total_cell.push(table[3]);
+
+    //tmp = results.indexOf2(['Estado', table[3][0][1]], extracts, 3);
+
+    ////
+    //if (tmp[0]) { result_row = tmp[0]; }
+    //else {
+    //    result_row = ['Estado', data_row[0], []];
+    //    for (var i = 3; i < row_total.length; i++) { result_row[i] = []; }
+    //    results.insertAt(tmp[1], result_row);
+    //}
+    //result_row[2].push(data_row);
+
+    //tmp = result_row.indexOf2(['Lugar', data_row[1]], extractsh, 3);
+    //if (tmp[0]) { result_col = tmp[1]; }
+    //else {
+    //    result_col = tmp[1];
+    //    results[0].insertAt(result_col, 'Lugar');
+    //    results[1].insertAt(result_col, data_row[1]);
+    //    results[2].insertAt(result_col, []);
+    //    for (var i = 3; i < results.length; i++) { results[i].insertAt(result_col, []); }
+    //}
+    //row_total[result_col].push(data_row);
+    //result_row[result_col].push(data_row);
 }
 var end = 1;
 function compare(a, b, extracts, index) {
     if (extracts) {
-        for (var cols_i = 0, result; cols_i < extracts.length && !result; cols_i++) {
-            result = compare_s(a[cols_i], extracts[cols_i](b, index));
+        if (extracts.length) {
+            for (var cols_i = 0, result; cols_i < extracts.length && !result; cols_i++) {
+                result = compare_s(a[cols_i], extracts[cols_i](b, index));
+            }
+            return result
         }
-        return result;
+        return compare_s(a, extracts(b, index));
     }
     return compare_s(a, b);
 }
