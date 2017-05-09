@@ -5,9 +5,9 @@
     <meta charset="UTF-8">
     <meta name="description" content="The description of my page" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/normalize/7.0.0/normalize.min.css" rel="stylesheet" />
+    <link href="normalize.min.css" rel="stylesheet" />
     <link href="reporteador.css" rel="stylesheet" />
-    <script src="http://momentjs.com/downloads/moment.js"></script>
+    <script src="moment.js"></script>
     <!--<script src="scripts/reporteador/reporteador.js" type="text/javascript" charset="utf-8"></script>-->
     <script>
         var ttt;
@@ -17,6 +17,19 @@
         var body;
         var thead;
         var sheet;
+		var sheetData = {
+			"thead":{"top":""},
+			"th:nth-child(1),td:nth-child(1)":{"left":""}
+		};
+		function updatesheet(){
+			sheet.innerHTML = Object.keys(sheetData).map(
+				function(selector) {
+					return selector + "{" + Object.keys(sheetData[selector]).map(
+						function(property){return property + ":" + sheetData[selector][property]+";"; }
+					) + "}";
+				}
+			).join("");
+		}
         document.addEventListener('DOMContentLoaded', function() {
             body = document.querySelector("body");
             thead = document.querySelector("body > table > thead");
@@ -25,14 +38,23 @@
         }, false);
         document.addEventListener("mousedown", function() { mousedown = true; });
         document.addEventListener("mouseup", function() { mousedown = false; });
+        document.addEventListener("mouseup", function() { mousedown = false; });
+        document.addEventListener(
+			"wheel", 
+			function(e) { e.preventDefault(); window.scrollTo(body.scrollLeft + e.deltaX, body.scrollTop + e.deltaY); }
+		);
         document.addEventListener("scroll", function(e) {
-            clearTimeout(ttt);
+			console.log("scroll", body.scrollLeft, body.scrollTop);
+			clearTimeout(ttt);
             if (mousedown) { ttt = document.addEventListener("mouseup", repositioning); }
-            else { ttt = setTimeout(repositioning, 500); }
-            thead.style.top = body.scrollTop + "px";
-            sheet.innerHTML = "th:nth-child(1),td:nth-child(1){left: " + body.scrollLeft + "px;}";
+            //else { ttt = setTimeout(repositioning, 250); }
+			repositioning();
+			sheetData.thead.top = body.scrollTop + "px";
+			sheetData["th:nth-child(1),td:nth-child(1)"].left = body.scrollLeft + "px";
+            updatesheet();
         });
         function repositioning() {
+			console.log("repositioning()", deltaX, deltaY, x, y);
             var aaa = document.elementFromPoint(47, 22);
             var bbb = aaa.getBoundingClientRect();
             var x = body.scrollLeft, y = body.scrollTop;
@@ -42,8 +64,9 @@
             if (bbb.top + (bbb.height / 2) > 22) { y = aaa.offsetTop - 22; }
             else { y = aaa.offsetTop + bbb.height - 22; }
             window.scrollTo(x, y);
-            thead.style.top = body.scrollTop + "px";
-            sheet.innerHTML = "th:nth-child(1),td:nth-child(1){left: " + body.scrollLeft + "px;}";
+			sheetData.thead.top = body.scrollTop + "px";
+			sheetData["th:nth-child(1),td:nth-child(1)"].left = body.scrollLeft + "px";
+            updatesheet();
         }
     </script>
 </head>
