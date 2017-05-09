@@ -1,6 +1,10 @@
 {
   "ExpandedNodes": [
-    ""
+    "",
+    "\\scripts",
+    "\\scripts\\reporteador",
+    "\\scripts\\scormplayer"
   ],
+  "SelectedNode": "\\scripts\\reporteador\\tables.html",
   "PreviewInSolutionExplorer": false
 }

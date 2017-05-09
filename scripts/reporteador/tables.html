@@ -1,0 +1,1341 @@
+﻿<!DOCTYPE html>
+<html lang="es-mx">
+<head>
+	<title>TEST</title>
+	<meta charset="UTF-8">
+	<meta name="description" content="The description of my page" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/normalize/7.0.0/normalize.min.css" rel="stylesheet" />
+    <link href="reporteador.css" rel="stylesheet" />
+	<script src="http://momentjs.com/downloads/moment.js"></script>
+	<!--<script src="scripts/reporteador/reporteador.js" type="text/javascript" charset="utf-8"></script>-->
+	<script>
+		var ttt;
+		var wheel;
+		var click;
+		var mousedown;
+		var draging;
+		var body;
+		var thead;
+		document.addEventListener('DOMContentLoaded', function() { 
+			body = document.querySelector("body"); 
+			thead = document.querySelector("body > table > thead");
+		}, false);
+		document.addEventListener("mousedown", function(){ document.addEventListener("mousemove", mousemove);});
+		document.addEventListener("mouseup", function(){ mousedown = false; });
+		function mousemove(){console.log("mousemove")}
+		document.addEventListener("wheel", function(){ wheel = true; });
+		document.addEventListener("scroll", function(e){
+			clearTimeout(ttt);
+			if(mousedown){ttt = document.addEventListener("mouseup", repositioning);}
+			else{ttt = setTimeout(repositioning, 0);}
+			thead.style.top = body.scrollTop + "px";
+			wheel = false;
+		});
+		function repositioning(){ 
+			var aaa = document.elementFromPoint(47,22);
+			var bbb = aaa.getBoundingClientRect();
+			var x, y;
+			document.removeEventListener("mouseup", repositioning);
+			if((bbb.width / 2) > bbb.left){ x = body.scrollLeft + bbb.left; }
+			else{ x = body.scrollLeft + (bbb.left - 47); }
+			if((bbb.height / 2) > bbb.top){y = body.scrollTop + bbb.top;}
+			else{y = body.scrollTop + (bbb.top - 22);}
+			window.scrollTo(x, y );
+			thead.style.top = body.scrollTop + "px";
+			var sheet = document.createElement('style')
+			sheet.innerHTML = "th:nth-child(1),td:nth-child(1){left: " + +"px;}";
+			document.body.appendChild(sheet);
+		}
+	</script>
+</head>
+<body>
+	<table>
+		<thead>
+			<tr>
+				<th>.</th>
+				<th>Colaborador ID</th>
+				<th>COMEX ID</th>
+				<th>PPG ID</th>
+				<th>LATAM ID</th>
+				<th>Contractor ID</th>
+				<th>Colaborador</th>
+				<th>Posición</th>
+				<th>Posición &gt;COMEX ID</th>
+				<th>Posición &gt;Lugar</th>
+				<th>Posición &gt;Lugar &gt;Empresa</th>
+				<th>Posición &gt;Lugar &gt;Empresa &gt;Tipo</th>
+				<th>Posición &gt;Lugar &gt;Municipio &gt;Entidad</th>
+				<th>Posición &gt;Lugar &gt;Municipio &gt;Entidad &gt;País</th>
+				<th>Posición &gt;Lugar &gt;Posición JC &gt;Colaborador</th>
+				<th>Posición &gt;Lugar &gt;Posición JC &gt;Email</th>
+				<th>Posición &gt;Puesto</th>
+				<th>Posición &gt;Puesto &gt;Nivel</th>
+				<th>Posición &gt;Centro de costos</th>
+				<th>Posición &gt;Dirección</th>
+				<th>Posición &gt;Dirección &gt;Posición BP &gt;Colaborador</th>
+				<th>Posición &gt;Dirección &gt;Posición BP &gt;Email</th>
+				<th>Posición &gt;Tipo</th>
+				<th>Posición &gt;Posición jefe &gt;Colaborador</th>
+				<th>Posición &gt;Posición jefe &gt;Email</th>
+				<th>Posición &gt;Posición director &gt;Colaborador</th>
+				<th>Posición &gt;Email</th>
+				<th>Posición &gt;Email capturado</th>
+				<th>Posición &gt;Email seguimiento</th>
+				<th>Posición &gt;Email confirmado</th>
+				<th>Posición &gt;Email confirmado fecha</th>
+				<th>Posición &gt;Teléfono</th>
+				<th>Posición &gt;Teléfono móvil</th>
+				<th>Posición &gt;Banda</th>
+				<th>Posición &gt;Equipo</th>
+				<th>Posición &gt;Equipo capturado</th>
+				<th>Posición &gt;Incapacidad</th>
+				<th>Posición &gt;Alta</th>
+				<th>Posición &gt;Baja</th>
+				<th>Posición &gt;Fecha actualizado</th>
+				<th>Posición &gt;Fecha insertado</th>
+				<th>Apellido paterno</th>
+				<th>Apellido materno</th>
+				<th>Nombre(s)</th>
+				<th>Teléfono móvil</th>
+				<th>Email</th>
+				<th>Usuario</th>
+				<th>Fecha nacimiento</th>
+				<th>Sexo</th>
+				<th>CURP</th>
+				<th>CURP valido</th>
+				<th>RFC</th>
+				<th>RFC valido</th>
+				<th>CAE ID</th>
+				<th>Último acceso</th>
+				<th>Actualizado por</th>
+				<th>Fecha actualizado</th>
+				<th>Fecha insertado</th>
+				<th>Insertado por</th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr>
+				<td>1</td>
+				<td class="right">16</td>
+				<td class="right">13006577</td>
+				<td class="right">283141</td>
+				<td class="right"></td>
+				<td class="right"></td>
+				<td>Morales Lopez, Ernesto Andres|16</td>
+				<td class="right">866</td>
+				<td>K00245</td>
+				<td>KROMA TULTITLAN</td>
+				<td>KROMA</td>
+				<td>Interna COMEX</td>
+				<td>MEXICO|15</td>
+				<td>Mexico</td>
+				<td></td>
+				<td></td>
+				<td>ADMINISTRADOR DE SEGURIDAD ERP|11</td>
+				<td></td>
+				<td>SISTEMAS (TI)|21030</td>
+				<td>Sistemas (TI)</td>
+				<td>Baranda Rochin, Paulina|1103</td>
+				<td>pbarandar@ppg.com</td>
+				<td>CONFIANZA</td>
+				<td>Benitez Santana, Jose Luis|2436</td>
+				<td>jlbenitezs@ppg.com</td>
+				<td>Malo del Valle, Jorge Alberto|6250</td>
+				<td></td>
+				<td class="right">19/04/2017</td>
+				<td class="center">?</td>
+				<td class="center"></td>
+				<td class="right">28/07/2016</td>
+				<td></td>
+				<td></td>
+				<td>G</td>
+				<td></td>
+				<td class="right"></td>
+				<td class="right"></td>
+				<td class="right">17/10/2005</td>
+				<td class="right">13/05/2016</td>
+				<td class="right">19/04/2017 15:25</td>
+				<td class="right">16/03/2016 14:55</td>
+				<td>Morales</td>
+				<td>L�pez</td>
+				<td>Ernesto Andr�s</td>
+				<td></td>
+				<td></td>
+				<td>e283141</td>
+				<td class="right">18/11/1979</td>
+				<td>H</td>
+				<td>MOLE791118HMCRPR11</td>
+				<td class="center"></td>
+				<td>MOLE791118118</td>
+				<td class="center">?</td>
+				<td class="right">3970</td>
+				<td class="right"></td>
+				<td>Naves Santoyo, Luis Fernando|1127</td>
+				<td class="right">19/04/2017 14:35</td>
+				<td class="right">11/06/2013 17:41</td>
+				<td>Naves Santoyo, Luis Fernando|1127</td>
+			</tr>
+			<tr>
+				<td>2</td>
+				<td class="right">46</td>
+				<td class="right">90007068</td>
+				<td class="right"></td>
+				<td class="right"></td>
+				<td class="right"></td>
+				<td>Urbina Villalpando, Sarai|46</td>
+				<td class="right">8460</td>
+				<td></td>
+				<td>GRUPO COMEX</td>
+				<td>GRUPO COMEX</td>
+				<td>Interna COMEX</td>
+				<td>DISTRITO FEDERAL|9</td>
+				<td>Mexico</td>
+				<td>Flores alvarez, Silvia|81</td>
+				<td>sfloresa@ppg.com</td>
+				<td>GERENTE RECURSOS HUMANOS Y CAPACITACION|410</td>
+				<td>GERENCIA</td>
+				<td>CAPITAL HUMANO|21020</td>
+				<td></td>
+				<td></td>
+				<td></td>
+				<td>CONFIANZA</td>
+				<td></td>
+				<td></td>
+				<td></td>
+				<td></td>
+				<td class="right"></td>
+				<td class="center">?</td>
+				<td class="center"></td>
+				<td class="right"></td>
+				<td></td>
+				<td></td>
+				<td></td>
+				<td></td>
+				<td class="right"></td>
+				<td class="right"></td>
+				<td class="right">01/08/2011</td>
+				<td class="right">15/07/2013</td>
+				<td class="right"></td>
+				<td class="right">14/09/2016 18:47</td>
+				<td>Urbina</td>
+				<td>Villalpando</td>
+				<td>Sarai</td>
+				<td></td>
+				<td></td>
+				<td></td>
+				<td class="right">16/08/1977</td>
+				<td>M</td>
+				<td></td>
+				<td class="center"></td>
+				<td>UIVS770816IN5</td>
+				<td class="center">?</td>
+				<td class="right">3807</td>
+				<td class="right"></td>
+				<td>Naves Santoyo, Luis Fernando|1127</td>
+				<td class="right">16/02/2017 12:47</td>
+				<td class="right">19/06/2013 16:54</td>
+				<td>Naves Santoyo, Luis Fernando|1127</td>
+			</tr>
+			<tr>
+				<td>3</td>
+				<td class="right">48</td>
+				<td class="right">90004462</td>
+				<td class="right">283880</td>
+				<td class="right"></td>
+				<td class="right"></td>
+				<td>Soto Figueroa, Fernando|48</td>
+				<td class="right">1452</td>
+				<td>AME059</td>
+				<td>CIC TLALNEPANTLA</td>
+				<td>CIC</td>
+				<td>Interna COMEX</td>
+				<td>MEXICO|15</td>
+				<td>Mexico</td>
+				<td>Marquez Valdez, Edgar Arturo|43558</td>
+				<td>eamarquezv@ppg.com</td>
+				<td>CAPTURISTA|134</td>
+				<td></td>
+				<td>PLANEACION DE LA PRODUCCION|11701</td>
+				<td>Plantas CIC</td>
+				<td>Munoz Organiz, Raul|2488</td>
+				<td>rmunozo@ppg.com</td>
+				<td>CONFIANZA</td>
+				<td>Flores Baca, Fernando|4058</td>
+				<td>ffloresb@ppg.com</td>
+				<td>Padilla Lares, Francisco Salvador|2379</td>
+				<td></td>
+				<td class="right">19/04/2017</td>
+				<td class="center">?</td>
+				<td class="center"></td>
+				<td class="right">09/02/2017</td>
+				<td>tel:+525516692578;ext=2578</td>
+				<td></td>
+				<td>H</td>
+				<td>WCICDMXL434170K</td>
+				<td class="right">29/07/2016</td>
+				<td class="right"></td>
+				<td class="right">19/10/2009</td>
+				<td class="right">09/01/2017</td>
+				<td class="right">19/04/2017 15:25</td>
+				<td class="right">16/03/2016 14:55</td>
+				<td>Soto</td>
+				<td>Figueroa</td>
+				<td>Fernando</td>
+				<td></td>
+				<td></td>
+				<td>e283880</td>
+				<td class="right">30/05/1977</td>
+				<td>H</td>
+				<td>SOFF770530HDFTGR09</td>
+				<td class="center"></td>
+				<td>SOFF7705301Z1</td>
+				<td class="center">?</td>
+				<td class="right">305</td>
+				<td class="right">13/03/2014 12:18</td>
+				<td>Naves Santoyo, Luis Fernando|1127</td>
+				<td class="right">19/04/2017 14:35</td>
+				<td class="right">27/06/2013 13:12</td>
+				<td>Naves Santoyo, Luis Fernando|1127</td>
+			</tr>
+			<tr>
+				<td>4</td>
+				<td class="right">49</td>
+				<td class="right">31000138</td>
+				<td class="right">280698</td>
+				<td class="right"></td>
+				<td class="right"></td>
+				<td>Pioquinto Ruiz, Armando|49</td>
+				<td class="right">3720</td>
+				<td>AGA019</td>
+				<td>AGA</td>
+				<td>AGA</td>
+				<td>Interna COMEX</td>
+				<td>MEXICO|15</td>
+				<td>Mexico</td>
+				<td>Jimenez Arellano, Mariana|2139</td>
+				<td>mjimeneza@ppg.com</td>
+				<td>AUXILIAR ADMINISTRATIVO|93</td>
+				<td></td>
+				<td>OPERACIONES ALMACENES|11734</td>
+				<td>Plantas AGA</td>
+				<td>Morales Suarez, Edith Dafne|1137</td>
+				<td>emorales@ppg.com</td>
+				<td>CONFIANZA</td>
+				<td>Granados Miguel, Jose Alberto|4668</td>
+				<td>jagranadosm@ppg.com</td>
+				<td>Pacheco Montano, Julian de Jesus|3973</td>
+				<td>apioquintor@ppg.com</td>
+				<td class="right"></td>
+				<td class="center">?</td>
+				<td class="center">?</td>
+				<td class="right">05/09/2016</td>
+				<td></td>
+				<td></td>
+				<td>H</td>
+				<td>WAGADHNN4C42</td>
+				<td class="right">23/06/2016</td>
+				<td class="right"></td>
+				<td class="right">22/12/2014</td>
+				<td class="right"></td>
+				<td class="right">12/09/2016 18:09</td>
+				<td class="right">16/03/2016 14:55</td>
+				<td>Pioquinto</td>
+				<td>Ruiz</td>
+				<td>Armando</td>
+				<td></td>
+				<td></td>
+				<td></td>
+				<td class="right">11/02/1978</td>
+				<td>H</td>
+				<td>PIRA780211HMCQZR00</td>
+				<td class="center"></td>
+				<td>PIRA7802115J3</td>
+				<td class="center">?</td>
+				<td class="right">3248</td>
+				<td class="right"></td>
+				<td>Naves Santoyo, Luis Fernando|1127</td>
+				<td class="right">26/04/2017 09:43</td>
+				<td class="right">27/06/2013 14:02</td>
+				<td>Naves Santoyo, Luis Fernando|1127</td>
+			</tr>
+			<tr>
+				<td>5</td>
+				<td class="right">50</td>
+				<td class="right">11000237</td>
+				<td class="right">280725</td>
+				<td class="right"></td>
+				<td class="right"></td>
+				<td>Hernandez de la Cruz, Margarita|50</td>
+				<td class="right">889</td>
+				<td>PSA045</td>
+				<td>PESA</td>
+				<td>PESA</td>
+				<td>Interna COMEX</td>
+				<td>DISTRITO FEDERAL|9</td>
+				<td>Mexico</td>
+				<td></td>
+				<td></td>
+				<td>COORDINADOR DE ADMON DE PERSONAL|154</td>
+				<td>COODINACION/SUPERVISION</td>
+				<td>CAPITAL HUMANO|21020</td>
+				<td>Recursos Humanos</td>
+				<td>Baranda Rochin, Paulina|1103</td>
+				<td>pbarandar@ppg.com</td>
+				<td>CONFIANZA</td>
+				<td>Garcia Paz, Maria de los Angeles|4613</td>
+				<td>magarciap@ppg.com</td>
+				<td>Padilla Lares, Francisco Salvador|2379</td>
+				<td>mhernandezdelac@ppg.com</td>
+				<td class="right"></td>
+				<td class="center">?</td>
+				<td class="center">?</td>
+				<td class="right">31/08/2016</td>
+				<td>tel:+525516692622;ext=2622</td>
+				<td>tel:+5215539994462;ext=4462</td>
+				<td>G</td>
+				<td>WPSALC48HQ32</td>
+				<td class="right">23/06/2016</td>
+				<td class="right"></td>
+				<td class="right">30/01/2006</td>
+				<td class="right"></td>
+				<td class="right">14/09/2016 18:33</td>
+				<td class="right">16/03/2016 14:55</td>
+				<td>Hern�ndez</td>
+				<td>de la Cruz</td>
+				<td>Margarita</td>
+				<td></td>
+				<td></td>
+				<td></td>
+				<td class="right">23/03/1981</td>
+				<td>M</td>
+				<td>HECM810323MSPRRR08</td>
+				<td class="center"></td>
+				<td>HECM8103235TA</td>
+				<td class="center">?</td>
+				<td class="right">777</td>
+				<td class="right"></td>
+				<td>Naves Santoyo, Luis Fernando|1127</td>
+				<td class="right">26/04/2017 09:44</td>
+				<td class="right">28/06/2013 13:22</td>
+				<td>Naves Santoyo, Luis Fernando|1127</td>
+			</tr>
+			<tr>
+				<td>6</td>
+				<td class="right">51</td>
+				<td class="right">90004808</td>
+				<td class="right">280634</td>
+				<td class="right"></td>
+				<td class="right"></td>
+				<td>Tamez Gomez, Gerardo|51</td>
+				<td class="right">7920</td>
+				<td>GCO402</td>
+				<td>GRUPO COMEX CUAUTITLAN</td>
+				<td>GRUPO COMEX</td>
+				<td>Interna COMEX</td>
+				<td>MEXICO|15</td>
+				<td>Mexico</td>
+				<td>Flores alvarez, Silvia|81</td>
+				<td>sfloresa@ppg.com</td>
+				<td>ESPECIALISTA DE AUDITORIA INTERNA|925</td>
+				<td></td>
+				<td>AUDITORIA INTERNA|21060</td>
+				<td>Auditoria Interna</td>
+				<td>Baranda Rochin, Paulina|1103</td>
+				<td>pbarandar@ppg.com</td>
+				<td>CONFIANZA</td>
+				<td>Velazquez Arellano, Mario|2439</td>
+				<td>mvelazqueza@ppg.com</td>
+				<td></td>
+				<td>gtamezg@ppg.com</td>
+				<td class="right">05/08/2016</td>
+				<td class="center">?</td>
+				<td class="center">?</td>
+				<td class="right">14/02/2017</td>
+				<td></td>
+				<td></td>
+				<td>G</td>
+				<td>WCUAL8CG4320FSF</td>
+				<td class="right">05/08/2016</td>
+				<td class="right"></td>
+				<td class="right">22/02/2010</td>
+				<td class="right"></td>
+				<td class="right">14/02/2017 12:01</td>
+				<td class="right">05/08/2016 09:23</td>
+				<td>Tamez</td>
+				<td>G�mez</td>
+				<td>Gerardo</td>
+				<td></td>
+				<td></td>
+				<td></td>
+				<td class="right">04/04/1970</td>
+				<td>H</td>
+				<td>TAGG700404HDFMMR07</td>
+				<td class="center"></td>
+				<td>TAGG700404HP4</td>
+				<td class="center">?</td>
+				<td class="right">3628</td>
+				<td class="right">11/04/2014 11:46</td>
+				<td>Naves Santoyo, Luis Fernando|1127</td>
+				<td class="right">26/04/2017 09:44</td>
+				<td class="right">01/07/2013 10:40</td>
+				<td>Naves Santoyo, Luis Fernando|1127</td>
+			</tr>
+			<tr>
+				<td>7</td>
+				<td class="right">52</td>
+				<td class="right">90006970</td>
+				<td class="right">282167</td>
+				<td class="right"></td>
+				<td class="right"></td>
+				<td>Sarabia Camacho, Jose Abraham|52</td>
+				<td class="right">14014</td>
+				<td>TPX429</td>
+				<td>TEPEXPAN</td>
+				<td>TEPEXPAN</td>
+				<td>Interna COMEX</td>
+				<td>MEXICO|15</td>
+				<td>Mexico</td>
+				<td>Valverde Ramirez, Ilse Giovanna|10226</td>
+				<td>ivalverder@ppg.com</td>
+				<td>LABORATORISTA SR|534</td>
+				<td></td>
+				<td>DESARROLLO DE PRODUCTOS Y PROCESOS|27501</td>
+				<td>I&amp;D y DPP</td>
+				<td>Navarrete Hoyos, Jose Alberto|5916</td>
+				<td>janavarreteh@ppg.com</td>
+				<td>CONFIANZA</td>
+				<td>Luna Lopez, Rafael|2225</td>
+				<td>rluna@ppg.com</td>
+				<td>Flores Andrade, Jose Angel|6433</td>
+				<td>jasarabiac@ppg.com</td>
+				<td class="right">06/10/2016</td>
+				<td class="center">?</td>
+				<td class="center">?</td>
+				<td class="right">20/10/2016</td>
+				<td></td>
+				<td></td>
+				<td>H</td>
+				<td></td>
+				<td class="right"></td>
+				<td class="right"></td>
+				<td class="right">19/12/2011</td>
+				<td class="right"></td>
+				<td class="right">10/01/2017 10:25</td>
+				<td class="right">05/10/2016 13:10</td>
+				<td>Sarabia</td>
+				<td>Camacho</td>
+				<td>Jos� Abraham</td>
+				<td></td>
+				<td></td>
+				<td></td>
+				<td class="right">21/09/1984</td>
+				<td>H</td>
+				<td>SACA840921HDFRMB06</td>
+				<td class="center"></td>
+				<td>SACA840921VA6</td>
+				<td class="center">?</td>
+				<td class="right">5539</td>
+				<td class="right"></td>
+				<td>Naves Santoyo, Luis Fernando|1127</td>
+				<td class="right">26/04/2017 09:44</td>
+				<td class="right">09/07/2013 09:38</td>
+				<td>Naves Santoyo, Luis Fernando|1127</td>
+			</tr>
+			<tr>
+				<td>8</td>
+				<td class="right">53</td>
+				<td class="right">1001072</td>
+				<td class="right">281656</td>
+				<td class="right"></td>
+				<td class="right"></td>
+				<td>Serrato Arreola, Carlos|53</td>
+				<td class="right">1489</td>
+				<td>GCO028</td>
+				<td>GRUPO COMEX</td>
+				<td>GRUPO COMEX</td>
+				<td>Interna COMEX</td>
+				<td>DISTRITO FEDERAL|9</td>
+				<td>Mexico</td>
+				<td>Flores alvarez, Silvia|81</td>
+				<td>sfloresa@ppg.com</td>
+				<td>SUPERVISOR CORPORATIVO DE SEGURIDAD PATRIMONIAL|777</td>
+				<td>COODINACION/SUPERVISION</td>
+				<td>SEGURIDAD PATRIMONIAL|21515</td>
+				<td>Direccion General</td>
+				<td>Baranda Rochin, Paulina|1103</td>
+				<td>pbarandar@ppg.com</td>
+				<td>CONFIANZA</td>
+				<td>Avilez, Rafael|2388</td>
+				<td>raviles@ppg.com</td>
+				<td>Achar Levy, Marcos|2377</td>
+				<td></td>
+				<td class="right">27/07/2016</td>
+				<td class="center">?</td>
+				<td class="center"></td>
+				<td class="right"></td>
+				<td></td>
+				<td></td>
+				<td>G</td>
+				<td></td>
+				<td class="right"></td>
+				<td class="right"></td>
+				<td class="right">01/01/2010</td>
+				<td class="right">08/02/2016</td>
+				<td class="right">13/09/2016 08:35</td>
+				<td class="right">16/03/2016 14:55</td>
+				<td>Serrato</td>
+				<td>Arreola</td>
+				<td>Carlos</td>
+				<td></td>
+				<td></td>
+				<td>e281656</td>
+				<td class="right">28/01/1972</td>
+				<td>H</td>
+				<td>SEAC720128HDFRRR00</td>
+				<td class="center"></td>
+				<td>SEAC720128TI6</td>
+				<td class="center">?</td>
+				<td class="right">3776</td>
+				<td class="right"></td>
+				<td>Naves Santoyo, Luis Fernando|1127</td>
+				<td class="right">19/04/2017 14:35</td>
+				<td class="right">09/07/2013 13:18</td>
+				<td>Naves Santoyo, Luis Fernando|1127</td>
+			</tr>
+			<tr>
+				<td>9</td>
+				<td class="right">54</td>
+				<td class="right">90009453</td>
+				<td class="right"></td>
+				<td class="right"></td>
+				<td class="right"></td>
+				<td>Adams Razo, Daniel|54</td>
+				<td class="right">8461</td>
+				<td></td>
+				<td>PESA</td>
+				<td>PESA</td>
+				<td>Interna COMEX</td>
+				<td>DISTRITO FEDERAL|9</td>
+				<td>Mexico</td>
+				<td></td>
+				<td></td>
+				<td>ANALISTA DE CAPACITACION|22</td>
+				<td></td>
+				<td>CAPITAL HUMANO|21020</td>
+				<td>Recursos Humanos</td>
+				<td>Baranda Rochin, Paulina|1103</td>
+				<td>pbarandar@ppg.com</td>
+				<td>CONFIANZA</td>
+				<td></td>
+				<td></td>
+				<td></td>
+				<td></td>
+				<td class="right"></td>
+				<td class="center">?</td>
+				<td class="center"></td>
+				<td class="right"></td>
+				<td></td>
+				<td></td>
+				<td></td>
+				<td></td>
+				<td class="right"></td>
+				<td class="right"></td>
+				<td class="right">28/09/2012</td>
+				<td class="right">13/12/2013</td>
+				<td class="right"></td>
+				<td class="right">14/09/2016 18:47</td>
+				<td>Adams</td>
+				<td>Razo</td>
+				<td>Daniel</td>
+				<td></td>
+				<td></td>
+				<td></td>
+				<td class="right">24/04/1984</td>
+				<td>H</td>
+				<td>AARD840424HDFDZN08</td>
+				<td class="center"></td>
+				<td>AARD840424BL7</td>
+				<td class="center">?</td>
+				<td class="right">7116</td>
+				<td class="right"></td>
+				<td>Naves Santoyo, Luis Fernando|1127</td>
+				<td class="right">16/02/2017 12:47</td>
+				<td class="right">11/07/2013 09:11</td>
+				<td>Naves Santoyo, Luis Fernando|1127</td>
+			</tr>
+			<tr>
+				<td>10</td>
+				<td class="right">56</td>
+				<td class="right">1002156</td>
+				<td class="right">284093</td>
+				<td class="right"></td>
+				<td class="right"></td>
+				<td>Becerra Vazquez, Karina|56</td>
+				<td class="right">1613</td>
+				<td>GCO067</td>
+				<td>KROMA TULTITLAN</td>
+				<td>KROMA</td>
+				<td>Interna COMEX</td>
+				<td>MEXICO|15</td>
+				<td>Mexico</td>
+				<td></td>
+				<td></td>
+				<td>JEFE DE CAPACITACION|460</td>
+				<td>JEFATURA</td>
+				<td>CAPACITACION Y DESARROLLO|21021</td>
+				<td>Recursos Humanos</td>
+				<td>Baranda Rochin, Paulina|1103</td>
+				<td>pbarandar@ppg.com</td>
+				<td>CONFIANZA</td>
+				<td>Pina Castillo, Blanca Azucena|3110</td>
+				<td>blancap@ppg.com</td>
+				<td>Pina Castillo, Blanca Azucena|3110</td>
+				<td>kbecerrav@ppg.com</td>
+				<td class="right"></td>
+				<td class="center">?</td>
+				<td class="center">?</td>
+				<td class="right">19/07/2016</td>
+				<td>tel:+525516691081;ext=1081</td>
+				<td>tel:+5215548404964;ext=4964</td>
+				<td>G</td>
+				<td>WTLTL2RZPQ32</td>
+				<td class="right">23/06/2016</td>
+				<td class="right"></td>
+				<td class="right">01/06/2010</td>
+				<td class="right"></td>
+				<td class="right">13/03/2017 09:38</td>
+				<td class="right">16/03/2016 14:55</td>
+				<td>Becerra</td>
+				<td>V�zquez</td>
+				<td>Karina</td>
+				<td></td>
+				<td></td>
+				<td>e284093</td>
+				<td class="right">26/06/1984</td>
+				<td>M</td>
+				<td>BEVK840626MDFCZR03</td>
+				<td class="center">?</td>
+				<td>BEVK8406269B3</td>
+				<td class="center">?</td>
+				<td class="right">11</td>
+				<td class="right">19/05/2016 12:07</td>
+				<td>Naves Santoyo, Luis Fernando|1127</td>
+				<td class="right">06/10/2016 17:16</td>
+				<td class="right">16/07/2013 16:39</td>
+				<td>Naves Santoyo, Luis Fernando|1127</td>
+			</tr>
+			<tr>
+				<td>11</td>
+				<td class="right">62</td>
+				<td class="right"></td>
+				<td class="right"></td>
+				<td class="right"></td>
+				<td class="right"></td>
+				<td>Gonzalez Robles, Moises|62</td>
+				<td class="right">5673</td>
+				<td></td>
+				<td>EXTERNO STA. MA. LA RIVERA</td>
+				<td>EXTERNOS</td>
+				<td>Externa</td>
+				<td>DISTRITO FEDERAL|9</td>
+				<td>Mexico</td>
+				<td>Franco Tapia, Lizbeth|11580</td>
+				<td>lfrancot@ppg.com</td>
+				<td></td>
+				<td></td>
+				<td></td>
+				<td></td>
+				<td></td>
+				<td></td>
+				<td></td>
+				<td>Becerra Vazquez, Karina|56</td>
+				<td>kbecerrav@ppg.com</td>
+				<td>Pina Castillo, Blanca Azucena|3110</td>
+				<td></td>
+				<td class="right">23/09/2016</td>
+				<td class="center">?</td>
+				<td class="center"></td>
+				<td class="right"></td>
+				<td>tel:+525516692150;ext=2150</td>
+				<td></td>
+				<td></td>
+				<td></td>
+				<td class="right"></td>
+				<td class="right"></td>
+				<td class="right">24/03/2014</td>
+				<td class="right">03/05/2016</td>
+				<td class="right">15/02/2017 12:11</td>
+				<td class="right">18/03/2016 11:03</td>
+				<td>Gonzalez</td>
+				<td>Robles</td>
+				<td>Moises</td>
+				<td>tel:+5215544824550</td>
+				<td></td>
+				<td></td>
+				<td class="right">10/06/1981</td>
+				<td>H</td>
+				<td></td>
+				<td class="center"></td>
+				<td></td>
+				<td class="center"></td>
+				<td class="right">874</td>
+				<td class="right">22/01/2016 12:46</td>
+				<td>Naves Santoyo, Luis Fernando|1127</td>
+				<td class="right">23/09/2016 09:49</td>
+				<td class="right">12/08/2013 10:06</td>
+				<td>Naves Santoyo, Luis Fernando|1127</td>
+			</tr>
+			<tr>
+				<td>12</td>
+				<td class="right">63</td>
+				<td class="right">1001432</td>
+				<td class="right">282644</td>
+				<td class="right"></td>
+				<td class="right"></td>
+				<td>Coria Ramirez, Enrique|63</td>
+				<td class="right">515</td>
+				<td>TPX011</td>
+				<td>TEPEXPAN</td>
+				<td>TEPEXPAN</td>
+				<td>Interna COMEX</td>
+				<td>MEXICO|15</td>
+				<td>Mexico</td>
+				<td>Valverde Ramirez, Ilse Giovanna|10226</td>
+				<td>ivalverder@ppg.com</td>
+				<td>SUPERVISOR DE ALMACEN|596</td>
+				<td>COODINACION/SUPERVISION</td>
+				<td>OPERACIONES ALMACENES|11734</td>
+				<td>Plantas TEPEXPAN</td>
+				<td>Baranda Hernandez, Jesus|25542</td>
+				<td>jbarandah@ppg.com</td>
+				<td>CONFIANZA</td>
+				<td>Reyna Ramirez, Francisco Cristopler|8150</td>
+				<td>fcreynar@ppg.com</td>
+				<td>Diaz Flores, Jose Francisco|2645</td>
+				<td>ecoriar@ppg.com</td>
+				<td class="right"></td>
+				<td class="center">?</td>
+				<td class="center">?</td>
+				<td class="right">05/09/2016</td>
+				<td></td>
+				<td></td>
+				<td>H</td>
+				<td>WTEPDHNS3C42</td>
+				<td class="right">23/06/2016</td>
+				<td class="right"></td>
+				<td class="right">18/06/2001</td>
+				<td class="right"></td>
+				<td class="right">12/09/2016 18:09</td>
+				<td class="right">16/03/2016 14:55</td>
+				<td>Coria</td>
+				<td>Ram�rez</td>
+				<td>Enrique</td>
+				<td></td>
+				<td></td>
+				<td></td>
+				<td class="right">10/10/1976</td>
+				<td>H</td>
+				<td>CORE761010HDFRMN09</td>
+				<td class="center"></td>
+				<td>CORE761010KQ3</td>
+				<td class="center">?</td>
+				<td class="right">2990</td>
+				<td class="right"></td>
+				<td>Naves Santoyo, Luis Fernando|1127</td>
+				<td class="right">26/04/2017 09:44</td>
+				<td class="right">12/08/2013 11:25</td>
+				<td>Naves Santoyo, Luis Fernando|1127</td>
+			</tr>
+			<tr>
+				<td>13</td>
+				<td class="right">64</td>
+				<td class="right"></td>
+				<td class="right"></td>
+				<td class="right"></td>
+				<td class="right">2819</td>
+				<td>Millan Flores, Elizabeth Virginia|64</td>
+				<td class="right">5674</td>
+				<td></td>
+				<td>EXTERNO KROMA CUAUTITLAN</td>
+				<td>EXTERNOS</td>
+				<td>Externa</td>
+				<td>MEXICO|15</td>
+				<td>Mexico</td>
+				<td></td>
+				<td></td>
+				<td>DISE�ADOR GR�FICO SENIOR</td>
+				<td></td>
+				<td>CAPACITACION Y DESARROLLO|21021</td>
+				<td></td>
+				<td></td>
+				<td></td>
+				<td></td>
+				<td>Arriaga Marin, Raquel|46801</td>
+				<td>rarriagam@ppg.com</td>
+				<td>Pina Morales, Diana Guadalupe|2141</td>
+				<td>evmillanf@ppg.com</td>
+				<td class="right"></td>
+				<td class="center">?</td>
+				<td class="center"></td>
+				<td class="right"></td>
+				<td>tel:+525516693400;ext=7890</td>
+				<td></td>
+				<td></td>
+				<td>WCFIDBZNPB42</td>
+				<td class="right">20/07/2016</td>
+				<td class="right"></td>
+				<td class="right">03/02/2014</td>
+				<td class="right">28/04/2017</td>
+				<td class="right">02/05/2017 09:44</td>
+				<td class="right">18/03/2016 11:03</td>
+				<td>Millan</td>
+				<td>Flores</td>
+				<td>Elizabeth Virginia</td>
+				<td>tel:+5215526589158</td>
+				<td>cloidjade2015@gmail.com</td>
+				<td>c002819</td>
+				<td class="right">25/09/1983</td>
+				<td>M</td>
+				<td></td>
+				<td class="center"></td>
+				<td></td>
+				<td class="center"></td>
+				<td class="right">5824</td>
+				<td class="right">24/11/2015 10:25</td>
+				<td>Naves Santoyo, Luis Fernando|1127</td>
+				<td class="right">02/01/2017 10:35</td>
+				<td class="right">12/08/2013 11:47</td>
+				<td>Naves Santoyo, Luis Fernando|1127</td>
+			</tr>
+			<tr>
+				<td>14</td>
+				<td class="right">65</td>
+				<td class="right">38000067</td>
+				<td class="right">283184</td>
+				<td class="right"></td>
+				<td class="right"></td>
+				<td>Olguin Camacho, Gabriel|65</td>
+				<td class="right">775</td>
+				<td>KMZ007</td>
+				<td>KMZ SJR QUERETARO</td>
+				<td>KMZ</td>
+				<td>Interna COMEX</td>
+				<td>QUERETARO|22</td>
+				<td>Mexico</td>
+				<td>Garcia Aguilar, Jose Luis|11480</td>
+				<td></td>
+				<td>TECNICO DE INVESTIGACION Y DESARROLLO|618</td>
+				<td></td>
+				<td>SERVICIO TECNICO|25305</td>
+				<td>Nuevos Negocios KMZ</td>
+				<td>Ledesma Basurto, Rebeca|11478</td>
+				<td>rledesmab@ppg.com</td>
+				<td>CONFIANZA</td>
+				<td>Vasquez Martinez, Francisco Javier|4224</td>
+				<td>fjvasquezm@ppg.com</td>
+				<td>Padilla Lares, Francisco Salvador|2379</td>
+				<td>golguinc@ppg.com</td>
+				<td class="right"></td>
+				<td class="center">?</td>
+				<td class="center">?</td>
+				<td class="right">05/09/2016</td>
+				<td></td>
+				<td></td>
+				<td>G</td>
+				<td>WAPRL5KKSA51406</td>
+				<td class="right">23/06/2016</td>
+				<td class="right"></td>
+				<td class="right">01/01/2005</td>
+				<td class="right"></td>
+				<td class="right">14/09/2016 18:33</td>
+				<td class="right">16/03/2016 14:55</td>
+				<td>Olguin</td>
+				<td>Camacho</td>
+				<td>Gabriel</td>
+				<td></td>
+				<td></td>
+				<td></td>
+				<td class="right">03/04/1977</td>
+				<td>H</td>
+				<td>OUCG770403HQTLMB00</td>
+				<td class="center"></td>
+				<td>OUCG770403AG4</td>
+				<td class="center">?</td>
+				<td class="right">1621</td>
+				<td class="right">11/04/2014 12:01</td>
+				<td>Naves Santoyo, Luis Fernando|1127</td>
+				<td class="right">26/04/2017 09:44</td>
+				<td class="right">19/08/2013 12:17</td>
+				<td>Naves Santoyo, Luis Fernando|1127</td>
+			</tr>
+			<tr>
+				<td>15</td>
+				<td class="right">66</td>
+				<td class="right">9000968</td>
+				<td class="right"></td>
+				<td class="right"></td>
+				<td class="right"></td>
+				<td>Aguayo Martinez, Fabiola Ruth|66</td>
+				<td class="right">8462</td>
+				<td></td>
+				<td>AGA</td>
+				<td>AGA</td>
+				<td>Interna COMEX</td>
+				<td>MEXICO|15</td>
+				<td>Mexico</td>
+				<td>Jimenez Arellano, Mariana|2139</td>
+				<td>mjimeneza@ppg.com</td>
+				<td>SECRETARIA|581</td>
+				<td></td>
+				<td>DESARROLLO DE PRODUCTOS Y PROCESOS|27501</td>
+				<td>I&amp;D y DPP</td>
+				<td>Navarrete Hoyos, Jose Alberto|5916</td>
+				<td>janavarreteh@ppg.com</td>
+				<td>CONFIANZA</td>
+				<td></td>
+				<td></td>
+				<td></td>
+				<td></td>
+				<td class="right"></td>
+				<td class="center">?</td>
+				<td class="center"></td>
+				<td class="right"></td>
+				<td></td>
+				<td></td>
+				<td></td>
+				<td></td>
+				<td class="right"></td>
+				<td class="right"></td>
+				<td class="right">02/11/2005</td>
+				<td class="right">14/01/2015</td>
+				<td class="right"></td>
+				<td class="right">14/09/2016 18:47</td>
+				<td>Aguayo</td>
+				<td>Martinez</td>
+				<td>Fabiola Ruth</td>
+				<td></td>
+				<td></td>
+				<td></td>
+				<td class="right">04/01/1972</td>
+				<td>M</td>
+				<td>AUMF720104MDFGRB03</td>
+				<td class="center"></td>
+				<td>AUMF7201047Q8</td>
+				<td class="center">?</td>
+				<td class="right">3496</td>
+				<td class="right"></td>
+				<td>Naves Santoyo, Luis Fernando|1127</td>
+				<td class="right">16/02/2017 12:47</td>
+				<td class="right">19/08/2013 15:57</td>
+				<td>Naves Santoyo, Luis Fernando|1127</td>
+			</tr>
+			<tr>
+				<td>16</td>
+				<td class="right">67</td>
+				<td class="right">90010257</td>
+				<td class="right"></td>
+				<td class="right"></td>
+				<td class="right"></td>
+				<td>Mendoza Carpio, Diana|67</td>
+				<td class="right">8463</td>
+				<td></td>
+				<td>CLRH EDO.MEX.</td>
+				<td>CLRH</td>
+				<td>Interna COMEX</td>
+				<td>MEXICO|15</td>
+				<td>Mexico</td>
+				<td></td>
+				<td></td>
+				<td>SECRETARIA DE GERENCIA|74</td>
+				<td></td>
+				<td>APP COMUNICACION INSTITUCIONAL|25209</td>
+				<td>Nuevos Negocios CLRH</td>
+				<td>Bolanos Sanchez, Ivonne Soledad|7864</td>
+				<td>ibolanoss@ppg.com</td>
+				<td>CONFIANZA</td>
+				<td></td>
+				<td></td>
+				<td></td>
+				<td></td>
+				<td class="right"></td>
+				<td class="center">?</td>
+				<td class="center"></td>
+				<td class="right"></td>
+				<td></td>
+				<td></td>
+				<td></td>
+				<td></td>
+				<td class="right"></td>
+				<td class="right"></td>
+				<td class="right">01/02/2013</td>
+				<td class="right">17/01/2014</td>
+				<td class="right"></td>
+				<td class="right">14/09/2016 18:47</td>
+				<td>Mendoza</td>
+				<td>Carpio</td>
+				<td>Diana</td>
+				<td></td>
+				<td></td>
+				<td></td>
+				<td class="right">01/12/1980</td>
+				<td>M</td>
+				<td>MECD801201MDFNRN01</td>
+				<td class="center"></td>
+				<td>MECD801201AY2</td>
+				<td class="center">?</td>
+				<td class="right">7886</td>
+				<td class="right"></td>
+				<td>Naves Santoyo, Luis Fernando|1127</td>
+				<td class="right">16/02/2017 12:47</td>
+				<td class="right">19/08/2013 17:55</td>
+				<td>Naves Santoyo, Luis Fernando|1127</td>
+			</tr>
+			<tr>
+				<td>17</td>
+				<td class="right">69</td>
+				<td class="right">86000215</td>
+				<td class="right">282988</td>
+				<td class="right"></td>
+				<td class="right"></td>
+				<td>Lopez Cortes, Miguel Angel|69</td>
+				<td class="right">1131</td>
+				<td>PAR099</td>
+				<td>PARCAR</td>
+				<td>PARCAR</td>
+				<td>Interna COMEX</td>
+				<td>MEXICO|15</td>
+				<td>Mexico</td>
+				<td>Gonzalez Romo, Librada|4334</td>
+				<td>lgonzalezr@ppg.com</td>
+				<td>TECNICO ACADEMICO II|616</td>
+				<td>COODINACION/SUPERVISION</td>
+				<td>DESARROLLO DE PRODUCTOS Y PROCESOS (INV|27505</td>
+				<td>I&amp;D y DPP</td>
+				<td>Navarrete Hoyos, Jose Alberto|5916</td>
+				<td>janavarreteh@ppg.com</td>
+				<td>CONFIANZA</td>
+				<td>Camacho Heredia, Juan Luis|84</td>
+				<td>jcamachoh@ppg.com</td>
+				<td>Camacho Heredia, Juan Luis|84</td>
+				<td>malopezc@ppg.com</td>
+				<td class="right"></td>
+				<td class="center">?</td>
+				<td class="center">?</td>
+				<td class="right">01/09/2016</td>
+				<td></td>
+				<td></td>
+				<td>H</td>
+				<td>WTEPDMXL4350TL0</td>
+				<td class="right">23/06/2016</td>
+				<td class="right"></td>
+				<td class="right">03/12/2007</td>
+				<td class="right"></td>
+				<td class="right">10/01/2017 10:25</td>
+				<td class="right">16/03/2016 14:55</td>
+				<td>Lopez</td>
+				<td>Cortes</td>
+				<td>Miguel Angel</td>
+				<td></td>
+				<td></td>
+				<td></td>
+				<td class="right">01/10/1973</td>
+				<td>H</td>
+				<td>LOCM731001HMCPRG05</td>
+				<td class="center"></td>
+				<td>LOCM731001DN3</td>
+				<td class="center">?</td>
+				<td class="right">3585</td>
+				<td class="right"></td>
+				<td>Naves Santoyo, Luis Fernando|1127</td>
+				<td class="right">26/04/2017 09:44</td>
+				<td class="right">21/08/2013 11:19</td>
+				<td>Naves Santoyo, Luis Fernando|1127</td>
+			</tr>
+			<tr>
+				<td>18</td>
+				<td class="right">71</td>
+				<td class="right">90006947</td>
+				<td class="right">282214</td>
+				<td class="right"></td>
+				<td class="right"></td>
+				<td>Diaz Rivas, Rocio Margarita|71</td>
+				<td class="right">1898</td>
+				<td>K00908</td>
+				<td>KROMA GUADALAJARA</td>
+				<td>KROMA</td>
+				<td>Interna COMEX</td>
+				<td>JALISCO|14</td>
+				<td>Mexico</td>
+				<td>Morales Lara, Tania|1112</td>
+				<td>tmoralesl@ppg.com</td>
+				<td>GENERALISTA DE RECURSOS HUMANOS|293</td>
+				<td></td>
+				<td>CAPITAL HUMANO|21020</td>
+				<td>Recursos Humanos</td>
+				<td>Baranda Rochin, Paulina|1103</td>
+				<td>pbarandar@ppg.com</td>
+				<td>CONFIANZA</td>
+				<td></td>
+				<td></td>
+				<td></td>
+				<td>rmdiazr@ppg.com</td>
+				<td class="right"></td>
+				<td class="center">?</td>
+				<td class="center">?</td>
+				<td class="right">26/07/2016</td>
+				<td>tel:+523310572930;ext=2930</td>
+				<td></td>
+				<td>G</td>
+				<td>WGDLLBR95R72</td>
+				<td class="right">23/06/2016</td>
+				<td class="right"></td>
+				<td class="right">27/06/2011</td>
+				<td class="right"></td>
+				<td class="right">15/02/2017 12:11</td>
+				<td class="right">16/03/2016 14:55</td>
+				<td>Diaz</td>
+				<td>Rivas</td>
+				<td>Rocio Margarita</td>
+				<td></td>
+				<td></td>
+				<td></td>
+				<td class="right">14/05/1986</td>
+				<td>M</td>
+				<td>DIRR860514MJCZVC06</td>
+				<td class="center"></td>
+				<td>DIRR860514R12</td>
+				<td class="center">?</td>
+				<td class="right">3956</td>
+				<td class="right"></td>
+				<td>Naves Santoyo, Luis Fernando|1127</td>
+				<td class="right">26/04/2017 09:44</td>
+				<td class="right">21/08/2013 12:29</td>
+				<td>Naves Santoyo, Luis Fernando|1127</td>
+			</tr>
+			<tr>
+				<td>19</td>
+				<td class="right">72</td>
+				<td class="right">90009299</td>
+				<td class="right">281211</td>
+				<td class="right"></td>
+				<td class="right"></td>
+				<td>Leyva Gomez, Ivonne Patricia|72</td>
+				<td class="right">2535</td>
+				<td>KMZ086</td>
+				<td>KMZ SJR QUERETARO</td>
+				<td>KMZ</td>
+				<td>Interna COMEX</td>
+				<td>QUERETARO|22</td>
+				<td>Mexico</td>
+				<td>Garcia Aguilar, Jose Luis|11480</td>
+				<td></td>
+				<td>CONTADOR JR.|741</td>
+				<td></td>
+				<td>FINANZAS /CONTABILIDAD GENERAL|21010</td>
+				<td>Nuevos Negocios KMZ</td>
+				<td>Ledesma Basurto, Rebeca|11478</td>
+				<td>rledesmab@ppg.com</td>
+				<td>CONFIANZA</td>
+				<td>Pacheco, Saul Alfredo|10237</td>
+				<td>sapacheco@ppg.com</td>
+				<td>Padilla Lares, Francisco Salvador|2379</td>
+				<td>ipleyvag@ppg.com</td>
+				<td class="right"></td>
+				<td class="center">?</td>
+				<td class="center">?</td>
+				<td class="right">01/09/2016</td>
+				<td>tel:+524272719507;ext=3207</td>
+				<td></td>
+				<td>H</td>
+				<td>WAPRLJPQSLQ1</td>
+				<td class="right">23/06/2016</td>
+				<td class="right"></td>
+				<td class="right">03/09/2012</td>
+				<td class="right"></td>
+				<td class="right">10/01/2017 10:25</td>
+				<td class="right">16/03/2016 14:55</td>
+				<td>Leyva</td>
+				<td>Gomez</td>
+				<td>Ivonne Patricia</td>
+				<td></td>
+				<td></td>
+				<td></td>
+				<td class="right">06/04/1973</td>
+				<td>M</td>
+				<td>LEGI730406MDFYMV07</td>
+				<td class="center"></td>
+				<td>LEGI730406AD2</td>
+				<td class="center">?</td>
+				<td class="right">7034</td>
+				<td class="right"></td>
+				<td>Naves Santoyo, Luis Fernando|1127</td>
+				<td class="right">26/04/2017 09:44</td>
+				<td class="right">21/08/2013 13:18</td>
+				<td>Naves Santoyo, Luis Fernando|1127</td>
+			</tr>
+			<tr>
+				<td>20</td>
+				<td class="right">74</td>
+				<td class="right">13001956</td>
+				<td class="right">280695</td>
+				<td class="right"></td>
+				<td class="right"></td>
+				<td>Moreno Ruiz, Jorge|74</td>
+				<td class="right">228</td>
+				<td>K00076</td>
+				<td>KROMA TULTITLAN</td>
+				<td>KROMA</td>
+				<td>Interna COMEX</td>
+				<td>MEXICO|15</td>
+				<td>Mexico</td>
+				<td></td>
+				<td></td>
+				<td>SUPERVISOR DE ALMACEN|596</td>
+				<td>COODINACION/SUPERVISION</td>
+				<td>DISTRIBUCION TULTITLAN|23001</td>
+				<td>Distribuci�n</td>
+				<td>Sanchez Romero, Daniel|5112</td>
+				<td>dsanchezr@ppg.com</td>
+				<td>CONFIANZA</td>
+				<td>Martinez Guerrero, Enrique|3147</td>
+				<td>emartinez1@ppg.com</td>
+				<td>Rubio Guerra, Miguel Angel|11279</td>
+				<td>jmorenor@ppg.com</td>
+				<td class="right"></td>
+				<td class="center">?</td>
+				<td class="center">?</td>
+				<td class="right">13/07/2016</td>
+				<td>tel:+525516691238;ext=1238</td>
+				<td></td>
+				<td>H</td>
+				<td>WTLTDMXL4361JHB</td>
+				<td class="right">23/06/2016</td>
+				<td class="right"></td>
+				<td class="right">30/10/1996</td>
+				<td class="right"></td>
+				<td class="right">05/10/2016 14:25</td>
+				<td class="right">16/03/2016 14:55</td>
+				<td>Moreno</td>
+				<td>Ruiz</td>
+				<td>Jorge</td>
+				<td></td>
+				<td></td>
+				<td></td>
+				<td class="right">18/12/1975</td>
+				<td>H</td>
+				<td>MORJ751218HMCRZR07</td>
+				<td class="center"></td>
+				<td>MORJ751218QY3</td>
+				<td class="center">?</td>
+				<td class="right">2297</td>
+				<td class="right"></td>
+				<td>Naves Santoyo, Luis Fernando|1127</td>
+				<td class="right">26/04/2017 09:44</td>
+				<td class="right">21/08/2013 15:28</td>
+				<td>Naves Santoyo, Luis Fernando|1127</td>
+			</tr>
+		</tbody>
+	</table>
+</body>
+</html>
