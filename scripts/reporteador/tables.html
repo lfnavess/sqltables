@@ -18,21 +18,21 @@
         var thead;
         var sheet;
         var lasposition = [0, 0];
-		var sheetData = {
-			"thead":{"top":""},
-			"th:nth-child(1),td:nth-child(1)":{"left":""}
-		};
+        var sheetData = {
+            "thead": { "top": "" },
+            "th:nth-child(1),td:nth-child(1)": { "left": "" }
+        };
         function updatesheet() {
             sheetData.thead.top = window.scrollY + "px";
             sheetData["th:nth-child(1),td:nth-child(1)"].left = window.scrollX + "px";
-			sheet.innerHTML = Object.keys(sheetData).map(
-				function(selector) {
-					return selector + "{" + Object.keys(sheetData[selector]).map(
-						function(property){return property + ":" + sheetData[selector][property]+";"; }
-					) + "}";
-				}
-			).join("");
-		}
+            sheet.innerHTML = Object.keys(sheetData).map(
+                function(selector) {
+                    return selector + "{" + Object.keys(sheetData[selector]).map(
+                        function(property) { return property + ":" + sheetData[selector][property] + ";"; }
+                    ) + "}";
+                }
+            ).join("");
+        }
         document.addEventListener('DOMContentLoaded', function() {
             thead = document.querySelector("body > table > thead");
             sheet = document.createElement('style');
@@ -41,12 +41,12 @@
         document.addEventListener("mousedown", function() { mousedown = true; mousedownTime = moment(); });
         document.addEventListener("mouseup", function() { mousedown = false; });
         document.addEventListener(
-			"wheel", 
-			function(e) { e.preventDefault(); window.scrollTo(window.scrollX + e.deltaX, window.scrollY + e.deltaY); }
-		);
+            "wheel",
+            function(e) { e.preventDefault(); window.scrollTo(window.scrollX + e.deltaX, window.scrollY + e.deltaY); }
+        );
         document.addEventListener("scroll", function(e) {
-			clearTimeout(ttt);
-            if (mousedown) {  document.addEventListener("mouseup", repositioning); }
+            clearTimeout(ttt);
+            if (mousedown) { document.addEventListener("mouseup", repositioning); }
             else {
                 moviie();
                 //ttt = setTimeout(repositioning, 250);
@@ -55,8 +55,8 @@
             updatesheet();
         });
         function moviie() {
-            var x = window.scrollX - lasposition[0]; }
-            var y = window.scrollY - lasposition[1]}
+            var x = window.scrollX - lasposition[0];
+            var y = window.scrollY - lasposition[1];
             if (x === 0 && y === 0) { return; }
             var aaa = document.elementFromPoint(47, 22);
             if (x > 0) { aaa = aaa.nextElementSibling; } else if (x < 0) { aaa = aaa.previousElementSibling; }
