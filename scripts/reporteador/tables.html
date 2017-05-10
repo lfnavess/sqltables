@@ -13,15 +13,18 @@
         var ttt;
         var click;
         var mousedown;
+        var mousedownTime;
         var draging;
-        var body;
         var thead;
         var sheet;
+        var lasposition = [0, 0];
 		var sheetData = {
 			"thead":{"top":""},
 			"th:nth-child(1),td:nth-child(1)":{"left":""}
 		};
-		function updatesheet(){
+        function updatesheet() {
+            sheetData.thead.top = window.scrollY + "px";
+            sheetData["th:nth-child(1),td:nth-child(1)"].left = window.scrollX + "px";
 			sheet.innerHTML = Object.keys(sheetData).map(
 				function(selector) {
 					return selector + "{" + Object.keys(sheetData[selector]).map(
@@ -31,42 +34,50 @@
 			).join("");
 		}
         document.addEventListener('DOMContentLoaded', function() {
-            body = document.querySelector("body");
             thead = document.querySelector("body > table > thead");
             sheet = document.createElement('style');
-            document.body.appendChild(sheet);
+            document.head.appendChild(sheet);
         }, false);
-        document.addEventListener("mousedown", function() { mousedown = true; });
-        document.addEventListener("mouseup", function() { mousedown = false; });
+        document.addEventListener("mousedown", function() { mousedown = true; mousedownTime = moment(); });
         document.addEventListener("mouseup", function() { mousedown = false; });
         document.addEventListener(
 			"wheel", 
-			function(e) { e.preventDefault(); window.scrollTo(body.scrollLeft + e.deltaX, body.scrollTop + e.deltaY); }
+			function(e) { e.preventDefault(); window.scrollTo(window.scrollX + e.deltaX, window.scrollY + e.deltaY); }
 		);
         document.addEventListener("scroll", function(e) {
-			console.log("scroll", body.scrollLeft, body.scrollTop);
 			clearTimeout(ttt);
-            if (mousedown) { ttt = document.addEventListener("mouseup", repositioning); }
-            //else { ttt = setTimeout(repositioning, 250); }
-			repositioning();
-			sheetData.thead.top = body.scrollTop + "px";
-			sheetData["th:nth-child(1),td:nth-child(1)"].left = body.scrollLeft + "px";
+            if (mousedown) {  document.addEventListener("mouseup", repositioning); }
+            else {
+                moviie();
+                //ttt = setTimeout(repositioning, 250);
+            }
+
             updatesheet();
         });
+        function moviie() {
+            var x = window.scrollX - lasposition[0]; }
+            var y = window.scrollY - lasposition[1]}
+            if (x === 0 && y === 0) { return; }
+            var aaa = document.elementFromPoint(47, 22);
+            if (x > 0) { aaa = aaa.nextElementSibling; } else if (x < 0) { aaa = aaa.previousElementSibling; }
+            else if (x === 0) {
+                var iElement = Array.prototype.slice.call(aaa.parentElement.children).indexOf(aaa);
+                if (y > 0) { aaa = aaa.parentElement.nextElementSibling.children[iElement]; }
+                else if (y < 0) { aaa = aaa.parentElement.previousElementSibling.children[iElement]; }
+            }
+            var bbb = aaa.getBoundingClientRect();
+            lasposition[0] = aaa.offsetLeft - 47;
+            lasposition[1] = aaa.offsetTop - 22;
+            window.scrollTo(lasposition[0], lasposition[1]);
+        }
         function repositioning() {
-			console.log("repositioning()", deltaX, deltaY, x, y);
+            document.removeEventListener("mouseup", repositioning);
+            if (moment() - mousedownTime < 500) { moviie(); return; }
             var aaa = document.elementFromPoint(47, 22);
             var bbb = aaa.getBoundingClientRect();
-            var x = body.scrollLeft, y = body.scrollTop;
-            document.removeEventListener("mouseup", repositioning);
-            if (bbb.left + (bbb.width / 2) > 47) { x = aaa.offsetLeft - 47; }
-            else { x = aaa.offsetLeft + bbb.width - 47; }
-            if (bbb.top + (bbb.height / 2) > 22) { y = aaa.offsetTop - 22; }
-            else { y = aaa.offsetTop + bbb.height - 22; }
-            window.scrollTo(x, y);
-			sheetData.thead.top = body.scrollTop + "px";
-			sheetData["th:nth-child(1),td:nth-child(1)"].left = body.scrollLeft + "px";
-            updatesheet();
+            lasposition[0] = aaa.offsetLeft - 47 + (bbb.left + (bbb.width / 2) > 47 ? 0 : bbb.width);
+            lasposition[1] = aaa.offsetTop - 22 + (bbb.top + (bbb.height / 2) > 22 ? 0 : bbb.height);
+            window.scrollTo(lasposition[0], lasposition[1]);
         }
     </script>
 </head>
