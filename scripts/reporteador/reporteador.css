@@ -1,16 +1,18 @@
-﻿*{box-sizing: border-box;}
+*{box-sizing: border-box;}
 html{ min-height: 100%; }
 body{
-    position: relative;
-    top: 0;
-    left: 0;
-	min-height: 100%;
-}
-table{
-    display: block;
-    position: relative;
+    display: inline-block;
+    min-width: 100%;
+    position: absolute;
     top: 0;
     bottom: 0;
+}
+table{
+    display: inline-block;
+    position: relative;
+    min-height: 100%;
+    min-width: 100%;
+    margin-bottom: -4px;
 	background-color: lightgray;
 	border-collapse: collapse;	
 }
