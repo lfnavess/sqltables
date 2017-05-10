@@ -42,11 +42,11 @@
         document.addEventListener(
             "wheel",
             function(e) {
-				e.preventDefault();
-				var scrollX = window.scrollX + (e.shiftKey ? e.deltaY : e.deltaX);
-				var scrollY = window.scrollY + (e.shiftKey ? e.deltaX : e.deltaY);
-				window.scrollTo(scrollX, scrollY);
-			}
+                e.preventDefault();
+                var scrollX = window.scrollX + (e.shiftKey ? e.deltaY : e.deltaX);
+                var scrollY = window.scrollY + (e.shiftKey ? e.deltaX : e.deltaY);
+                window.scrollTo(scrollX, scrollY);
+            }
         );
         document.addEventListener("scroll", function(e) {
             if (mousedown) { document.addEventListener("mouseup", repositioning); } else { moviie(); }
