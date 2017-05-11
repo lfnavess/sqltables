@@ -1,7 +1,7 @@
 if (!Array.prototype.insertAt) {
     //http://stackoverflow.com/questions/586182/javascript-insert-item-into-array-at-a-specific-index
     Array.prototype.insertAt = function(index, item) {
-        if (index === -1 || item === undefined) { return this; }
+        if (index === -1 || index === null || item === undefined) { return this; }
         this.splice(index, 0, item);
         return this;
     };
@@ -10,26 +10,26 @@ if (!Array.prototype.indexOf2) {
     Array.prototype.indexOf2 = function(a, o, s, e) {
         if (s === undefined) { s = 0; }
         if (e === undefined) { e = this.length - 1; }
-        for (var i, r, b; s <= e;) {
+        for (var i, b, m, mi, r = -1; s <= e;) {
             i = s + Math.round((e - s) / 2);
             b = this[i];
-            for (var o = o[1], oi = 0, r; oi < length && !r; oi++) { r = compare_s(a[oi], b.parse(o[oi]), o[oi][1]); }
+            for (m = o[1], mi = 0, r = 0; mi < m.length && !r; mi++) { r = compare_s(a[mi], b[m[mi][0]], m[mi][1]); }
             if (r > 0) { s = i + 1; }
-            else if (r < 0) { e = i - 1; }
-            else if (o[2]) { s = i + 1; }
+            else if (r) { e = i - 1; }
+            else if (!o[3]) { s = i + 1; }
             else { s = i; break; }
         }
-        return [r === 0 ? b : null, s];
+        return [r ? null : s, r ? s : null, r ? null : b];
     };
 }
 if (!Array.prototype.orderBy) {
     Array.prototype.orderBy = function(m, s) {
         if (s === undefined) { s = 0; }
-        for (s++; s < this.length; s++) {
-            for (var o = m[1], oi = 0, v = []; oi < o.length; oi++) { v[oi] = this[s].parse(o[oi]); }
-            this.move(s, this.indexOf2(v, m, 1, s - 1)[1]);
+        var a = this;
+        for (s++; s < a.length; s++) {
+            a.move(s, a.indexOf2(m[1].map(function(m) { return a[s][m[0]]; }), m, 1, s - 1)[1]);
         }
-        return this;
+        return a;
     };
 }
 if (!Array.prototype.move) {
@@ -44,11 +44,6 @@ if (!Array.prototype.move) {
         return this; // for testing purposes
     };
 }
-if (!Array.prototype.insert2) {
-    Array.prototype.insert2 = function(v, m) {
-        return this.insertAt(this.indexOf2(m.map(function(map) { return map(row); }), m)[1], v);
-    };
-}
 if (!String.prototype.format) {
     //http://stackoverflow.com/questions/18405736/is-there-a-c-sharp-string-format-equivalent-in-javascript
     String.prototype.format = function() {
@@ -57,37 +52,47 @@ if (!String.prototype.format) {
     };
 }
 if (!Array.prototype.parse) {
-    Array.prototype.parse = function(s) { return s.length ? this[s[0]] : null : s; }
+    Array.prototype.parse = function(s) { return s.length ? this[s] : s; }
 }
 if (!Array.prototype.insert) {
     Array.prototype.insert = function(v) {
-        for (var i = this[2], ii = 0, r = true; ii < i.length && r; ii++) {
-            if (i[ii][2]) {
-                for (var o = i[1], oi = 0, d = []; oi < o.length; oi++) { d = v.parse(o[oi]); }
-                r = this[1].indexOf2(d, o, 1)[0] !== null;
+        var a = this;
+        if (!a[1].find(function(i) { return i[2]; })) { a[3].push(v); return a; }
+        for (var i = a[1], ii = 0, r = true, d; ii < i.length && r; ii++) {
+            if (i[ii][2] && !a[2][ii]) { a[2][ii] = a[3]; }
+            if (i[ii][3]) { r = a[2][ii].indexOf2(i[ii][1].map(function(i) { return v[i[0]]; }), i, 1)[0] === null; }
+        }
+        if (r) {
+            for (i = a[1], ii = 0; ii < i.length; ii++) {
+                a[2][ii].insertAt(a[2][ii].indexOf2(i[ii][1].map(function(i) { return v[i[0]]; }), i, 1)[1], v);
             }
         }
-        if (r) { for (i = this[2], ii = 0; ii < i.length; ii++) { this[1].insert2(v, o); } }
+        return a;
     }
 }
 var resultados = [
     ['Columna', 'Valor', 'Totales']
 ];
 
-var database = [
+var reportes = [
     "reportes",
+    [["PK_reportes", [[0, 1]], true, true]],
     [],
-    [["PK_reportes", [[0, 1]], true, 1]]
+    []
 ];
-var reporte = [
-    ['Estado', 'Lugar', "Curso ID"],
-    ['Completado', 'PARCAR', 75],
-    ['Completado', 'PARCAR', 76],
-    ['Completado', 'AGA', 76],
-    ['Completado', 'KROMA TULTITLAN', 75]
-];
-var estados = [
+reportes.tables = {
+    create: function(t) {
+        reportes.insert(t);
+        reportes[t[0]] = t;
+        var i = t[1].find(function(i) { return i[2]; });
+        if (i && t[3]) { t[3].orderBy(i, 1); }
+        return t;
+    }
+}
+var table = [
     "estados",
+    [["PK_estados", [[0, 1]], true, true]],
+    [],
     [
         ['Estado', '*Orden', '*Color'],
         ['Completado', 1, '#00B050'],
@@ -100,16 +105,22 @@ var estados = [
         ['Incompleto', 8, '#FFFF00'],
         ['Sin iniciar', 9, '#A6A6A6'],
         ['Programado', 10, '#4472C4']
-    ],
-    [["PK_estados", [[0, 1]], true, 1]]
+    ]
 ];
-function prepare(t) {
-    if (t[2]) {
-        for (var i = t[2], ii = 0, r; ii < i.length && !r; ii++) { r = i[ii][2] === 1; }
-        if (r) { t[1].orderby(i[ii - 1], 1); }
-        database.insert(t);
-    }
-}
+reportes.tables.create(table);
+tabla = [
+    "reporte",
+    [],
+    [],
+    [
+        ['Estado', 'Lugar', "Curso ID"],
+        ['Completado', 'PARCAR', 75],
+        ['Completado', 'PARCAR', 76],
+        ['Completado', 'AGA', 76],
+        ['Completado', 'KROMA TULTITLAN', 75]
+    ],
+    ["FK_reporte_estados", "estados", ["Estado", "Estado"]]
+];
 //var row_total = resultados[2];
 //var total_cell = resultados[2][2];
 var extractsh = [
@@ -139,7 +150,7 @@ function makesss(s) {
     }
     return s.join(" && ");
 }
-function parsedata(a, s) { return s.length ? (a[1][s[0]] ? a[1][s[0]].[s[1]] : null) : s; }
+function parsedata(a, s) { return s.length ? (a[1][s[0]] ? a[1][s[0]][s[1]] : null) : s; }
 function insert2(a, v, o, s) {
     a.insertAt(indexOf2(a, v, o, s)[1], v);
 }
