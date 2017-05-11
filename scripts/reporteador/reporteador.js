@@ -1,3 +1,10 @@
+if (!String.prototype.format) {
+    //http://stackoverflow.com/questions/18405736/is-there-a-c-sharp-string-format-equivalent-in-javascript
+    String.prototype.format = function() {
+        var args = arguments;
+        return this.replace(/{(\d+)}/g, function(match, number) { return typeof args[number] !== undefined ? args[number] : match; });
+    };
+}
 if (!Array.prototype.insertAt) {
     //http://stackoverflow.com/questions/586182/javascript-insert-item-into-array-at-a-specific-index
     Array.prototype.insertAt = function(index, item) {
@@ -44,31 +51,47 @@ if (!Array.prototype.move) {
         return this; // for testing purposes
     };
 }
-if (!String.prototype.format) {
-    //http://stackoverflow.com/questions/18405736/is-there-a-c-sharp-string-format-equivalent-in-javascript
-    String.prototype.format = function() {
-        var args = arguments;
-        return this.replace(/{(\d+)}/g, function(match, number) { return typeof args[number] !== undefined ? args[number] : match; });
-    };
-}
 if (!Array.prototype.parse) {
     Array.prototype.parse = function(s) { return s.length ? this[s] : s; }
 }
+if (!Array.prototype.contains){
+    Array.prototype.contains = function (item) { return this.indexOf(item) !== -1; };
+}
+if (!Array.prototype.remove){
+    Array.prototype.remove = Afunction (v) {
+        //http://stackoverflow.com/questions/3596089/how-to-add-and-remove-array-value-in-jquery
+        this.splice(this.indexOf(v) === -1 ? this.length : this.indexOf(v), 1);
+        return this;
+    };
+}
 if (!Array.prototype.insert) {
     Array.prototype.insert = function(v) {
-        var a = this;
-        if (!a[1].find(function(i) { return i[2]; })) { a[3].push(v); return a; }
-        for (var i = a[1], ii = 0, r = true, d; ii < i.length && r; ii++) {
-            if (i[ii][2] && !a[2][ii]) { a[2][ii] = a[3]; }
-            if (i[ii][3]) { r = a[2][ii].indexOf2(i[ii][1].map(function(i) { return v[i[0]]; }), i, 1)[0] === null; }
-        }
-        if (r) {
-            for (i = a[1], ii = 0; ii < i.length; ii++) {
-                a[2][ii].insertAt(a[2][ii].indexOf2(i[ii][1].map(function(i) { return v[i[0]]; }), i, 1)[1], v);
+        var a = this, error;
+        if (!a[2].find(function(i) { return i[2]; })) { a[5].push(v); return a; }
+        for (var i = a[2], ii = 0; ii < i.length; ii++) {
+            if (i[ii][3] && a[3][ii].indexOf2(i[ii][1].map(function(i) { return v[i[0]]; }), i, 1)[0] !== null) {
+                return "value duplicated in index" + i[ii][0];
             }
+        }      
+        for(i = a[4], ii = 0, v2, v3; ii < i.length; i++){
+            v2 = i.map(function(m){return v[m[1]]; });
+            v3 = i.map(function(m){return m[1]; });
+        }
+        for (ii = 0; ii < i.length; ii++) {
+            a[3][ii].insertAt(a[3][ii].indexOf2(i[ii][1].map(function(i) { return v[i[0]]; }), i, 1)[1], v);
         }
         return a;
     }
+}
+function searchdata(table, map, v2){
+    //buscar un index que coincida con las columnas y que sea único
+    var ind = table[2].find(function(i){ return i[1].every(function(c){ return map.indexOf(c[0]) !== -1; });
+    if(ind){
+        ind = table.indexOf2(ind[1].map(function(m){ return v2.splice(map.splice(map.indexOf(m[0]), 1)[0],1)[0]; }))[2];
+        return 	ind && map.every(function(t, i){ return v2[i] === ind[m]; }) ? ind : null;
+    }
+    //no hay index y por lo tanto se hace la búsqueda fila por fila
+    
 }
 var resultados = [
     ['Columna', 'Valor', 'Totales']
@@ -76,51 +99,62 @@ var resultados = [
 
 var reportes = [
     "reportes",
+    [["name", [varchar, 50], false], ["columns", null, false], ["indexes", null, false], ["relations", null, false], ["rows", null, false]],
     [["PK_reportes", [[0, 1]], true, true]],
+    [],
     [],
     []
 ];
+reportes[3][0] = reportes[5];
+reportes[
 reportes.tables = {
     create: function(t) {
         reportes.insert(t);
         reportes[t[0]] = t;
-        var i = t[1].find(function(i) { return i[2]; });
-        if (i && t[3]) { t[3].orderBy(i, 1); }
+        for (var ind = t[2], i = 0; i < ind.length; i++){
+            if(ind[i][2]){
+                t[3][ind] = t[3][ind] = t[5];
+                t[4].orderBy(ind[i]);
+                break;
+            }
+        }
         return t;
     }
 }
 var table = [
     "estados",
+    [["Estado", ["varchar", 20], false], ["*orden", "tinyint", false], ["*Color", "int", false]],
     [["PK_estados", [[0, 1]], true, true]],
     [],
+    [],
     [
-        ['Estado', '*Orden', '*Color'],
-        ['Completado', 1, '#00B050'],
-        ['Reprobado', 2, '#FF0000'],
-        ['Fuga', 3, '#003300'],
-        ['Cancelado', 4, '#000000'],
-        ['Incapacidad', 5, '#FFC000'],
-        ['Vencido incompleto', 6, '#C65911'],
-        ['Vencido sin iniciar', 7, '#833C0C'],
-        ['Incompleto', 8, '#FFFF00'],
-        ['Sin iniciar', 9, '#A6A6A6'],
-        ['Programado', 10, '#4472C4']
+        ['Completado', 1, 45136],
+        ['Reprobado', 2, 16711680],
+        ['Fuga', 3, 13056],
+        ['Cancelado', 4, 0],
+        ['Incapacidad', 5, 16760832],
+        ['Vencido incompleto', 6, 12998929],
+        ['Vencido sin iniciar', 7, 8600588],
+        ['Incompleto', 8, 16776960],
+        ['Sin iniciar', 9, 10921638],
+        ['Programado', 10, 4485828]
     ]
 ];
 reportes.tables.create(table);
-tabla = [
+table = [
     "reporte",
+    [["Estado", ["varchar", 20], false], ["Lugar", ["varchar", 50], true], ["Curso ID", "smallint", false]],
     [],
     [],
+    [["FK_reporte_estados", "estados", [[0, 0]]]],
     [
-        ['Estado', 'Lugar', "Curso ID"],
         ['Completado', 'PARCAR', 75],
         ['Completado', 'PARCAR', 76],
         ['Completado', 'AGA', 76],
         ['Completado', 'KROMA TULTITLAN', 75]
-    ],
-    ["FK_reporte_estados", "estados", ["Estado", "Estado"]]
+    ]
 ];
+reporte.tables.create(table);
 //var row_total = resultados[2];
 //var total_cell = resultados[2][2];
 var extractsh = [
@@ -134,8 +168,8 @@ var extractsh = [
 //ORDER BY "reporte >estado"."*Orden", reporte.Lugar
 var select = [
     [
-        [["Estado", [0, 0]], ["Lugar", [0, 1]]],
-        [["reporte", reporte], ["reporte >estado", estados, "LJ", [[[1, 0], "=", [0, 0]]]]],
+        [[null, [0, 0]], [null, [0, 1]]],
+        [["reporte", reporte], ["estados", estados, "LJ", [[[1, 0], "=", [0, 0]]]]],
         [[[0, 3], "=", 75]],
         [[[1, 1], 1], [[0, 2], 1]]
     ]
