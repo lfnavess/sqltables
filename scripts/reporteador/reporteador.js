@@ -15,6 +15,7 @@ if (!Array.prototype.insertAt) {
 }
 if (!Array.prototype.indexOf2) {
     Array.prototype.indexOf2 = function(a, o, s, e) {
+        var rows = this
         if (s === undefined) { s = 0; }
         if (e === undefined) { e = this.length - 1; }
         for (var i, b, m, mi, r = -1; s <= e;) {
