@@ -152,7 +152,7 @@ table = [
         ['Completado', 'KROMA TULTITLAN', 75]
     ]
 ];
-reporte.tables.create(table);
+reportes.tables.create(table);
 //var row_total = resultados[2];
 //var total_cell = resultados[2][2];
 var extractsh = [
