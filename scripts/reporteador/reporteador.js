@@ -34,7 +34,7 @@ if (!Array.prototype.orderBy) {
         if (s === undefined) { s = 0; }
         var a = this;
         for (s++; s < a.length; s++) {
-            a.move(s, a.indexOf2(m[1].map(function(m) { return a[s][m[0]]; }), m, 1, s - 1)[1]);
+            a.move(s, a.indexOf2(m[1].map(function(m) { return a[s][m[0]]; }), m, 0, s - 1)[1]);
         }
         return a;
     };
@@ -54,11 +54,8 @@ if (!Array.prototype.move) {
 if (!Array.prototype.parse) {
     Array.prototype.parse = function(s) { return s.length ? this[s] : s; }
 }
-if (!Array.prototype.contains){
-    Array.prototype.contains = function (item) { return this.indexOf(item) !== -1; };
-}
-if (!Array.prototype.remove){
-    Array.prototype.remove = Afunction (v) {
+if (!Array.prototype.remove) {
+    Array.prototype.remove = function(v) {
         //http://stackoverflow.com/questions/3596089/how-to-add-and-remove-array-value-in-jquery
         this.splice(this.indexOf(v) === -1 ? this.length : this.indexOf(v), 1);
         return this;
@@ -66,32 +63,33 @@ if (!Array.prototype.remove){
 }
 if (!Array.prototype.insert) {
     Array.prototype.insert = function(v) {
-        var a = this, error;
+        var a = this;
         if (!a[2].find(function(i) { return i[2]; })) { a[5].push(v); return a; }
         for (var i = a[2], ii = 0; ii < i.length; ii++) {
-            if (i[ii][3] && a[3][ii].indexOf2(i[ii][1].map(function(i) { return v[i[0]]; }), i, 1)[0] !== null) {
+            if (i[ii][3] && a[3][ii].indexOf2(i[ii][1].map(function(i) { return v[i[0]]; }), i)[0] !== null) {
                 return "value duplicated in index" + i[ii][0];
             }
-        }      
-        for(i = a[4], ii = 0, v2, v3; ii < i.length; i++){
-            v2 = i.map(function(m){return v[m[1]]; });
-            v3 = i.map(function(m){return m[1]; });
         }
-        for (ii = 0; ii < i.length; ii++) {
-            a[3][ii].insertAt(a[3][ii].indexOf2(i[ii][1].map(function(i) { return v[i[0]]; }), i, 1)[1], v);
+        for (var i = a[4], ii = 0, v2, v3; ii < i.length; i++) {
+            v2 = i[2].map(function(m) { return v[m[1]]; });
+            v3 = i[2].map(function(m) { return m[1]; });
+            if (!searchdata(a[1], v3, v2)) { return "Valor no encontrado en la tabla {0}".format(i[2][0]); }
+        }
+        for (i = a[2], ii = 0; ii < i.length; ii++) {
+            a[3][ii].insertAt(a[3][ii].indexOf2(i[ii][1].map(function(i) { return v[i[0]]; }), i)[1], v);
         }
         return a;
     }
 }
-function searchdata(table, map, v2){
+function searchdata(table, map, v2) {
     //buscar un index que coincida con las columnas y que sea único
-    var ind = table[2].find(function(i){ return i[1].every(function(c){ return map.indexOf(c[0]) !== -1; });
-    if(ind){
-        ind = table.indexOf2(ind[1].map(function(m){ return v2.splice(map.splice(map.indexOf(m[0]), 1)[0],1)[0]; }))[2];
-        return 	ind && map.every(function(t, i){ return v2[i] === ind[m]; }) ? ind : null;
+    var ind = table[2].find(function(i) { return i[1].every(function(c) { return map.indexOf(c[0]) !== -1; }) });
+    if (ind) {
+        ind = table.indexOf2(ind[1].map(function(m) { return v2.splice(map.splice(map.indexOf(m[0]), 1)[0], 1)[0]; }))[2];
+        return ind && map.every(function(t, i) { return v2[i] === ind[m]; }) ? ind : null;
     }
     //no hay index y por lo tanto se hace la búsqueda fila por fila
-    
+
 }
 var resultados = [
     ['Columna', 'Valor', 'Totales']
@@ -99,22 +97,22 @@ var resultados = [
 
 var reportes = [
     "reportes",
-    [["name", [varchar, 50], false], ["columns", null, false], ["indexes", null, false], ["relations", null, false], ["rows", null, false]],
+    [["name", ["varchar", 50], false], ["columns", null, false], ["indexes", null, false], ["relations", null, false], ["rows", null, false]],
     [["PK_reportes", [[0, 1]], true, true]],
     [],
     [],
     []
 ];
 reportes[3][0] = reportes[5];
-reportes[
 reportes.tables = {
     create: function(t) {
         reportes.insert(t);
         reportes[t[0]] = t;
-        for (var ind = t[2], i = 0; i < ind.length; i++){
-            if(ind[i][2]){
-                t[3][ind] = t[3][ind] = t[5];
-                t[4].orderBy(ind[i]);
+        for (var r = t[4], ri = 0; ri < r.length; ri++) { r[ri][0] = searchdata(reportes, [0], [r[ri][1]]); }
+        for (var ind = t[2], i = 0; i < ind.length; i++) {
+            if (ind[i][2]) {
+                t[3][ind] = t[5];
+                t[5].orderBy(ind[i]);
                 break;
             }
         }
