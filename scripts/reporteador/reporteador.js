@@ -96,37 +96,115 @@ var resultados = [
     ['Columna', 'Valor', 'Totales']
 ];
 
-var reportes = [
+
+(function () {
+    var _dbs = [];
+    _dbs.meta = [
+        "jsdatabase",
+        [["name", ["varchar", 50], false]],
+        [["PK_jsdatabase",[[0,1]], true, true]],
+        []
+    ];
+    prep(_dbs, {Columns:{},Keys:{},Indexes:{}});
+    var dbs = {Databases:{}};
+    window[_dbs[0]] = dbs;
+    jsdatabase["CREATE DATABASE"] = function(meta,_db) {
+        if(_db === undefined){ _db = []; }
+        _db.meta = meta;
+        _dbs.insert(prep(_db), {Columns:{},Keys:{},Indexes:{}});
+        var db = { Tables:{}};
+        dbs.Databases[_db[0]] = db;
+        db["CREATE TABLE"] = function(meta, _ta) {
+            if(_ta === undefined){ _ta = []; }
+            _ta.meta = meta;b 
+            var ta = {Columns:{},Keys:{},Indexes:{}};
+            _db.insert(prep(_ta), ta);
+            db.tables[_ta[0]] = ta;
+            
+            return ta;
+        }
+        db["SELECT"] = function(se){
+
+        }
+        db["INSERT INTO"] = function(ins){
+
+        }
+        db["UPDATE"] = function(up){
+
+        }
+        db["DELETE"] = function(de){
+
+        }
+
+        return db;
+    }
+    function prep (t, ob, rec){
+
+
+        for (var r = t[3], ri = 0; ri < r.length; ri++) { r[ri][0] = searchdata(reportes, [0], [r[ri][1]]); }
+        
+        if(!rec){ 
+            prep([
+                "Columns",
+                [["Column Name", ["varchar", 50], false], ["Data type",null,false], ["Allow Nulls", "bit"]],
+                [["IX_columname", [[0,1]], false, true]],
+                [],
+                [],
+                t[1]
+            ], {Columns:{},Keys:{},Indexes:{}}, true);
+        }
+
+        t[1].forEach(function(col, coli){
+            ob.Columns[col[0]] = col;
+        });
+        t[2].forEach(function(ind, indi){
+            t[4][indi] = ind[2] ? t[5] : [];
+            ob.Indexes[ind[0]] = ind;
+            t[4][indi].indefxof2 = ind.indefxof2 = indefxof2;
+            if(ind[3] && ind[1].length === 1){}
+            function indefxof2(a, s, e) {
+                var rows = t[4][indi];
+                if (a.length !== ind[1].length){ retrun; }
+                if(rows.length === 0 && !rows.close){
+                    rows.close = true;
+                    t[5].forEach(function(r){ 
+                        if(!ind[1].every(function(ind){ return !t[1][ind[0]] || r[ind[0]] !== null; })){ return; }
+                        t[4].insert(r);
+                    });
+                    delete rows.close;
+                }
+                if (s === undefined) { s = 0; }
+                if (e === undefined) { e = rows.length - 1; }
+                for (var i, b, m, mi, r = -1; s <= e;) {
+                    i = s + Math.round((e - s) / 2);
+                    b = rows[i];
+                    for (m = ind[1], mi = 0, r = 0; mi < m.length && !r; mi++) { r = compare_s(a[mi], b[m[mi][0]], m[mi][1]); }
+                    if (r > 0) { s = i + 1; }
+                    else if (r) { e = i - 1; }
+                    else if (!ind[3]) { s = i + 1; }
+                    else { s = i; break; }
+                }
+                return [r ? null : s, r ? s : null, r ? null : b];
+            };
+            if(ind[2]){t[5].orderBy(ind[i]);}
+        });
+        return t;
+        
+    }
+})();
+var dbreportes = jsdatabase["CREATE DATABASE"]([
     "reportes",
     [["name", ["varchar", 50], false], ["columns", null, false], ["indexes", null, false], ["relations", null, false], ["rows", null, false]],
     [["PK_reportes", [[0, 1]], true, true]],
     [],
-    [],
-    []
-];
-reportes[3][0] = reportes[5];
-reportes.tables = {
-    create: function(t) {
-        reportes.insert(t);
-        reportes[t[0]] = t;
-        for (var r = t[4], ri = 0; ri < r.length; ri++) { r[ri][0] = searchdata(reportes, [0], [r[ri][1]]); }
-        for (var ind = t[2], i = 0; i < ind.length; i++) {
-            if (ind[i][2]) {
-                t[3][ind] = t[5];
-                t[5].orderBy(ind[i]);
-                break;
-            }
-        }
-        return t;
-    }
-}
-var table = [
-    "estados",
-    [["Estado", ["varchar", 20], false], ["*orden", "tinyint", false], ["*Color", "int", false]],
-    [["PK_estados", [[0, 1]], true, true]],
-    [],
-    [],
+]);
+dbreportes["CREATE TABLE"](
     [
+        "estados",
+        [[1, "Estado", ["varchar", 20], false], [2, "*orden", "tinyint", false], [3, "*Color", "int", false]],
+        [["PK_estados", [[0, 1]], true, true]],
+        []
+    ],[
         ['Completado', 1, 45136],
         ['Reprobado', 2, 16711680],
         ['Fuga', 3, 13056],
@@ -138,22 +216,24 @@ var table = [
         ['Sin iniciar', 9, 10921638],
         ['Programado', 10, 4485828]
     ]
-];
-reportes.tables.create(table);
-table = [
-    "reporte",
-    [["Estado", ["varchar", 20], false], ["Lugar", ["varchar", 50], true], ["Curso ID", "smallint", false]],
-    [],
-    [],
-    [["FK_reporte_estados", "estados", [[0, 0]]]],
+);
+dbreportes["CREATE TABLE"](
     [
+        "reporte",
+        [[1, "Estado", ["varchar", 20], false], [2, "Lugar", ["varchar", 50], true], [3, "Curso ID", "smallint", false]],
+        [],
+        [["FK_reporte_estados", "estados", [[0, 0]]]]
+    
+    ],[
         ['Completado', 'PARCAR', 75],
         ['Completado', 'PARCAR', 76],
         ['Completado', 'AGA', 76],
         ['Completado', 'KROMA TULTITLAN', 75]
     ]
-];
-reportes.tables.create(table);
+);
+
+
+//reportes.tables.create(table);
 //var row_total = resultados[2];
 //var total_cell = resultados[2][2];
 var extractsh = [
