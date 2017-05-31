@@ -15,7 +15,7 @@ if (!Array.prototype.insertAt) {
 }
 if (!Array.prototype.indexOf2) {
     Array.prototype.indexOf2 = function(a, o, s, e) {
-        var rows = this
+        var rows = this;
         if (s === undefined) { s = 0; }
         if (e === undefined) { e = this.length - 1; }
         for (var i, b, m, mi, r = -1; s <= e;) {
@@ -53,7 +53,7 @@ if (!Array.prototype.move) {
     };
 }
 if (!Array.prototype.parse) {
-    Array.prototype.parse = function(s) { return s.length ? this[s] : s; }
+    Array.prototype.parse = function(s) { return s.length ? this[s] : s; };
 }
 if (!Array.prototype.remove) {
     Array.prototype.remove = function(v) {
@@ -80,11 +80,11 @@ if (!Array.prototype.insert) {
             a[3][ii].insertAt(a[3][ii].indexOf2(i[ii][1].map(function(i) { return v[i[0]]; }), i)[1], v);
         }
         return a;
-    }
+    };
 }
 function searchdata(table, map, v2) {
     //buscar un index que coincida con las columnas y que sea único
-    var ind = table[2].find(function(i) { return i[1].every(function(c) { return map.indexOf(c[0]) !== -1; }) });
+    var ind = table[2].find(function(i) { return i[1].every(function(c) { return map.indexOf(c[0]) !== -1; }); });
     if (ind) {
         ind = table.indexOf2(ind[1].map(function(m) { return v2.splice(map.splice(map.indexOf(m[0]), 1)[0], 1)[0]; }))[2];
         return ind && map.every(function(t, i) { return v2[i] === ind[m]; }) ? ind : null;
@@ -108,59 +108,53 @@ var resultados = [
     prep(_dbs, {Columns:{},Keys:{},Indexes:{}});
     var dbs = {Databases:{}};
     window[_dbs[0]] = dbs;
-    jsdatabase["CREATE DATABASE"] = function(meta,_db) {
-        if(_db === undefined){ _db = []; }
+    jsdatabase["CREATE DATABASE"] = function(meta,_db = []) {
         _db.meta = meta;
         _dbs.insert(prep(_db), {Columns:{},Keys:{},Indexes:{}});
         var db = { Tables:{}};
         dbs.Databases[_db[0]] = db;
-        db["CREATE TABLE"] = function(meta, _ta) {
-            if(_ta === undefined){ _ta = []; }
-            _ta.meta = meta;b 
-            var ta = {Columns:{},Keys:{},Indexes:{}};
+        db["CREATE TABLE"] = function(meta, _ta = []) {
+            _ta.meta = meta;
+            var ta = { Columns: {}, Keys: {}, Indexes: {} };
             _db.insert(prep(_ta), ta);
             db.tables[_ta[0]] = ta;
-            
+
             return ta;
-        }
-        db["SELECT"] = function(se){
+        };
+        db["SELECT"] = function(se) {
 
-        }
-        db["INSERT INTO"] = function(ins){
+        };
+        db["INSERT INTO"] = function(ins) {
 
-        }
-        db["UPDATE"] = function(up){
+        };
+        db["UPDATE"] = function(up) {
 
-        }
-        db["DELETE"] = function(de){
+        };
+        db["DELETE"] = function(de) {
 
-        }
+        };
 
         return db;
     }
     function prep (t, ob, rec){
-
-
-        for (var r = t[3], ri = 0; ri < r.length; ri++) { r[ri][0] = searchdata(reportes, [0], [r[ri][1]]); }
-        
-        if(!rec){ 
-            prep([
+        for (var r = t.meta[3], ri = 0; ri < r.length; ri++) { r[ri][0] = searchdata(reportes, [0], [r[ri][1]]); }
+        if (!rec) {
+            t[1].meta = [
                 "Columns",
-                [["Column Name", ["varchar", 50], false], ["Data type",null,false], ["Allow Nulls", "bit"]],
-                [["IX_columname", [[0,1]], false, true]],
-                [],
-                [],
-                t[1]
-            ], {Columns:{},Keys:{},Indexes:{}}, true);
+                [["Column Name", ["varchar", 50], false], ["Data type", null, false], ["Allow Nulls", "bit"]],
+                [["IX_columname", [[0, 1]], false, true]],
+                []
+            ];
+            prep(t[1], { Columns: {}, Keys: {}, Indexes: {} }, true);
         }
 
         t[1].forEach(function(col, coli){
             ob.Columns[col[0]] = col;
         });
-        t[2].forEach(function(ind, indi){
-            t[4][indi] = ind[2] ? t[5] : [];
+        t.meta[2].forEach(function(ind, indi){
+            t.meta[4][indi] = ind[2] ? t : [];
             ob.Indexes[ind[0]] = ind;
-            t[4][indi].indefxof2 = ind.indefxof2 = indefxof2;
+            t.meta[4][indi].indefxof2 = ind.indefxof2 = indefxof2;
             if(ind[3] && ind[1].length === 1){}
             function indefxof2(a, s, e) {
                 var rows = t[4][indi];
@@ -196,7 +190,7 @@ var dbreportes = jsdatabase["CREATE DATABASE"]([
     "reportes",
     [["name", ["varchar", 50], false], ["columns", null, false], ["indexes", null, false], ["relations", null, false], ["rows", null, false]],
     [["PK_reportes", [[0, 1]], true, true]],
-    [],
+    []
 ]);
 dbreportes["CREATE TABLE"](
     [
