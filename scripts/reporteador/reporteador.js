@@ -65,7 +65,7 @@ if (!Array.prototype.remove) {
 if (!Array.prototype.insert) {
     Array.prototype.insert = function(v) {
         var a = this;
-        if (!a[2].find(function(i) { return i[2]; })) { a[5].push(v); return a; }
+        if (!a.meta[2].find(function(i) { return i[2]; })) { a.push(v); return a; }
         for (var i = a[2], ii = 0; ii < i.length; ii++) {
             if (i[ii][3] && a[3][ii].indexOf2(i[ii][1].map(function(i) { return v[i[0]]; }), i)[0] !== null) {
                 return "value duplicated in index" + i[ii][0];
