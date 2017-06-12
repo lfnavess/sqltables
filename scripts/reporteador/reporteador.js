@@ -22,10 +22,7 @@ if (!Array.prototype.indexOf2) {
             i = s + Math.round((e - s) / 2);
             b = this[i];
             for (m = o[1], mi = 0, r = 0; mi < m.length && !r; mi++) { r = compare_s(a[mi], b[m[mi][0]], m[mi][1]); }
-            if (r > 0) { s = i + 1; }
-            else if (r) { e = i - 1; }
-            else if (!o[3]) { s = i + 1; }
-            else { s = i; break; }
+            if (r > 0) { s = i + 1; } else if (r) { e = i - 1; } else if (!o[3]) { s = i + 1; } else { s = i; break; }
         }
         return [r ? null : s, r ? s : null, r ? null : b];
     };
@@ -139,20 +136,20 @@ var resultados = [
     function prep (t, ob, rec){
         for (var r = t.meta[3], ri = 0; ri < r.length; ri++) { r[ri][0] = searchdata(reportes, [0], [r[ri][1]]); }
         if (!rec) {
-            t[1].meta = [
+            t.meta[1].meta = [
                 "Columns",
                 [["Column Name", ["varchar", 50], false], ["Data type", null, false], ["Allow Nulls", "bit"]],
                 [["IX_columname", [[0, 1]], false, true]],
                 []
             ];
-            prep(t[1], { Columns: {}, Keys: {}, Indexes: {} }, true);
+            prep(t.meta[1], { Columns: {}, Keys: {}, Indexes: {} }, true);
         }
 
-        t[1].forEach(function(col, coli){
+        t.meta[1].forEach(function(col, coli){
             ob.Columns[col[0]] = col;
         });
         t.meta[2].forEach(function(ind, indi){
-            t.meta[4][indi] = ind[2] ? t : [];
+            t.meta[4][indi] = ind.meta[2] ? t : [];
             ob.Indexes[ind[0]] = ind;
             t.meta[4][indi].indefxof2 = ind.indefxof2 = indefxof2;
             if(ind[3] && ind[1].length === 1){}
