@@ -18,6 +18,9 @@ if (!Array.prototype.indexOf2) {
         var rows = this;
         if (s === undefined) { s = 0; }
         if (e === undefined) { e = this.length - 1; }
+        rows.meta[2].find(function(ind) {
+            
+        });
         for (var i, b, m, mi, r = -1; s <= e;) {
             i = s + Math.round((e - s) / 2);
             b = this[i];
