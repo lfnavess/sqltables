@@ -1,5 +1,8 @@
-if (!Array.prototype.WHERE) {
-    Array.prototype.WHERE = function(search_condition) { return this[search_condition[0]] === search_condition[1]; }
+if(!String.prototype.trimSingleLine){
+    //http://stackoverflow.com/questions/498970/how-do-i-trim-a-string-in-javascript
+    String.prototype.trimSingleLine = function () {
+        return this.replace(/^\s+|\s+$/g, '').replace(/\s+/g, ' ');
+    };
 }
 
 
@@ -7,6 +10,10 @@ var dn = { null: 1, "NULL": 1, "NOT NULL": 0 };
 var tiden = 1;
 var tciden = 1;
 var t = [];
+var aaa = function(a) { return a; }
+var bbb = function(b) {  b = [tiden++, b]; t.push(b); return b; }
+var ccc = function (c) { c.unshift(tciden++); t[0].rows.push(c); return c; }
+
 addtable(
     "Columns",
     [
@@ -21,7 +28,6 @@ addtable(
         ["CONSTRAINTTYPE", "int", null, null, null, null, "CONSTRAINTTYPES"]
     ]
 );
-t[0].cols[0][6] = tciden;
 addtable(
     "Tables",
     [
@@ -29,34 +35,32 @@ addtable(
         ["table_name", "nvarchar", 50, null, null, "NOT NULL", "UNIQUE"]
     ]
 ).rows = t;
-t[1].cols[0][6] = 2;
 var tmp;
 addtable(
     "DataTypes",
     [
-        ["DataTypeID", "tinyint", null, null, "IDENTITY", "NOT NULL", "PRIMARY KEY"],
+        ["DataTypeID", "tinyint", null, null, null, "NOT NULL", "PRIMARY KEY"],
         ["DataTypeName", "nvarchar", 50, null, null, "NOT NULL", "UNIQUE"],
         ["min", "bigint", null, null, null, null, null],
         ["max", "bigint", null, null, null, null, null]
     ]
 );
-INSERT("DataTypes", ["DataTypeName"], ["bit",0,1]);
-INSERT("DataTypes", ["DataTypeName"], ["tinyint",0,255]);
-INSERT("DataTypes", ["DataTypeName"], ["smallint", -32768, 32767]);
-INSERT("DataTypes", ["DataTypeName"], ["int", -2147483648, 2147483647]);
-INSERT("DataTypes", ["DataTypeName"], ["bigint", -9223372036854775808, 9223372036854775807]);
-INSERT("DataTypes", ["DataTypeName"], ["nvarchar"]);
-t[0].rows.forEach(function(c) { c[3] = WHERE("DataTypes", [["DataTypeName", c[3]]])[0]; })
+t[2].rows.push([1,"bit",0,1]);
+t[2].rows.push([2,"tinyint",0,255]);
+t[2].rows.push([3,"smallint",-32768, 32767]);
+t[2].rows.push([4,"int",-2147483648, 2147483647]);
+t[2].rows.push([5,"bigint",-9223372036854775808, 9223372036854775807]);
+t[2].rows.push([6,"nvarchar",null,null]);
 tmp = addtable(
     "CONSTRAINTTYPES",
     [
-        ["CONSTRAINTTYPEID", "tinyint", null, null, "IDENTITY", "NOT NULL", "PRIMARY KEY"],
+        ["CONSTRAINTTYPEID", "tinyint", null, null, null, "NOT NULL", "PRIMARY KEY"],
         ["CONSTRAINTTYPE", "nvarchar", 50, null, null, "NOT NULL", "UNIQUE"]
     ]
 );
-INSERT("CONSTRAINTTYPES", ["CONSTRAINTTYPE"], ["PRIMARY KEY"]);
-INSERT("CONSTRAINTTYPES", ["CONSTRAINTTYPE"], ["UNIQUE"]);
-INSERT("CONSTRAINTTYPES", ["CONSTRAINTTYPE"], ["FROREING KEY"]);
+t[3].rows.push([1,"PRIMARY KEY"]);
+t[3].rows.push([2,"UNIQUE"]);
+t[3].rows.push([3,"FROREING KEY"]);
 addtable(
     "CONSTRAINTS",
     [
@@ -77,11 +81,22 @@ addtable(
     [[null, "PRIMARY KEY", [["Constraint"], ["Column"]]]]
 );
 
+t[1].cols[0][6] = tiden;
+t[0].cols[0][6] = tciden;
+aaa = function(a) { return WHERE(t[3], ["DataTypeName", a]); }
+bbb = function(b) { b = INSERT(t[1], t[1].cols.slice(1), [b]); return b; }
+ccc = function (c) { c = INSERT(t[0], t[0].cols.slice(1), c); return c; }
+t[0].rows.forEach(function(c) { c[3] = WHERE("DataTypes", [["DataTypeName", c[3]]])[0]; });
+
 ADDCONSTRAINT("cola", undefined, "UNIQUE", [["Table"], ["column_name"]], null);
 
 addtable("Puestos", [["PuestoID", 1], ["Puesto", 2]], [["PK_Puesto", true, true, [["PuestoID"]]], ["IX_Puesto", false, true, [["Puesto"]]]]);
 
-
+function trns(val){
+    if (typeof val === "string"){ val = val.trimSingleLine(); }
+    if (!val && val !== 0){ val = null; }
+    
+}
 function ADDCONSTRAINT(table, name, type, cols, refcols) {
     if (typeof table === "string") { table = WHERE(t, [1, table]); }
     if (typeof type === "string") { type = WHERE(t[3], [1, type]); }
@@ -102,9 +117,7 @@ function WHERE(table, conditions) {
     var con = table.constraints.find(function(c) {
         return (c[3] === 1 || c[3] === 2) && c.constcols.every(function(cc) { return conditions.find(function(con) { return con[0] === cc; }); });
     });
-    table.rows.forEach(function(r) {
-        if (conditions.every(function(c) { return r[table.cols.indexOf(c[0])] === c[1]; })) { rs.push(r); }
-    });
+    table.rows.forEach(function(r) { if (conditions.every(function(c) { return r[table.cols.indexOf(c[0])] === c[1]; })) { rs.push(r); } });
     if (con) { return rs[0]; }
     return rs;
 }
@@ -113,8 +126,17 @@ function INSERT(table, cols, vals) {
     cols = cols.map(function(c) { return colstr(table, c); });
     vals = table.cols.map(function(c) {
         var val;
-        if (c[6]) { val = c[6]++; }
-        else { val = vals[cols.indexOf(c)]; if (!val && val !== 0) { if (!c[7]) { showAlert("Value required"); } val = null; } }
+        if (c[6]) { val = c[6]++; } else { val = vals[cols.indexOf(c)]; }
+        if (typeof val === "string"){ val = val.trimSingleLine(); }        
+        if (!val && val !== 0) { val = null; if (!c[7]) { showAlert("Value required"); } }
+        else if(c[3][1] === "nvarchar"){
+            if(typeof val !== "string"){ val = val + ""; }
+            if(val.length > c[4]){ showAlert("Maxlength value reached"); }
+        } else {
+            if(isNaN(val)){ showAlert("Value is not a number"); } else { val = Number(val); }
+            if(val < c[3][2]){ showAlert("Min value reached"); }
+            else if(val > c[3][3]){ showAlert("Max value reached"); }
+        }
         return val;
     });
     table.rows.push(vals);
@@ -137,9 +159,6 @@ function colstr(table, c) {
 }
 //"Latin1_General_CS_AS";
 
-function aaa(a) { return t[4] ? WHERE(t[3], ["DataTypeName", a]) : a; }
-function bbb(b) { if (t[1]) { b = INSERT(t[1], t[1].cols.slice(1), [b]); } else { b = [tiden++, b]; t.push(b); } return b; }
-function ccc(c) { if (t[1]) { c = INSERT(t[0], t[0].cols.slice(1), c); } else { c.unshift(tciden++); t[0].rows.push(c); } return c; }
 
 function addtable(table, column_definition, table_constraint) {
     if (t.length > 0 && tablestr(table)) { showAlert("Tablename exist allready"); }
