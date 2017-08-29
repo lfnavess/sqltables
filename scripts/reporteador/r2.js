@@ -85,8 +85,17 @@ t[1].cols[0][6] = tiden;
 t[0].cols[0][6] = tciden;
 aaa = function(a) { return WHERE(t[3], ["DataTypeName", a]); }
 bbb = function(b) { b = INSERT(t[1], t[1].cols.slice(1), [b]); return b; }
-ccc = function (c) { c = INSERT(t[0], t[0].cols.slice(1), c); return c; }
-t[0].rows.forEach(function(c) { c[3] = WHERE("DataTypes", [["DataTypeName", c[3]]])[0]; });
+ccc = function(c) { c = INSERT(t[0], t[0].cols.slice(1), c); return c; }
+tiden = 1;
+tciden = 1;
+t[0].rows.forEach(function(c) {
+    c[3] = WHERE("DataTypes", [["DataTypeName", c[3]]])[0];
+    if (c[8]) {
+        c[8] = WHERE("CONSTRAINTTYPES", [["CONSTRAINTTYPE", c[8]]]);
+        [tiden++, c[1],,c[8]]
+        [tiden++, c, null, 1]
+    }
+});
 
 ADDCONSTRAINT("cola", undefined, "UNIQUE", [["Table"], ["column_name"]], null);
 
