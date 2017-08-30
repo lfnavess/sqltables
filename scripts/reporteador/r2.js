@@ -4,6 +4,13 @@ if(!String.prototype.trimSingleLine){
         return this.replace(/^\s+|\s+$/g, '').replace(/\s+/g, ' ');
     };
 }
+if (!String.prototype.format) {
+    //http://stackoverflow.com/questions/18405736/is-there-a-c-sharp-string-format-equivalent-in-javascript
+    String.prototype.format = function() {
+        var args = arguments;
+        return this.replace(/{(\d+)}/g, function(match, number) { return typeof args[number] !== undefined ? args[number] : match; });
+    };
+}
 
 
 var dn = { null: 1, "NULL": 1, "NOT NULL": 0 };
@@ -35,7 +42,6 @@ addtable(
         ["table_name", "nvarchar", 50, null, null, "NOT NULL", "UNIQUE"]
     ]
 ).rows = t;
-var tmp;
 addtable(
     "DataTypes",
     [
@@ -51,7 +57,7 @@ t[2].rows.push([3,"smallint",-32768, 32767]);
 t[2].rows.push([4,"int",-2147483648, 2147483647]);
 t[2].rows.push([5,"bigint",-9223372036854775808, 9223372036854775807]);
 t[2].rows.push([6,"nvarchar",null,null]);
-tmp = addtable(
+addtable(
     "CONSTRAINTTYPES",
     [
         ["CONSTRAINTTYPEID", "tinyint", null, null, null, "NOT NULL", "PRIMARY KEY"],
@@ -75,29 +81,23 @@ addtable(
     [
         ["Constraint", "int", null, null, null, "NOT NULL", "CONSTRAINTS"],
         ["column", "int", null, null, null, "NOT NULL", "Columns"],
-        ["ref_column", "int", null, null, null, null, "Columns"],
-        ["order", "bit", null, null, null, null, null]
+        ["order", "bit", null, null, null, "NOT NULL", null],
+        ["ref_column", "int", null, null, null, null, "Columns"]
     ],
     [[null, "PRIMARY KEY", [["Constraint"], ["Column"]]]]
 );
 
 t[1].cols[0][6] = tiden;
 t[0].cols[0][6] = tciden;
-aaa = function(a) { return WHERE(t[3], ["DataTypeName", a]); }
-bbb = function(b) { b = INSERT(t[1], t[1].cols.slice(1), [b]); return b; }
+aaa = function(a) { return WHERE(t[3], [["DataTypeName", a]]); }
+bbb = function(b) { b = INSERT(t[1], [t[1].cols[1]], [b]); return b; }
 ccc = function(c) { c = INSERT(t[0], t[0].cols.slice(1), c); return c; }
-tiden = 1;
-tciden = 1;
-t[0].rows.forEach(function(c) {
-    c[3] = WHERE("DataTypes", [["DataTypeName", c[3]]])[0];
-    if (c[8]) {
-        c[8] = WHERE("CONSTRAINTTYPES", [["CONSTRAINTTYPE", c[8]]]);
-        [tiden++, c[1],,c[8]]
-        [tiden++, c, null, 1]
-    }
-});
 
-ADDCONSTRAINT("cola", undefined, "UNIQUE", [["Table"], ["column_name"]], null);
+ADDCONSTRAINT("Columns", undefined, "PRIMARY KEY", [["ColumnID"]], null, null);
+ADDCONSTRAINT("Columns", undefined, "UNIQUE", [["Table"], ["column_name"]], null,null);
+ADDCONSTRAINT("Columns", undefined, "FROREING KEY", [["Table"]], "Tables", [["TableID"]]);
+ADDCONSTRAINT("Tables", undefined, "PRIMARY KEY", [["TableID"]], null, null);
+ADDCONSTRAINT("Tables", undefined, "UNIQUE", [["table_name"]], null, null);
 
 addtable("Puestos", [["PuestoID", 1], ["Puesto", 2]], [["PK_Puesto", true, true, [["PuestoID"]]], ["IX_Puesto", false, true, [["Puesto"]]]]);
 
@@ -106,18 +106,21 @@ function trns(val){
     if (!val && val !== 0){ val = null; }
     
 }
-function ADDCONSTRAINT(table, name, type, cols, refcols) {
-    if (typeof table === "string") { table = WHERE(t, [1, table]); }
-    if (typeof type === "string") { type = WHERE(t[3], [1, type]); }
-    cols.forEach(function(c, i) { if (typeof c === "string") { cols[i] = WHERE(t.cols, [2, c]); } });
-    if (!name) { name = "{0}_{1}{2}".format(type === 1 ? "PK" : type === 2 ? "IX" : "FK", table[1], type === 1 ? "" : "_{0}".format(cols[0][2])); }
-    var cid = t[3].INSERT(["Table", "constraint_name", "CONSTRAINTTYPE"], [tableid, cname, ct]).SELECT("ConstraintID");
-    c[2].every(function(co) {
-        c[0] = t.WHERE([["table_name", "Columns"]]).rows.WHERE([["Table", tableid], ["column_name", co[0]]]).SELECT("ColumnID");
-        c[1] = (c[0] === 1 || c[0] === 2) && c[1] === undefined ? 1 : null;
-        t[4].INSERT(["Constraint", "column", "ref_column", "order"], [cid, c[0], null, c[1]]);
-    });
-
+function ADDCONSTRAINT(table, name, type, cols, reftable, refcols) {
+    if (typeof table === "string") { table = WHERE(t[1], [[t[1].cols[1], table]])[0]; }
+    if (typeof type === "string") { type = WHERE(t[3], [[t[3].cols[1], type]])[0]; }
+    cols.forEach(function(c, i) { if (typeof c[0] === "string") { cols[i][0] = WHERE(t[0], [[t[0].cols[1], table],[t[0].cols[2], c[0]]]); } });
+    if (!name) {
+        name = "{0}_{1}{2}".format(
+            type[0] === 1 ? "PK" : type[0] === 2 ? "IX" : "FK",
+            table[1],
+            type[0] === 1 ? "" : "_{0}".format(cols[0][2])
+        );
+    }
+    var constr = INSERT(t[4], ["Table", "constraint_name", "CONSTRAINTTYPE"], [table, name, type]);
+    table.constraints.push(constr);
+    constr.ccols = cols.map(function(c) { return INSERT(t[5], ["Constraint", "column", "order"], [constr, c[0], 1]); });
+    return constr;
 }
 function WHERE(table, conditions) {
     table = tablestr(table);
