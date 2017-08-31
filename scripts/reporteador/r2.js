@@ -165,9 +165,9 @@ function ADDCONSTRAINT(table, name, type, cols, reftable, refcols) {
         }
     } else if (type[0] === 2) {
         constr.rows = [];
-        for (var ai = 0, a, s, e, i, r; ai < table.rows.length; ai++) {
+        for (var alln = cdde(constr.ccols), ai = 0, a, s, e, i, r; ai < table.rows.length; ai++) {
             a = table.rows[ai];
-            if (cddd(constr.ccols, a)) { continue; }
+            if (alln && cddd(constr.ccols, a)) { continue; }
             for (s = 0, e = constr.rows.length - 1; s <= e;) {
                 i = s + Math.round((e - s) / 2);
                 r = cddc(constr.ccols, a, constr.rows[i]);
@@ -201,6 +201,10 @@ function cddd(cs, a) {
         c = cs[ci];
         r = a[c[0][1].cols.indexOf(c[1])] === null;
     }
+    return r;
+}
+function cdde(cs) {
+    for (var ci = 0, r = false; ci < cs.length && !r; ci++) { r = cs[ci][1][7]; }
     return r;
 }
 function compare(c, o, a, b) {
