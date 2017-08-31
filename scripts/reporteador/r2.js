@@ -11,6 +11,18 @@ if (!String.prototype.format) {
         return this.replace(/{(\d+)}/g, function(match, number) { return typeof args[number] !== undefined ? args[number] : match; });
     };
 }
+if (!String.prototype.accentFold){
+    //https://stackoverflow.com/questions/5700636/using-javascript-to-perform-text-matches-with-without-accented-characters
+     String.prototype.accentFold = function () {
+        return this.replace(
+            /([àáâãäåāăąǎǟǡǻȁȃȧⱥɐḁẚạảấầẩẫậắằẳẵặɑɒ])|([ƀɓƃʙḃḅḇ])|([çćĉċčƈȼɕʗ])|([ďđɖɗƌȡḋḍḏḑḓ])|([èéêëēĕėęěǝȅȇȩɇɛɜɝɞḕḗḙḛẹẻẽếềểễệɘʚ])|([ƒḟ])|([ĝğġģɠǥǧǵɡɢʛḡɣɤ])|([ĥħȟɥɦʜḣḥḧḩḫẖ])|([ìíîïĩīĭįıǐȉȋɨɪḭḯỉị])|([ĵǰȷɉɟʄʝ])|([ķƙǩʞḱḳḵ])|([ĺļľŀłƚȴɫɬɭʟḷḹḻḽ])|([ɯɰɱḿṁṃ])|([ñńņňŉƞǹȵɲɳṅṇṉṋ])|([òóôõöøōŏőơǒǫǭǿȍȏȫȭȯȱɔɵṍṏṑṓọỏốồổỗộớờởỡợωɷ])|([ƥʠṕṗ])|([ɋ])|([ŕŗřȑȓɍɹɺɻɼɽɾɿʀʁṙṛṝṟ])|([ßśŝşšſșȿʂṡṣṥṧṩẛ])|([ţťŧƫƭʈțȶⱦʇṫṭṯṱẗ])|([ùúûüũūŭůűųưǔǖǘǚǜȕȗʉṳṵṷṹṻụủứừửữự])|([ʋʌṽṿ])|([ŵʍẁẃẅẇẉẘ])|([ẋẍ])|([ýÿŷƴȳɏʎʸʏẏẙỳỵỷỹ])|([źżžƶȥɀʐʑẑẓẕ])|([æǣǽ])|([ĳ])/gi, 
+            function(str,a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u,v,w,x,y,z,ae,ij) {
+                var tmp = a?"a":b?"b":c?"c":d?"d":e?"e":f?"f":g?"g":h?"h":i?"i":j?"j":k?"k":l?"l":m?"m":n?"n":o?"o":p?"p":q?"q":r?"r":s?"s":t?"t":u?"u":v?"v":w?"w":x?"x":y?"y":z?"z":ae?"ae":ij?"ij":"";
+                return str === str.toUpperCase() ? tmp.toUpperCase() : tmp;
+            }
+        );
+    }
+}
 if (!Array.prototype.move) {
     //http://stackoverflow.com/questions/5306680/move-an-array-element-from-one-array-position-to-another
     Array.prototype.move = function(old_index, new_index) {
@@ -40,32 +52,31 @@ var aaa = function(a) { return a; }
 var bbb = function(b) { b = [tiden++, b]; t.push(b); return b; }
 var ccc = function(c) { c.unshift(tciden++); t[0].rows.push(c); return c; }
 
-addtable(
+CREATE_TABLE(
     "Columns",
     [
-        ["ColumnID", "int", null, null, "IDENTITY", "NOT NULL", "PRIMARY KEY"],
-        ["Table", "int", null, null, null, "NOT NULL", "Tables"],
+        ["ColumnID", "int", null, null, "IDENTITY", "NOT NULL", null],
+        ["Table", "int", null, null, null, "NOT NULL", null],
         ["column_name", "nvarchar", 50, null, null, "NOT NULL", null],
-        ["data_type", "int", null, null, null, "NOT NULL", "DataTypes"],
+        ["data_type", "int", null, null, null, "NOT NULL", null],
         ["precision", "int", null, null, null, null, null],
         ["COLLATE", "int", null, null, null, "NOT NULL", null],
         ["IDENTITY", "int", null, null, null, null, null],
-        ["NULLS", "bit", null, null, null, "NOT NULL", null],
-        ["CONSTRAINTTYPE", "int", null, null, null, null, "CONSTRAINTTYPES"]
+        ["NULLS", "bit", null, null, null, "NOT NULL", null]
     ]
 );
-addtable(
+CREATE_TABLE(
     "Tables",
     [
-        ["TableID", "int", null, null, "IDENTITY", "NOT NULL", "PRIMARY KEY"],
-        ["table_name", "nvarchar", 50, null, null, "NOT NULL", "UNIQUE"]
+        ["TableID", "int", null, null, "IDENTITY", "NOT NULL", null],
+        ["table_name", "nvarchar", 50, null, null, "NOT NULL", null]
     ]
 ).rows = t;
-addtable(
+CREATE_TABLE(
     "DataTypes",
     [
-        ["DataTypeID", "tinyint", null, null, null, "NOT NULL", "PRIMARY KEY"],
-        ["DataTypeName", "nvarchar", 50, null, null, "NOT NULL", "UNIQUE"],
+        ["DataTypeID", "tinyint", null, null, null, "NOT NULL", null],
+        ["DataTypeName", "nvarchar", 50, null, null, "NOT NULL", null],
         ["min", "bigint", null, null, null, null, null],
         ["max", "bigint", null, null, null, null, null]
     ]
@@ -76,40 +87,40 @@ t[2].rows.push([3, "smallint", -32768, 32767]);
 t[2].rows.push([4, "int", -2147483648, 2147483647]);
 t[2].rows.push([5, "bigint", -9223372036854775808, 9223372036854775807]);
 t[2].rows.push([6, "nvarchar", null, null]);
-addtable(
+CREATE_TABLE(
     "CONSTRAINTTYPES",
     [
-        ["CONSTRAINTTYPEID", "tinyint", null, null, null, "NOT NULL", "PRIMARY KEY"],
-        ["CONSTRAINTTYPE", "nvarchar", 50, null, null, "NOT NULL", "UNIQUE"]
+        ["CONSTRAINTTYPEID", "tinyint", null, null, null, "NOT NULL", null],
+        ["CONSTRAINTTYPE", "nvarchar", 50, null, null, "NOT NULL", null]
     ]
 );
 t[3].rows.push([1, "PRIMARY KEY"]);
 t[3].rows.push([2, "UNIQUE"]);
 t[3].rows.push([3, "FROREING KEY"]);
-addtable(
+CREATE_TABLE(
     "CONSTRAINTS",
     [
-        ["ConstraintID", "int", null, null, "IDENTITY", "NOT NULL", "PRIMARY KEY"],
-        ["Table", "int", null, null, null, "NOT NULL", "Tables"],
-        ["constraint_name", "nvarchar", 50, null, null, "NOT NULL", "UNIQUE"],
-        ["CONSTRAINTTYPE", "int", null, null, null, "NOT NULL", "CONSTRAINTTYPES"]
+        ["ConstraintID", "int", null, null, "IDENTITY", "NOT NULL", null],
+        ["Table", "int", null, null, null, "NOT NULL", null],
+        ["constraint_name", "nvarchar", 50, null, null, "NOT NULL", null],
+        ["CONSTRAINTTYPE", "int", null, null, null, "NOT NULL", null]
     ]
 );
-addtable(
+CREATE_TABLE(
     "CONSTRAINTSCOLUMNS",
     [
-        ["Constraint", "int", null, null, null, "NOT NULL", "CONSTRAINTS"],
-        ["column", "int", null, null, null, "NOT NULL", "Columns"],
+        ["Constraint", "int", null, null, null, "NOT NULL", null],
+        ["column", "int", null, null, null, "NOT NULL", null],
         ["order", "bit", null, null, null, null, null],
-        ["ref_column", "int", null, null, null, null, "Columns"]
+        ["ref_column", "int", null, null, null, null, null]
     ]
 );
 
 t[1].cols[0][6] = tiden;
 t[0].cols[0][6] = tciden;
 aaa = function(a) { return WHERE(t[2], [[t[2].cols[1], a]])[0]; }
-bbb = function(b) { b = INSERT(t[1], [t[1].cols[1]], [b]); return b; }
-ccc = function(c) { c = INSERT(t[0], t[0].cols.slice(1), c); return c; }
+bbb = function(b) { return INSERT(t[1], [t[1].cols[1]], [b]); }
+ccc = function(c) { return INSERT(t[0], t[0].cols.slice(1), c); }
 t[0].rows.forEach(function(r) { r[3] = WHERE(t[2], [[t[2].cols[1], r[3]]])[0]; });
 
 ADDCONSTRAINT("Columns", null, "PRIMARY KEY", [["ColumnID"]], null, null);
@@ -124,18 +135,43 @@ ADDCONSTRAINT("CONSTRAINTTYPES", null, "UNIQUE", [["CONSTRAINTTYPE"]], null, nul
 ADDCONSTRAINT("CONSTRAINTS", null, "PRIMARY KEY", [["ConstraintID"]], null, null);
 ADDCONSTRAINT("CONSTRAINTS", null, "FROREING KEY", [["Table"]], "Tables", ["TableID"]);
 ADDCONSTRAINT("CONSTRAINTS", null, "UNIQUE", [["constraint_name"]], null, null);
-ADDCONSTRAINT("CONSTRAINTSCOLUMNS", null, "PRIMARY KEY", [["Constraint"], ["Column"]], null, null);
 ADDCONSTRAINT("CONSTRAINTSCOLUMNS", null, "FROREING KEY", [["Constraint"]], "CONSTRAINTS", ["ConstraintID"]);
-ADDCONSTRAINT("CONSTRAINTSCOLUMNS", null, "FROREING KEY", [["Table"]], "Columns", ["ColumnID"]);
-ADDCONSTRAINT("CONSTRAINTSCOLUMNS", null, "FROREING KEY", [["Table"]], "Columns", ["ColumnID"]);
+ADDCONSTRAINT("CONSTRAINTSCOLUMNS", null, "FROREING KEY", [["column"]], "Columns", ["ColumnID"]);
+ADDCONSTRAINT("CONSTRAINTSCOLUMNS", null, "FROREING KEY", [["ref_column"]], "Columns", ["ColumnID"]);
+ADDCONSTRAINT("CONSTRAINTSCOLUMNS", null, "PRIMARY KEY", [["Constraint"], ["column"]], null, null);
 
-//addtable("Puestos", [["PuestoID", 1], ["Puesto", 2]], [["PK_Puesto", true, true, [["PuestoID"]]], ["IX_Puesto", false, true, [["Puesto"]]]]);
+CREATE_TABLE(
+    "Puestos",
+    [
+        ["PuestoID", "smallint", null, null, "IDENTITY", "NOT NULL", [[null, "PRIMARY KEY", null, null]]],
+        ["Puesto", "nvarchar", 50, null, null, "NOT NULL", [[null, "UNIQUE", null, null]]]
+    ]
+);
+CREATE_TABLE(
+    "Colaboradores",
+    [
+        ["Colaborador ID", "int", null, null, "IDENTITY", "NOT NULL", [[null, "PRIMARY KEY", null, null]]],
+        ["Nombre(s)", "nvarchar", 50, null, null, "NOT NULL", null],
+        ["Apellido paterno", "nvarchar", 50, null, null, "NOT NULL", null],
+        ["Apellido materno", "nvarchar", 50, null, null, "NULL", null],
+        ["Puesto", "smallint", null, null, null, "NULL", [[null, "FROREING KEY", "Puestos", "PuestoID"]]],
+        ["Email", "nvarchar", 50, null, null, "NULL", [[null, "UNIQUE", null, null]]]
+    ]
+);
 
 function trns(val) {
     if (typeof val === "string") { val = val.trimSingleLine(); }
     if (!val && val !== 0) { val = null; }
 
 }
+
+INSERT("Puestos",["Puesto"],["JEFE DE CAPACITACION"]);
+INSERT(
+    "Colaboradores",
+    ["Nombre(s)","Apellido paterno","Apellido materno","Puesto", "Email"],
+    ["Albert Gonzalo", "Mejía", "Rodríguez", 1, "agmejiar@ppg.com"]
+);
+
 function ADDCONSTRAINT(table, name, type, cols, reftable, refcols) {
     if (typeof table === "string") { table = WHERE(t[1], [[t[1].cols[1], table]])[0]; }
     if (typeof type === "string") { type = WHERE(t[3], [[t[3].cols[1], type]])[0]; }
@@ -145,6 +181,8 @@ function ADDCONSTRAINT(table, name, type, cols, reftable, refcols) {
     var constr = INSERT(t[4], t[4].cols.slice(1), [table, name, type]);
     table.constraints.push(constr);
     constr.ccols = cols.map(function(c, i) {
+        if (!c[0].constraints){ c[0].constraints = []; }
+        c[0].push(constr);
         if (type[0] === 3) {
             if (typeof refcols[i] === "string") { refcols[i] = WHERE(t[0], [[t[0].cols[1], reftable], [t[0].cols[2], refcols[i]]])[0]; }
             return INSERT(t[5], ["Constraint", "column", "ref_column"], [constr, c[0], refcols[i]]);
@@ -153,67 +191,58 @@ function ADDCONSTRAINT(table, name, type, cols, reftable, refcols) {
         return INSERT(t[5], ["Constraint", "column", "order"], [constr, c[0], c[1]]);
     });
     if (type[0] === 1) {
-        for (var ai = 1, a, s, i, r; ai < table.rows.length; ai++) {
+        constr.rows = table.rows;
+        for (var ai = 1, a, s, i, r = true; ai < table.rows.length; ai++) {
             a = table.rows[ai];
-            if (cddc(constr.ccols, a, table.rows[ai - 1]) > 0) { continue; }
+            if (cddc(constr, a, table.rows[ai - 1]) > 0) { continue; }
             for (s = 0, e = ai - 1; s <= e;) {
                 i = s + Math.round((e - s) / 2);
-                r = cddc(constr.ccols, a, table.rows[i]);
+                r = cddc(constr, a, table.rows[i]);
                 if (r > 0) { s = i + 1; } else if (r) { e = i - 1; } else { s = i; break; }
             }
-            if (!r) { table.rows.move(ai, s); }
+            if (!r) { throw("Valor duplicado"); break; }
+            table.rows.move(ai, s);
         }
     } else if (type[0] === 2) {
         constr.rows = [];
-        for (var alln = cdde(constr.ccols), ai = 0, a, s, e, i, r; ai < table.rows.length; ai++) {
+        for (var alln = cdde(constr), ai = 0, a, s, e, i, r = true; ai < table.rows.length; ai++) {
             a = table.rows[ai];
-            if (alln && cddd(constr.ccols, a)) { continue; }
+            if (alln && cddd(constr, a)) { continue; }
             for (s = 0, e = constr.rows.length - 1; s <= e;) {
                 i = s + Math.round((e - s) / 2);
-                r = cddc(constr.ccols, a, constr.rows[i]);
+                r = cddc(constr, a, constr.rows[i]);
                 if (r > 0) { s = i + 1; } else if (r) { e = i - 1; } else { s = i; break; }
             }
-            if (!r) { constr.rows.insertAt(a, s); }
+            if (!r) { throw("Valor duplicado"); break; }
+            constr.rows.insertAt(a, s);
         }
-    }
-    //var rows = this;
-    //if (s === undefined) { s = 0; }
-    //if (e === undefined) { e = this.length - 1; }
-    //for (var i, b, m, mi, r = -1; s <= e;) {
-    //    i = s + Math.round((e - s) / 2);
-    //    b = this[i];
-    //    for (m = o[1], mi = 0, r = 0; mi < m.length && !r; mi++) { r = compare_s(a[mi], b[m[mi][0]], m[mi][1]); }
-    //    if (r > 0) { s = i + 1; } else if (r) { e = i - 1; } else if (!o[3]) { s = i + 1; } else { s = i; break; }
-    //}
-    //return [r ? null : s, r ? s : null, r ? null : b];
-    //return constr;
+    } else { cols[0][0].FK = refcols[0]; }
+    return constr;
 }
-function cddc(cs, a, b) {
-    for (var ci = 0, c, r = 0; ci < cs.length && !r; ci++) {
-        c = cs[ci];
-        r = c[0][1].cols.indexOf(c[1]);
-        r = compare(c[1][5], c[2], a[r], b[r]);
+function cddc(cn, a, b) {
+    for (var ci = 0, r = 0; ci < cn.ccols.length && !r; ci++) {
+        r = cddf(cn.ccols[ci][1]);
+        r = compare(cn.ccols[ci], a[r], b[r]);
     }
     return r;
 }
-function cddd(cs, a) {
-    for (var ci = 0, c, r = false; ci < cs.length && !r; ci++) {
-        c = cs[ci];
-        r = a[c[0][1].cols.indexOf(c[1])] === null;
-    }
+function cddd(cn, a) {
+    for (var ci = 0, r = false; ci < cn.ccols.length && !r; ci++) { r = a[cddf(cn.ccols[ci][1])] === null;}
     return r;
 }
-function cdde(cs) {
-    for (var ci = 0, r = false; ci < cs.length && !r; ci++) { r = cs[ci][1][7]; }
+function cdde(cn) {
+    for (var ci = 0, r = 0; ci < cn.ccols.length && !r; ci++) { r = cn.ccols[ci][1][7]; }
     return r;
 }
-function compare(c, o, a, b) {
-    a = collate(c, a); b = collate(c, b);
-    return a === null ? -1 : b === null ? 1 : (a > b ? 1 : a < b ? -1 : 0) * o;
+function cddf(col){ return col[1].cols.indexOf(col); }
+function compare(cnc, a, b) {
+    if(cnc[1].FK){ a = a[cddf(cnc[1].FK)]; b = b[cddf(cnc[1].FK)]; }
+    a = collate(cnc[1][5], a); b = collate(cnc[1][5], b);
+    return a === null ? -1 : b === null ? 1 : (a > b ? 1 : a < b ? -1 : 0) * cnc[2];
 }
-function collate(collate, a) {
-    if (typeof b === "string") { return a.toLocaleUpperCase(); }
-    return a;
+function collate(collate, v) {
+    if (typeof v === "string") { return v.toLocaleUpperCase().accentFold(); }
+    return v;
 }
 function WHERE(table, conditions) {
     table = tablestr(table);
@@ -233,18 +262,33 @@ function INSERT(table, cols, vals) {
         var val;
         if (c[6]) { val = c[6]++; } else { val = vals[cols.indexOf(c)]; }
         if (typeof val === "string") { val = val.trimSingleLine(); }
-        if (!val && val !== 0) { val = null; if (!c[7]) { showAlert("Value required"); } }
-        else if (c[3][1] === "nvarchar") {
-            if (typeof val !== "string") { val = val + ""; }
-            if (val.length > c[4]) { showAlert("Maxlength value reached"); }
-        } else if (!val.length) {
-            if (isNaN(val)) { showAlert("Value is not a number"); } else { val = Number(val); }
-            if (val < c[3][2]) { showAlert("Min value reached"); }
-            else if (val > c[3][3]) { showAlert("Max value reached"); }
+        if (!val && val !== 0) { val = null; if (!c[7]) { throw("Value required"); } }
+        if (!val.length){
+            else if (c[3][1] === "nvarchar") {
+                if (typeof val !== "string") { val = val + ""; }
+                if (val.length > c[4]) { throw("Maxlength value reached"); }
+            } else {
+                if (isNaN(val)) { throw("Value is not a number"); } else { val = Number(val); }
+                if (val < c[3][2]) { throw("Min value reached"); }
+                else if (val > c[3][3]) { throw("Max value reached"); }
+            }
+            if(c.FK){
+                val = WHERE(c.FK[1], [[c.FK, val]])[0];
+                if(!val){val = null; throw("Valor no existente en Foreing Key")};
+            }
         }
         return val;
     });
-    table.rows.push(vals);
+    var constr = table.constraints.find(function(co){ return co[2] === 1; });
+    if(constr){
+        for (var s = 0, e = constr.rows.length - 1, i, r; s <= e;) {
+            i = s + Math.round((e - s) / 2);
+            r = cddc(constr, vals, constr.rows[i]);
+            if (r > 0) { s = i + 1; } else if (r) { e = i - 1; } else { s = i; break; }
+        }
+        if (!r) { throw("Valor duplicado"); break; }
+        constr.rows.insertAt(vals, s);
+    } else { table.rows.push(vals); }
     return vals;
 }
 function SELECT(table, row, cols) {
@@ -264,34 +308,17 @@ function colstr(table, c) {
 }
 //"Latin1_General_CS_AS";
 
-
-function addtable(table, column_definition, table_constraint) {
+function CREATE_TABLE(table, column_definition, table_constraint) {
     if (t.length > 0 && tablestr(table)) { showAlert("Tablename exist allready"); }
     table = bbb(table); table.rows = []; table.constraints = [];
     table.cols = column_definition.map(function(c) {
         if (c[3] === null) { c[3] = 1; }
         if (c[4]) { c[4] = 1; }
-        c = ccc([table, c[0], aaa(c[1]), c[2], c[3], c[4], dn[c[5]], c[6]]);
-        if (false) {
-            var ct = c[5] === "PRIMARY KEY" ? 1 : c[5] === "UNIQUE" ? 2 : 3;
-            var cname = "{0}_{1}{2}".format(ct === 1 ? "PK" : ct === 2 ? "IX" : "FK", tablename, ct === 1 ? "" : "_{0}".format(c[2]));
-            var cid = t[3].INSERT(["Table", "constraint_name", "CONSTRAINTTYPE"], [tableid, cname, ct]).SELECT("ConstraintID");
-            var ccrid = ct === 3 ? ccrid = c[2].WHERE([["Table", c[7]], ["CONSTRAINTTYPE", 1]]).SELECT("ColumnID") : null;
-            var co = c[7] === 1 || c[7] === 2 ? 1 : null;
-            t[4].INSERT(["Constraint", "column", "ref_column", ""], [cid, coid, ccrid, co]);
-        }
-        return c;
+        var c1 = ccc([table, c[0], aaa(c[1]), c[2], c[3], c[4], dn[c[5]]]);
+        if (c[6]) { c1.constraints = c[6].map(function(cc){ return ADDCONSTRAINT(table, cc[0], cc[1], [[c1]], cc[2], [cc[3]]); }); }
+        return c1;
     });
-    //table_constraint.forEach(function(c) {
-    //    if (c[0] === undefined) { c[0] = "{0}_{1}{2}".format(ct === 1 ? "PK" : ct === 2 ? "IX" : "FK", tablename, ct === 1 ? "" : "_{0}".format(c[2])); }
-    //    c[1] = c[1] === "PRIMARY KEY" ? 1 : c[1] === "UNIQUE" ? 2 : 3;
-    //    var cid = t[3].INSERT(["Table", "constraint_name", "CONSTRAINTTYPE"], [tableid, cname, ct]).SELECT("ConstraintID");
-    //    c[2].every(function(co) {
-    //        c[0] = t.WHERE([["table_name", "Columns"]]).rows.WHERE([["Table", tableid], ["column_name", co[0]]]).SELECT("ColumnID");
-    //        c[1] = (c[0] === 1 || c[0] === 2) && c[1] === undefined ? 1 : null;
-    //        t[4].INSERT(["Constraint", "column", "ref_column", "order"], [cid, c[0], null, c[1]]);
-    //    });
-    //});
+    table_constraint && table_constraint.forEach(function(cc) { ADDCONSTRAINT(table, cc[0], cc[1], cc[2], cc[3], cc[4]); });
     return table;
 }
 
