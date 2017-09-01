@@ -185,6 +185,7 @@ function ADDCONSTRAINT(table, name, type, cols, reftable, refcols) {
         c[0].constraints.push(constr);
         if (type[0] === 3) {
             if (typeof refcols[i] === "string") { refcols[i] = WHERE(t[0], [[t[0].cols[1], reftable], [t[0].cols[2], refcols[i]]])[0]; }
+            if (!refcols[i].constraints.find(function(cc){ return cc[3][0] < 3; })){ throw("FK contraint is not unique"); }
             return INSERT(t[5], ["Constraint", "column", "ref_column"], [constr, c[0], refcols[i]]);
         }
         if (c[1] === undefined) { c[1] = 1; }
@@ -235,8 +236,9 @@ function cdde(cn) {
     return r;
 }
 function cddf(col) { return col[1].cols.indexOf(col); }
+function getval(row, col){ return row[col[1].cols.indexOf(col)]; }
 function compare(cnc, a, b) {
-    if (cnc[1].FK) { a = a[cddf(cnc[1].FK)]; b = b[cddf(cnc[1].FK)]; }
+    if (cnc[1].FK) { a = a.length ? a[cddf(cnc[1].FK)] : a; b = b.length ? b[cddf(cnc[1].FK)] : b; }
     a = collate(cnc[1][5], a); b = collate(cnc[1][5], b);
     return a === null ? -1 : b === null ? 1 : (a > b ? 1 : a < b ? -1 : 0) * cnc[2];
 }
@@ -258,25 +260,27 @@ function WHERE(table, conditions) {
 function INSERT(table, cols, vals) {
     table = tablestr(table);
     cols = cols.map(function(c) { return colstr(table, c); });
-    vals = table.cols.map(function(c) {
-        var val, val2;
-        if (c[6]) { val = c[6]++; } else { val = vals[cols.indexOf(c)]; }
-        if (typeof val === "string") { val = val.trimSingleLine(); }
-        if (!val && val !== 0) { val = null; if (!c[7]) { throw ("Value required"); } }
+    var row = [];
+    for(var cí = 0,c; ci < table.cols.length; c++){
+        c = table.cols[ci];
+        var val2;
+        if (row[ci].length) { val2 = row[ci]; row[ci] = row[ci][cddf(c.FK)]; }
+        if (c[6]) { row[ci] = c[6]++; } else { row[ci] = vals[cols.indexOf(c)]; }
+        if (typeof row[ci] === "string") { row[ci] = row[ci].trimSingleLine(); }
+        if (!row[ci] && row[ci] !== 0) { row[ci] = null; if (!c[7]) { throw ("Value required"); } }
         else {
-            if (val.length) { val2 = val; val = val[cddf(c.FK)]; }
             if (c[3][1] === "nvarchar") {
-                if (typeof val !== "string") { val = val + ""; }
-                if (val.length > c[4]) { throw ("Maxlength value reached"); }
+                if (typeof row[ci] !== "string") { row[ci] = row[ci] + ""; }
+                if (row[ci].length > c[4]) { throw ("Maxlength value reached"); }
             } else {
-                if (isNaN(val)) { throw ("Value is not a number"); } else if (typeof val !== number) { val = Number(val); }
-                if (val < c[3][2]) { throw ("Min value reached"); }
-                else if (val > c[3][3]) { throw ("Max value reached"); }
+                if (isNaN(row[ci])) { throw ("Value is not a number"); } else if (typeof row[ci] !== number) { row[ci] = Number(row[ci]); }
+                if (row[ci] < c[3][2]) { throw ("Min value reached"); }
+                else if (row[ci] > c[3][3]) { throw ("Max value reached"); }
             }
             for (var i = 0, cc; i < c.constraints.length; i++) {
                 cc = c.constraints[i];
                 if (cc.rows.length !== 1 && cc[2] === 3) { continue; }
-
+                if(testcons(c.constraints[i], row)){};
             }
             if (c.FK) {
                 val = val2 || WHERE(c.FK[1], [[c.FK, val]])[0];
@@ -297,6 +301,35 @@ function INSERT(table, cols, vals) {
     } else { table.rows.push(vals); }
     return vals;
 }
+function testcons(constr, row){
+    var aaa = [];
+    if(constr[3] < 3){ aaa[1] = dsfdsd(constr, row)[0]; }
+    return WHERE(constr[3][1], [[constr[3], getval(row, constr[1])]])[0];
+}
+function preparecontraint(constr){
+    constr.ready = true;
+    for(var alln = cdde(constr), i = 0, row; i < constr[1].rows.length; i++){
+        row = constr[1].rows[i];
+        if (alln && cddd(constr, row)) { continue; }
+        var  r = dsfdsd(constr, row, constr[1] === 1 ? i : null);
+        if (r[0]) { throw ("Valor duplicado"); break; }
+        if(constr[1] === 1){ table.rows.move(i, r[1]); }
+        else{ constr.rows.insertAt(row, r[1]); }
+    }
+    return constr;
+}
+function dsfdsd(constr, row, e){
+    if(!e && e != 0){ e =  constr.rows.length - 1; }
+    if(!constr.ready){ preparecontraint(constr); }
+    for (var s = 0, i, r, t; s <= e;) {
+        i = s + Math.round((e - s) / 2);
+        t = constr.rows[i];
+        r = cddc(constr, row, t);
+        if (r > 0) { s = i + 1; } else if (r) { e = i - 1; } else { s = i; break; }
+    }
+    return [!r ? t : null, s];
+}
+
 function SELECT(table, row, cols) {
     row = cols.map(function(c) { return row[table.cols.indexOf(colstr(table, c))]; });
     if (row.length === 1) { return row[0]; }
