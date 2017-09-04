@@ -279,8 +279,8 @@ function INSERT(table, cols, vals) {
             }
             for (var i = 0, cc; i < c.constraints.length; i++) {
                 cc = c.constraints[i];
-                if (cc.rows.length !== 1 && cc[2] === 3) { continue; }
-                if(testcons(c.constraints[i], row)){};
+                if (cc.rows.length !== 1) { continue; }
+                if(testcons(c.constraints[i], row)){ };
             }
             if (c.FK) {
                 val = val2 || WHERE(c.FK[1], [[c.FK, val]])[0];
