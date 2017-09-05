@@ -193,7 +193,7 @@ function ADDCONSTRAINT(table, name, type, cols, reftable, refcols) {
         if (c[1] === undefined) { c[1] = 1; }
         return INSERT(t[5], ["Constraint", "column", "order"], [constr, c[0], c[1]]);
     });
-    if (type[0] === 1) { constr.rows = table.rows; preparecontraint(constr);} 
+    if (type[0] === 1) { table.PK = constr; constr.rows = table.rows; preparecontraint(constr);} 
     else if (type[0] === 2) { constr.rows = []; preparecontraint(constr); } 
     else { cols[0][0].FK = refcols[0]; }
     return constr;
@@ -257,8 +257,8 @@ function INSERT(table, cols, vals) {
             }
             for (var i = 0, cc; i < c.constraints.length; i++) {
                 cc = c.constraints[i];
-                if (cc.rows.length > 1) { continue; }
-                if(cc[3] < 3){ if(dsfdsd(cc, row)[0]){ throw ("Valor repetido"); } }
+                if (cc.ccols.length > 1) { continue; }
+                if(cc[2][0] < 3){ if(dsfdsd(cc, row)[0]){ throw ("Valor repetido"); } }
                 else {
                     var ttttt = [];
                     ttttt[cddf(c.FK)] = row[ci];
@@ -274,11 +274,6 @@ function INSERT(table, cols, vals) {
     }
     if(!table.PK){ table.rows.push(row); }
     return vals;
-}
-function testcons(constr, row){
-    var aaa = [];
-    if(constr[3] < 3){ aaa[1] = dsfdsd(constr, row)[0]; }
-    return WHERE(constr[3][1], [[constr[3], getval(row, constr[1])]])[0];
 }
 function preparecontraint(constr){
     constr.ready = true;
