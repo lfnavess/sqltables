@@ -10,48 +10,26 @@
 	<script src="r2.js"></script>
 </head>
 <body>
-    <table>
-        <thead>
-            <tr>
-                <th>.</th>
-                <th>TOTALES</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <th rowspan=8>ESTADOS</th>
-                <td>Completado</td>
-                <td>2330</td>
-            </tr>
-            <tr>
-                <td>Fuga</td>
-                <td>15</td>
-            </tr>
-            <tr>
-                <td>Cancelado</td>
-                <td>135</td>
-            </tr>
-            <tr>
-                <td>Incapacidad</td>
-                <td>5</td>
-            </tr>
-            <tr>
-                <td>Vencido incompleto</td>
-                <td>85</td>
-            </tr>
-            <tr>
-                <td>Vencido sin iniciar</td>
-                <td>317</td>
-            </tr>
-            <tr>
-                <td>Incompleto</td>
-                <td>1</td>
-            </tr>
-            <tr>
-                <td>Sin iniciar</td>
-                <td>1</td>
-            </tr>
-        </tbody>
-    </table>
+   <textarea id="textarea" cols="100" rows="20"></textarea>
+   <input type=button id=button value=trabajar>
+   <script>
+        (function() {
+            document.getElementById("button").addEventListener("click", function (e) {
+                var aaa = document.getElementById("textarea").value.split("\n").map(function(a){ return a.split("\t"); });
+                for(var i = 1, length = aaa.length -1, row, v, result; i < length; i++){
+                    row = INSERT("Interacciones",aaa[0],aaa[i]);
+                    v = SELECT("Interacciones", row, ["Pregunta"]);
+                    result = WHERE("Resultados",[["Pregunta",v]]);
+                    if(result.length === 0){ result = INSERT("Resultados", ["Pregunta","Promedio"],[v, [0,0,0,[]]]); }
+                    pp = SELECT("Resultados", result, ["Promedio"]);
+                    pp[1]++;
+                    pp[2] += SELECT("Interacciones", row, ["Peso"]);
+                    pp[0] = pp[2] / pp[1];
+                    pp[3].push(row);                  
+                }
+                
+            });
+        })();
+    </script>
 </body>
 </html>
