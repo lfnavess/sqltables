@@ -151,8 +151,8 @@ CREATE_TABLE(
         ["Peso", "tinyint", null, null, null, "NOT NULL", null]
     ],
     [
-        [null, "PRIMARY KEY", [["Inscripcion"],["Pregunta"]]],
-        [null, "UNIQUE", [["Pregunta"],["Inscripcion"]]]
+        [null, "PRIMARY KEY", [["Inscripcion"], ["Pregunta"]]],
+        [null, "UNIQUE", [["Pregunta"], ["Inscripcion"]]]
     ]
 );
 
@@ -201,32 +201,32 @@ INSERT(
 
 
 function ADDCONSTRAINT(table, name, type, cols, reftable, refcols) {
-    if (typeof table === "string") { table = WHERE(t[1], [[t[1].cols[1], table]])[0]; if(!table){ throw("table not found"); }}
-    if (typeof type === "string") { type = WHERE(t[3], [[t[3].cols[1], type]])[0]; if(!type){ throw("type not found"); }}
-    if (typeof reftable === "string") { reftable = WHERE(t[1], [[t[1].cols[1], reftable]])[0]; if(!reftable){ throw("reftable not found"); } }
-    cols.forEach(function(c, i) { 
-        if (typeof c[0] === "string") { c = WHERE(t[0], [[t[0].cols[1], table], [t[0].cols[2], c[0]]])[0]; if (!c){ throw("col not found"); } cols[i][0] = c; }
+    if (typeof table === "string") { table = WHERE(t[1], [[t[1].cols[1], table]])[0]; if (!table) { throw ("table not found"); } }
+    if (typeof type === "string") { type = WHERE(t[3], [[t[3].cols[1], type]])[0]; if (!type) { throw ("type not found"); } }
+    if (typeof reftable === "string") { reftable = WHERE(t[1], [[t[1].cols[1], reftable]])[0]; if (!reftable) { throw ("reftable not found"); } }
+    cols.forEach(function(c, i) {
+        if (typeof c[0] === "string") { c = WHERE(t[0], [[t[0].cols[1], table], [t[0].cols[2], c[0]]])[0]; if (!c) { throw ("col not found"); } cols[i][0] = c; }
     });
-    if(reftable){ 
-        refcols.forEach(function(c, i){
-            if (typeof c === "string") { c = WHERE(t[0], [[t[0].cols[1], reftable], [t[0].cols[2], refcols[0]]])[0]; if (!c){ throw("refcol not found"); } refcols[i] = c; }
-            if (!refcols[i].constraints.find(function(cc){ return cc[3][0] < 3; })){ throw("FK contraint is not unique"); }
+    if (reftable) {
+        refcols.forEach(function(c, i) {
+            if (typeof c === "string") { c = WHERE(t[0], [[t[0].cols[1], reftable], [t[0].cols[2], refcols[0]]])[0]; if (!c) { throw ("refcol not found"); } refcols[i] = c; }
+            if (!refcols[i].constraints.find(function(cc) { return cc[3][0] < 3; })) { throw ("FK contraint is not unique"); }
         });
     }
     if (!name) { name = "{0}_{1}{2}".format(type[0] === 1 ? "PK" : type[0] === 2 ? "IX" : "FK", table[1], type[0] === 1 ? "" : "_{0}".format(cols[0][0][2])); }
     var constr = INSERT(t[4], t[4].cols.slice(1), [table, name, type]);
-    if (type[0] === 1) { constr.rows = table.rows; table.PK = constr;  } else if (type[0] === 2) { constr.rows = [];  }
+    if (type[0] === 1) { constr.rows = table.rows; table.PK = constr; } else if (type[0] === 2) { constr.rows = []; }
     constr.ccols = cols.map(function(c, i) {
         if (type[0] === 3) {
             c = INSERT(t[5], ["Constraint", "column", "ref_column"], [constr, c[0], refcols[i]]);
             c[1].FK = c[3];
-        }else{
+        } else {
             if (c[1] === undefined) { c[1] = 1; }
             c = INSERT(t[5], ["Constraint", "column", "order"], [constr, c[0], c[1]]);
         }
         return c;
     });
-    cols.forEach(function(c, i ){ c[0].constraints.push(constr); });
+    cols.forEach(function(c, i) { c[0].constraints.push(constr); });
     table.constraints.push(constr);
     return constr;
 }
@@ -238,7 +238,7 @@ function cddc(cn, a, b) {
     return r;
 }
 function cddd(cn, a) {
-    for (var ci = 0, r = false; ci < cn.ccols.length && !r; ci++) { r = a[cddf(cn.ccols[ci][1])] === null; } 
+    for (var ci = 0, r = false; ci < cn.ccols.length && !r; ci++) { r = a[cddf(cn.ccols[ci][1])] === null; }
     return r;
 }
 function cdde(cn) {
@@ -246,7 +246,7 @@ function cdde(cn) {
     return r;
 }
 function cddf(col) { return col[1].cols.indexOf(col); }
-function getval(row, col){ return row[col[1].cols.indexOf(col)]; }
+function getval(row, col) { return row[col[1].cols.indexOf(col)]; }
 function compare(cnc, a, b) {
     if (cnc[1].FK) { a = a.length ? a[cddf(cnc[1].FK)] : a; b = b.length ? b[cddf(cnc[1].FK)] : b; }
     a = collate(cnc[1][5], a); b = collate(cnc[1][5], b);
@@ -257,32 +257,39 @@ function collate(collate, v) {
     return v;
 }
 function WHERE(table, conditions) {
-    table = tablestr(table);
-    conditions.forEach(function(c) { c[0] = colstr(table, c[0]); });
+    table = tablestr(table); if (!table) { throw ("Tabla no existe"); }
+    conditions.forEach(function(c) { c[0] = colstr(table, c[0]); if (!c[0]) { throw ("Columna no existe"); } });
     var rs = [];
-    var con = table.constraints.find(function(c) {
-        return (c[3] === 1 || c[3] === 2) && c.constcols.every(function(cc) { return conditions.find(function(con) { return con[0] === cc; }); });
+    var cc = table.constraints.find(function(c) {
+        return c[3][0] < 3 && c.ccols.every(function(cc) { return conditions.some(function(con) { return con[0] === cc[1]; }); });
     });
-    table.rows.forEach(function(r) { if (conditions.every(function(c) { return r[table.cols.indexOf(c[0])] === c[1]; })) { rs.push(r); } });
-    if (con) { return rs[0]; }
+    if (cc) {
+        var row = [];
+        for (var i = 0; i < cc.ccols.length; i++) {
+            row[cddf(cc.ccols[i][1])] = conditions.find(function(con) { return con[0] === cc.ccols[i][1]; })[1];
+        }
+        iscon(dsfdsd(cc, row)[0])
+    } else { table.rows.forEach(iscon); }
+    //if (con) { return rs[0]; }
     return rs;
+    function iscon(r) { if (conditions.every(function(c) { return r[cddf(c[0])] === c[1]; })) { rs.push(r); } }
 }
 function INSERT(table, cols, vals) {
     table = tablestr(table);
-    if(!table){ throw("Tabla no existe"); }
+    if (!table) { throw ("Tabla no existe"); }
     cols = cols.map(function(c) {
         c = colstr(table, c);
-        if(!c){ throw("Columna no existe"); }
+        if (!c) { throw ("Columna no existe"); }
         return c;
     });
     var row = [];
-    for(var ci = 0,c, val, tttt = []; ci < table.cols.length; ci++){
+    for (var ci = 0, c, val, tttt; ci < table.cols.length; ci++) {
         c = table.cols[ci];
         if (c[6]) { val = c[6]++; } else { val = vals[cols.indexOf(c)]; }
         if (c.FK && Array.isArray(val)) { val = val[cddf(c.FK)]; }
         if (typeof val === "string") { val = val.trimSingleLine(); }
         if (!val && val !== 0) { if (!c[7]) { throw ("Value required"); } val = null; }
-        else if(!Array.isArray(val)){
+        else if (!Array.isArray(val)) {
             if (c[3][1] === "nvarchar") {
                 if (typeof val !== "string") { val = val + ""; }
                 if (val.length > c[4]) { throw ("Maxlength reached"); }
@@ -294,59 +301,59 @@ function INSERT(table, cols, vals) {
             for (var i = 0, cc; i < c.constraints.length; i++) {
                 cc = c.constraints[i];
                 tttt = constorow(cc, row);
-                if(cc[3][0] < 3){ 
+                if (cc[3][0] < 3) {
                     tttt[ci] = val;
-                    if(cddd(cc, tttt)){ continue; }
-                    if(dsfdsd(cc, tttt)[0]){ throw ("Valor repetido"); } 
+                    if (cddd(cc, tttt)) { continue; }
+                    if (dsfdsd(cc, tttt)[0]) { throw ("Valor repetido"); }
                 } else {
                     cc = c.FK.constraints[0];
                     tttt[cddf(c.FK)] = val;
-                    if(cddd(cc, tttt)){ continue; }
-                    if(!dsfdsd(cc, tttt)[0]){ throw ("Valor no existe en la tabla relacionada"); }
+                    if (cddd(cc, tttt)) { continue; }
+                    if (!dsfdsd(cc, tttt)[0]) { throw ("Valor no existe en la tabla relacionada"); }
                 }
             }
         }
         row[ci] = val;
     };
-    for (var i = 0, cc, tttt = [], cc2; i < table.constraints.length; i++) {
+    for (var i = 0, cc, tttt, cc2; i < table.constraints.length; i++) {
         cc = table.constraints[i];
-        if(cc[3][0] < 3){
-            if(cddd(cc, row)){ continue; }
+        if (cc[3][0] < 3) {
+            if (cddd(cc, row)) { continue; }
             cc.rows.insertAt(row, dsfdsd(cc, row)[1]);
-        } else{
+        } else {
             cc2 = cc.ccols[0][3].constraints[0];
             tttt = constorow(cc, row);
-            if(cddd(cc2, tttt)){ continue; }
+            if (cddd(cc2, tttt)) { continue; }
             row[cddf(cc.ccols[0][1])] = dsfdsd(cc2, tttt)[0];
         }
     }
-    if(!table.PK){ table.rows.push(row); }
+    if (!table.PK) { table.rows.push(row); }
     return row;
 }
-function constorow(constr, row){
+function constorow(constr, row) {
     var ret = [];
-    for(var i = 0, val; i < constr.ccols.length; i++){
+    for (var i = 0, val; i < constr.ccols.length; i++) {
         val = row[cddf(constr.ccols[i][1])];
-        if(!val && val !== 0){ val = null; }
+        if (!val && val !== 0) { val = null; }
         ret[constr[3][0] < 3 ? cddf(constr.ccols[i][1]) : cddf(constr.ccols[i][3])] = val;
     }
     return ret;
 }
-function preparecontraint(constr){
+function preparecontraint(constr) {
     constr.ready = true;
-    for(var alln = cdde(constr), i = 0, row; i < constr[1].rows.length; i++){
+    for (var alln = cdde(constr), i = 0, row; i < constr[1].rows.length; i++) {
         row = constr[1].rows[i];
         if (alln && cddd(constr, row)) { continue; }
-        var  r = dsfdsd(constr, row, constr[3][0] === 1 ? i - 1 : null);
+        var r = dsfdsd(constr, row, constr[3][0] === 1 ? i - 1 : null);
         if (r[0]) { throw ("Valor duplicado"); }
-        if(constr[3][0] === 1){ constr.rows.move(i, r[1]); }
-        else{ constr.rows.insertAt(row, r[1]); }
+        if (constr[3][0] === 1) { constr.rows.move(i, r[1]); }
+        else { constr.rows.insertAt(row, r[1]); }
     }
     return constr;
 }
-function dsfdsd(constr, row, e){
-    if(!constr.ready){ preparecontraint(constr); }
-    if(!e && e != 0){ e =  constr.rows.length - 1; }
+function dsfdsd(constr, row, e) {
+    if (!constr.ready) { preparecontraint(constr); }
+    if (!e && e != 0) { e = constr.rows.length - 1; }
     for (var s = 0, i, r, t; s <= e;) {
         i = s + Math.round((e - s) / 2);
         t = constr.rows[i];
@@ -358,10 +365,10 @@ function dsfdsd(constr, row, e){
 
 function SELECT(table, row, cols) {
     table = tablestr(table);
-    if(!table){ throw("Tabla no existe"); }
+    if (!table) { throw ("Tabla no existe"); }
     cols = cols.map(function(c) {
         c = colstr(table, c);
-        if(!c){ throw("Columna no existe"); }
+        if (!c) { throw ("Columna no existe"); }
         return c;
     });
     row = cols.map(function(c) { return row[cddf(c)]; });
