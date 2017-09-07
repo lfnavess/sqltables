@@ -98,6 +98,7 @@ CREATE_TABLE(
 t[3].rows.push([1, "PRIMARY KEY"]);
 t[3].rows.push([2, "UNIQUE"]);
 t[3].rows.push([3, "FROREING KEY"]);
+t[3].rows.push([4, "HPK"]);
 CREATE_TABLE(
     "CONSTRAINTS",
     [
@@ -143,27 +144,6 @@ ADDCONSTRAINT("CONSTRAINTSCOLUMNS", null, "FROREING KEY", [["column"]], "Columns
 ADDCONSTRAINT("CONSTRAINTSCOLUMNS", null, "FROREING KEY", [["ref_column"]], "Columns", ["ColumnID"]);
 ADDCONSTRAINT("CONSTRAINTSCOLUMNS", null, "PRIMARY KEY", [["Constraint"], ["column"]], null, null);
 
-CREATE_TABLE(
-    "Interacciones",
-    [
-        ["Inscripcion", "int", null, null, null, "NOT NULL", null],
-        ["Pregunta", "tinyint", null, null, null, "NOT NULL", null],
-        ["Peso", "tinyint", null, null, null, "NOT NULL", null]
-    ],
-    [
-        [null, "PRIMARY KEY", [["Inscripcion"], ["Pregunta"]]],
-        [null, "UNIQUE", [["Pregunta"], ["Inscripcion"]]]
-    ]
-);
-
-CREATE_TABLE(
-    "Resultados",
-    [
-        ["Pregunta", "tinyint", null, null, null, "NOT NULL", [[null, "PRIMARY KEY", null, null]]],
-        ["Promedio", "promedio", null, null, null, "NULL", null]
-    ]
-)
-
 
 CREATE_TABLE(
     "Puestos",
@@ -198,7 +178,7 @@ INSERT(
     ["Luis Fernando", "Naves", "Santoyo", 2, "lfnavess@ppg.com"]
 );
 
-
+function hp (){}
 
 function ADDCONSTRAINT(table, name, type, cols, reftable, refcols) {
     if (typeof table === "string") { table = WHERE(t[1], [[t[1].cols[1], table]])[0]; if (!table) { throw ("table not found"); } }
@@ -275,12 +255,10 @@ function WHERE(table, conditions) {
     function iscon(r) { if (conditions.every(function(c) { return r[cddf(c[0])] === c[1]; })) { rs.push(r); } }
 }
 function INSERT(table, cols, vals) {
-    table = tablestr(table);
-    if (!table) { throw ("Tabla no existe"); }
+    table = tablestr(table); if (!table) { throw ("Tabla no existe"); }
     cols = cols.map(function(c) {
-        c = colstr(table, c);
-        if (!c) { throw ("Columna no existe"); }
-        return c;
+        var c2 = colstr(table, c); if (!c2) { throw ("Columna {0} no existe".format(c)); }
+        return c2;
     });
     var row = [];
     for (var ci = 0, c, val, tttt; ci < table.cols.length; ci++) {

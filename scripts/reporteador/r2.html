@@ -8,27 +8,14 @@
     <link href="normalize.min.css" rel="stylesheet" />
     <link href="reporteador.css" rel="stylesheet" />
 	<script src="r2.js"></script>
+	<script src="r3.js"></script>
 </head>
 <body>
    <textarea id="textarea" cols="100" rows="20"></textarea>
    <input type=button id=button value=trabajar>
    <script>
         (function() {
-            document.getElementById("button").addEventListener("click", function (e) {
-                var aaa = document.getElementById("textarea").value.split("\n").map(function(a){ return a.split("\t"); });
-                for(var i = 1, length = aaa.length -1, row, v, result,pp; i < length; i++){
-                    row = INSERT("Interacciones",aaa[0],aaa[i]);
-                    v = SELECT("Interacciones", row, ["Pregunta"]);
-                    result = WHERE("Resultados",[["Pregunta",v]])[0];
-                    if(!result){ result = INSERT("Resultados", ["Pregunta","Promedio"],[v, [0,0,0,[]]]); }
-                    pp = SELECT("Resultados", result, ["Promedio"]);
-                    pp[1]++;
-                    pp[2] += SELECT("Interacciones", row, ["Peso"]);
-                    pp[0] = pp[2] / pp[1];
-                    pp[3].push(row);                  
-                }
-                
-            });
+            document.getElementById("button").addEventListener("click", function (e) { work(document.getElementById("textarea").value); });
         })();
     </script>
 </body>
