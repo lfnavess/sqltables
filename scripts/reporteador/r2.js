@@ -368,16 +368,17 @@ function colstr(table, c) {
 function CREATE_TABLE(table, column_definition, table_constraint) {
     if (t.length > 0 && tablestr(table)) { showAlert("Tablename exist allready"); }
     table = bbb(table); table.rows = []; table.constraints = [];
-    table.cols = column_definition.map(function(c) {
-        if (c[3] === null) { c[3] = 1; }
-        if (c[4]) { c[4] = 1; }
-        var c1 = ccc([table, c[0], aaa(c[1]), c[2], c[3], c[4], dn[c[5]]]);
-        c1.constraints = [];
-        if (c[6]) { c[6].forEach(function(cc) { return ADDCONSTRAINT(table, cc[0], cc[1], [[c1]], cc[2], cc[3] ? [cc[3]] : null); }); }
-        return c1;
-    });
+    table.cols = column_definition.map(function(c) { return insertCol(table, c); });
     table_constraint && table_constraint.forEach(function(cc) { ADDCONSTRAINT(table, cc[0], cc[1], cc[2], cc[3], cc[4]); });
     return table;
+}
+function insertCol (t, c){
+        if (c[3] === null) { c[3] = 1; }
+        if (c[4]) { c[4] = 1; }
+        var c1 = ccc([t, c[0], aaa(c[1]), c[2], c[3], c[4], dn[c[5]]]);
+        c1.constraints = [];
+        if (c[6]) { c[6].forEach(function(cc) { return ADDCONSTRAINT(t, cc[0], cc[1], [[c1]], cc[2], cc[3] ? [cc[3]] : null); }); }
+        return c1;
 }
 
 function showAlert(message) {
