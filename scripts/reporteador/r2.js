@@ -178,7 +178,7 @@ INSERT(
     ["Luis Fernando", "Naves", "Santoyo", 2, "lfnavess@ppg.com"]
 );
 
-function hp (){}
+function hp() { }
 
 function ADDCONSTRAINT(table, name, type, cols, reftable, refcols) {
     if (typeof table === "string") { table = WHERE(t[1], [[t[1].cols[1], table]])[0]; if (!table) { throw ("table not found"); } }
@@ -252,7 +252,7 @@ function WHERE(table, conditions) {
     } else { table.rows.forEach(iscon); }
     //if (con) { return rs[0]; }
     return rs;
-    function iscon(r) { if (conditions.every(function(c) { return r[cddf(c[0])] === c[1]; })) { rs.push(r); } }
+    function iscon(r) { if (!r) { rs.push(r); } else if (conditions.every(function(c) { return r[cddf(c[0])] === c[1]; })) { rs.push(r); } }
 }
 function INSERT(table, cols, vals) {
     table = tablestr(table); if (!table) { throw ("Tabla no existe"); }
@@ -372,13 +372,13 @@ function CREATE_TABLE(table, column_definition, table_constraint) {
     table_constraint && table_constraint.forEach(function(cc) { ADDCONSTRAINT(table, cc[0], cc[1], cc[2], cc[3], cc[4]); });
     return table;
 }
-function insertCol (t, c){
-        if (c[3] === null) { c[3] = 1; }
-        if (c[4]) { c[4] = 1; }
-        var c1 = ccc([t, c[0], aaa(c[1]), c[2], c[3], c[4], dn[c[5]]]);
-        c1.constraints = [];
-        if (c[6]) { c[6].forEach(function(cc) { return ADDCONSTRAINT(t, cc[0], cc[1], [[c1]], cc[2], cc[3] ? [cc[3]] : null); }); }
-        return c1;
+function insertCol(t, c) {
+    if (c[3] === null) { c[3] = 1; }
+    if (c[4]) { c[4] = 1; }
+    var c1 = ccc([t, c[0], aaa(c[1]), c[2], c[3], c[4], dn[c[5]]]);
+    c1.constraints = [];
+    if (c[6]) { c[6].forEach(function(cc) { return ADDCONSTRAINT(t, cc[0], cc[1], [[c1]], cc[2], cc[3] ? [cc[3]] : null); }); }
+    return c1;
 }
 
 function showAlert(message) {
