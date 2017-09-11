@@ -230,7 +230,7 @@ function getval(row, col) { return row[col[1].cols.indexOf(col)]; }
 function compare(cnc, a, b) {
     if (cnc[1].FK) { a = a.length ? a[cddf(cnc[1].FK)] : a; b = b.length ? b[cddf(cnc[1].FK)] : b; }
     a = collate(cnc[1][5], a); b = collate(cnc[1][5], b);
-    return a === null ? -1 : b === null ? 1 : (a > b ? 1 : a < b ? -1 : 0) * cnc[2];
+    return a === null ? 1 : b === null ? -1 : (a > b ? 1 : a < b ? -1 : 0) * cnc[2];
 }
 function collate(collate, v) {
     if (typeof v === "string") { return v.toLocaleUpperCase().accentFold(); }
