@@ -11,11 +11,10 @@
 	<script src="r3.js"></script>
 </head>
 <body>
-   <textarea id="textarea" cols="100" rows="20"></textarea>
-   <input type=button id=button value=trabajar>
    <script>
         (function() {
-            document.getElementById("button").addEventListener("click", function (e) { work(document.getElementById("textarea").value); });
+            work();
+            //document.getElementById("button").addEventListener("click", function (e) { work(document.getElementById("textarea").value); });
         })();
     </script>
 </body>
