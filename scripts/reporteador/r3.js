@@ -39,10 +39,10 @@ function work(data) {
     INSERT(Resultados, Resultados.cols, [3, ".", "."]);//Row col vals
     var rcont = rsc([4, "Totales", "1"]);
     var rcat = rsc([4, "Totales", "2"]);
-    
+
     var ColPK = [0, 1, 3];
     var cit = csc([2, ".", "Totales", "."]);
-    
+
     for (var i = 1, length = data.length - 1, row, result, ci; i < length; i++) {
         row = INSERT("Interacciones", data[0], data[i]);
         countD(row, rcont[cit]);
@@ -54,26 +54,27 @@ function work(data) {
             ci = [3, j, hCols[j][0]];
             ci[3] = SELECT("Interacciones", row, [ci[2]]);
             ci = csc(ci);
+            countD(row, rcont[ci]);
             prome(row, rcat[ci]);
             prome(row, result[ci]);
         }
     }
-    console.log(Resultados.rows.map(function(r){ return r.map(function(c){ return Array.isArray(c) ? c[0] : c; }).join("\t"); }).join("\n"));
-    
-    function csc(data){
+    console.log(Resultados.rows.map(function(r) { return r.map(function(c) { return Array.isArray(c) ? c[0] : c; }).join("\t"); }).join("\n"));
+
+    function csc(data) {
         var ci = indexCol(ColPK.map(function(c) { return data[c]; }));
-        if(ci[0]){ ci = ci[1]; }
-        else{
+        if (ci[0]) { ci = ci[1]; }
+        else {
             ci = ci[1];
-            Resultados.cols.insertAt(insertCol(Resultados, ["{0}|{1}".format(data[2],data[3]), "tinyint", null, null, null, "NOT NULL", null]), ci);
+            Resultados.cols.insertAt(insertCol(Resultados, ["{0}|{1}".format(data[2], data[3]), "tinyint", null, null, null, "NOT NULL", null]), ci);
             for (var i = 0; i < 4; i++) { Resultados.rows[i].insertAt(data[i], ci); }
             for (; i < Resultados.rows.length; i++) { Resultados.rows[i].insertAt([0, 0, 0, []], ci); }
         }
         return ci;
     }
-    function rsc(row){
+    function rsc(row) {
         var s = WHERE(Resultados, [["CR", row[0]], ["Categoría", row[1]], ["Pregunta", row[2]]])[0];
-        if (s) { row = s; } 
+        if (s) { row = s; }
         else {
             for (var i = 3; i < Resultados.cols.length; i++) { row.push([0, 0, 0, []]); }
             row = INSERT(Resultados, Resultados.cols, row);
@@ -86,12 +87,12 @@ function work(data) {
         pp[0] = pp[2] / pp[1];
         pp[3].push(row);
     }
-    function countD(row, pp){
+    function countD(row, pp) {
         var tmp = [SELECT("Interacciones", row, ["Inscripcion"])];
-        var arri = arrind(pp[1], tmp);
-        if(arri[0]){ tmp = arri[0]; }
-        else{ pp[0]++; tmp[1] = []; pp[3].insertAt(tmp, arri); }
-        tmp[3].push(row);
+        var arri = arrind(pp[3], tmp);
+        if (arri[0]) { tmp = arri[0]; }
+        else { pp[0]++; tmp[1] = []; pp[3].insertAt(tmp, arri[1]); }
+        tmp[1].push(row);
     }
     function indexCol(a, e) {
         if (!e && e != 0) { e = Resultados.cols.length - 1; }
@@ -111,12 +112,11 @@ function work(data) {
         a = collate(1, a); b = collate(1, b);
         return a === null ? (b === null ? 0 : 1) : b === null ? (a === null ? 0 : -1) : (a > b ? 1 : a < b ? -1 : 0) * 1
     }
-    function arrind (arr, a){
-        a = a[0];
-        for(var s = 0, e = arr.length -1, i,r,b; s <= e;){
+    function arrind(arr, a) {
+        for (var s = 0, e = arr.length - 1, i, r, b; s <= e;) {
             i = s + Math.round((e - s) / 2);
-            b = arr[i][0];
-            r = compare(a, b);
+            b = arr[i];
+            r = compare(a[0], b[0]);
             if (r > 0) { s = i + 1; } else if (r) { e = i - 1; } else { s = i; break; }
         }
         return [!r ? b : null, s];
