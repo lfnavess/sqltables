@@ -35,6 +35,13 @@ if (!Array.prototype.move) {
         return this; // for testing purposes
     };
 }
+if(!Array.prototype.remove){
+    Array.prototype.remove = function(index, count) {
+        if(!count){ count = 1; }
+        this.splice(index, count);
+        return this;
+    };
+}
 if (!Array.prototype.insertAt) {
     //http://stackoverflow.com/questions/586182/javascript-insert-item-into-array-at-a-specific-index
     Array.prototype.insertAt = function(item, index) {
