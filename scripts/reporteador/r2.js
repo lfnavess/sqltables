@@ -35,9 +35,9 @@ if (!Array.prototype.move) {
         return this; // for testing purposes
     };
 }
-if(!Array.prototype.remove){
+if (!Array.prototype.remove) {
     Array.prototype.remove = function(index, count) {
-        if(!count){ count = 1; }
+        if (!count) { count = 1; }
         this.splice(index, count);
         return this;
     };
@@ -104,7 +104,7 @@ CREATE_TABLE(
 );
 t[3].rows.push([1, "PRIMARY KEY"]);
 t[3].rows.push([2, "UNIQUE"]);
-t[3].rows.push([3, "FROREING KEY"]);
+t[3].rows.push([3, "FOREING KEY"]);
 t[3].rows.push([4, "HPK"]);
 CREATE_TABLE(
     "CONSTRAINTS",
@@ -137,18 +137,18 @@ ADDCONSTRAINT("Tables", null, "UNIQUE", [["table_name"]], null, null);
 ADDCONSTRAINT("DataTypes", null, "PRIMARY KEY", [["DataTypeID"]], null, null);
 ADDCONSTRAINT("DataTypes", null, "UNIQUE", [["DataTypeName"]], null, null);
 ADDCONSTRAINT("Columns", null, "PRIMARY KEY", [["ColumnID"]], null, null);
-ADDCONSTRAINT("Columns", null, "FROREING KEY", [["Table"]], "Tables", ["TableID"]);
-ADDCONSTRAINT("Columns", null, "FROREING KEY", [["data_type"]], "DataTypes", ["DataTypeID"]);
+ADDCONSTRAINT("Columns", null, "FOREING KEY", [["Table"]], "Tables", ["TableID"]);
+ADDCONSTRAINT("Columns", null, "FOREING KEY", [["data_type"]], "DataTypes", ["DataTypeID"]);
 ADDCONSTRAINT("Columns", null, "UNIQUE", [["Table"], ["column_name"]], null, null);
 ADDCONSTRAINT("CONSTRAINTTYPES", null, "PRIMARY KEY", [["CONSTRAINTTYPEID"]], null, null);
 ADDCONSTRAINT("CONSTRAINTTYPES", null, "UNIQUE", [["CONSTRAINTTYPE"]], null, null);
 ADDCONSTRAINT("CONSTRAINTS", null, "PRIMARY KEY", [["ConstraintID"]], null, null);
 ADDCONSTRAINT("CONSTRAINTS", null, "UNIQUE", [["constraint_name"]], null, null);
-ADDCONSTRAINT("CONSTRAINTS", null, "FROREING KEY", [["Table"]], "Tables", ["TableID"]);
-ADDCONSTRAINT("CONSTRAINTS", null, "FROREING KEY", [["CONSTRAINTTYPE"]], "CONSTRAINTTYPES", ["CONSTRAINTTYPEID"]);
-ADDCONSTRAINT("CONSTRAINTSCOLUMNS", null, "FROREING KEY", [["Constraint"]], "CONSTRAINTS", ["ConstraintID"]);
-ADDCONSTRAINT("CONSTRAINTSCOLUMNS", null, "FROREING KEY", [["column"]], "Columns", ["ColumnID"]);
-ADDCONSTRAINT("CONSTRAINTSCOLUMNS", null, "FROREING KEY", [["ref_column"]], "Columns", ["ColumnID"]);
+ADDCONSTRAINT("CONSTRAINTS", null, "FOREING KEY", [["Table"]], "Tables", ["TableID"]);
+ADDCONSTRAINT("CONSTRAINTS", null, "FOREING KEY", [["CONSTRAINTTYPE"]], "CONSTRAINTTYPES", ["CONSTRAINTTYPEID"]);
+ADDCONSTRAINT("CONSTRAINTSCOLUMNS", null, "FOREING KEY", [["Constraint"]], "CONSTRAINTS", ["ConstraintID"]);
+ADDCONSTRAINT("CONSTRAINTSCOLUMNS", null, "FOREING KEY", [["column"]], "Columns", ["ColumnID"]);
+ADDCONSTRAINT("CONSTRAINTSCOLUMNS", null, "FOREING KEY", [["ref_column"]], "Columns", ["ColumnID"]);
 ADDCONSTRAINT("CONSTRAINTSCOLUMNS", null, "PRIMARY KEY", [["Constraint"], ["column"]], null, null);
 
 
@@ -166,7 +166,7 @@ CREATE_TABLE(
         ["Nombre(s)", "nvarchar", 50, null, null, "NOT NULL", null],
         ["Apellido paterno", "nvarchar", 50, null, null, "NOT NULL", null],
         ["Apellido materno", "nvarchar", 50, null, null, "NULL", null],
-        ["Puesto", "smallint", null, null, null, "NULL", [[null, "FROREING KEY", "Puestos", "PuestoID"]]],
+        ["Puesto", "smallint", null, null, null, "NULL", [[null, "FOREING KEY", "Puestos", "PuestoID"]]],
         ["Email", "nvarchar", 50, null, null, "NULL", [[null, "UNIQUE", null, null]]]
     ]
 );

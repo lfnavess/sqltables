@@ -36,8 +36,10 @@
 </head>
 <body>
    <script>
-        (function() {
-            work();
+       (function() {
+           fetch('json.json')
+               .then(function(response) { return response.json(); })
+               .then(function(j) { work(j); });
             //document.getElementById("button").addEventListener("click", function (e) { work(document.getElementById("textarea").value); });
         })();
     </script>
