@@ -138,10 +138,8 @@ function work(data) {
         for (var i = 1; i < percentColors.length - 1; i++) { if (pct < percentColors[i].pct) { break; } }
         var lower = percentColors[i - 1];
         var upper = percentColors[i];
-        var range = upper.pct - lower.pct;
-        var rangePct = (pct - lower.pct) / range;
-        var pctLower = 1 - rangePct;
-        var pctUpper = rangePct;
+        var pctUpper = (pct - lower.pct) / (upper.pct - lower.pct);
+        var pctLower = 1 - pctUpper;
         var color = {
             r: Math.floor(lower.color.r * pctLower + upper.color.r * pctUpper),
             g: Math.floor(lower.color.g * pctLower + upper.color.g * pctUpper),
