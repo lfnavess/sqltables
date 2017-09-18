@@ -50,12 +50,12 @@ function work(data) {
     INSERT(Resultados, Resultados.cols, [1, 1, 2]);
     for (var i = 1, row = [2]; i < Resultados.cols.length; i++) { row[i] = Resultados.cols[i][2]; }
     INSERT(Resultados, Resultados.cols, row);
-    INSERT(Resultados, Resultados.cols, [3, ".", "."]);//Row col vals
-    var rcont = rsc([4, "Totales", "1"]);
-    var rcat = rsc([4, "Totales", "2"]);
+    INSERT(Resultados, Resultados.cols, [3, "Categoría", "Pregunta"]);//Row col vals
+    var rcont = rsc([4, "Totales", "1.Encuestas"]);
+    var rcat = rsc([4, "Totales", "2.Promedio"]);
 
     var ColPK = [0, 1, 3];
-    var cit = csc([2, ".", "Totales", "."]);
+    var cit = csc([2, ".", "Totales", "Totales"]);
     var vcs = vCols.map(function(c) { return c[0]; });
 
     for (var i = 1, length = data.length - 1, row, result, ci; i < length; i++) {
@@ -77,7 +77,7 @@ function work(data) {
     Resultados.rows.remove(0, 2);
     var table = document.createElement("table"); document.body.appendChild(table);
     var tbody = document.createElement("tbody"); table.appendChild(tbody);
-    var prevci; var twi = 0;
+    var prevci = []; var twi = 0;
     Resultados.rows.forEach(function(r, ri) {
         var tr = document.createElement("tr"); tbody.appendChild(tr);
         r.remove(0); var prevri;
@@ -87,7 +87,7 @@ function work(data) {
         }
         if (ri < 4) { tr.style.fontWeight = "bold"; }
         r.forEach(function(c, ci) {
-            c = Array.isArray(c) ? c[0].toFixed(0) : c;
+            c = Array.isArray(c) ? ci < 2 ? c[0] : c[0].toFixed(0) : c;
             if (ri === 0) {
                 var wi = ci === 1 ? 200 : 28;
                 if (prevri && prevri.innerText.trimSingleLine() === c) {
@@ -99,11 +99,14 @@ function work(data) {
                 twi += wi;
                 table.style.width = twi + "px";
             }
-            if (ci === 0 && prevci && prevci.innerText.trimSingleLine() === c) {
-                prevci.setAttribute("rowspan", (prevci.getAttribute("rowspan") || 1) * 1 + 1);
+            if ((ci === 0 || ci < 3 && ri < 2) && prevci[ci] && prevci[ci].innerText.trimSingleLine() === c) {
+                prevci[ci].setAttribute("rowspan", (prevci[ci].getAttribute("rowspan") || 1) * 1 + 1);
                 return;
             }
             var td = document.createElement("td"); tr.appendChild(td);
+            if (ri === 1 && ci > 2) {
+                td.style.backgroundColor
+            }
             if (ri == 1 && ci > 13 || ci === 0) {
                 var div = document.createElement("div"); td.appendChild(div);
                 div.style.transform = "rotate(-90.0deg)";
@@ -122,7 +125,7 @@ function work(data) {
                 if (wi != 28) { td.style.width = wi + "px"; }
                 prevri = td;
             }
-            if (ci === 0) { prevci = td; }
+            prevci[ci] = td;
         });
     });
 
@@ -189,7 +192,7 @@ function work(data) {
         if (!e && e != 0) { e = Resultados.cols.length - 1; }
         for (var s = 0, i, r, b; s <= e;) {
             i = s + Math.round((e - s) / 2);
-            b = ColPK.map(function(c) { return Resultados.rows[c][i]; });
+            b = ColPK.map(c => Resultados.rows[c][i]);
             r = cddc(a, b);
             if (r > 0) { s = i + 1; } else if (r) { e = i - 1; } else { s = i; break; }
         }
