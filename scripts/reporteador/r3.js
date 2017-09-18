@@ -160,20 +160,14 @@ function work(data) {
         if (ci[0]) { ci = ci[1]; }
         else {
             ci = ci[1];
-            Resultados.cols.insertAt(insertCol(Resultados, ["{0}|{1}".format(data[2], data[3]), "tinyint", null, null, null, "NOT NULL", null]), ci);
-            for (var i = 0; i < 4; i++) { Resultados.rows[i].insertAt(data[i], ci); }
-            for (; i < Resultados.rows.length; i++) { Resultados.rows[i].insertAt([0, 0, 0, []], ci); }
+            insertCol(Resultados, ["{0}|{1}".format(data[2], data[3]), "tinyint", null, null, null, "NOT NULL", [[null, "DEFAULT", null, null, "[0,0,0,[]]"]]], ci);
+            for (var i = 0; i < 4; i++) { Resultados.rows[i][ci] = data[i]; }
         }
         return ci;
     }
     function rsc(row) {
         var s = WHERE(Resultados, [["CR", row[0]], ["Categoría", row[1]], ["Pregunta", row[2]]])[0];
-        if (s) { row = s; }
-        else {
-            for (var i = 3; i < Resultados.cols.length; i++) { row[i] = [0, 0, 0, []]; }
-            row = INSERT(Resultados, Resultados.cols, row);
-        }
-        return row;
+        return s || INSERT(Resultados, ["CR", "Categoría", "Pregunta"], row);
     }
     function prome(row, pp) {
         pp[1]++;
