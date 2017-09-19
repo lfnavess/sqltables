@@ -77,54 +77,59 @@ function work(data) {
     Resultados.rows.remove(0, 2);
     var table = document.createElement("table"); document.body.appendChild(table);
     var tbody = document.createElement("tbody"); table.appendChild(tbody);
-    var prevci = []; var twi = 0;
+    var prevci = [], prevri = []; var twi = 0;
     Resultados.rows.forEach(function(r, ri) {
         var tr = document.createElement("tr"); tbody.appendChild(tr);
-        r.remove(0); var prevri;
+        r.remove(0);
         if (ri === 1) {
             tr.style.verticalAlign = "bottom";
             tr.style.height = "95px";
         }
         if (ri < 4) { tr.style.fontWeight = "bold"; }
         r.forEach(function(c, ci) {
+            var c2 = c;
             c = Array.isArray(c) ? ci < 2 ? c[0] : c[0].toFixed(0) : c;
             if (ri === 0) {
                 var wi = ci === 1 ? 200 : 28;
-                if (prevri && prevri.innerText.trimSingleLine() === c) {
-                    prevri.setAttribute("colspan", (prevri.getAttribute("colspan") || 1) * 1 + 1);
-                    prevri.style.width = prevri.getAttribute("colspan") * wi + "px";
-                    prevri.style.textAlign = "center";
+                if (prevri[ri] && prevri[ri].innerText.trimSingleLine() === c) {
+                    prevci[ci] = prevri[ri];
+                    prevri[ri].setAttribute("colspan", (prevri[ri].getAttribute("colspan") || 1) * 1 + 1);
+                    prevri[ri].style.width = prevri[ri].getAttribute("colspan") * wi + "px";
                     return;
                 }
                 twi += wi;
                 table.style.width = twi + "px";
             }
             if ((ci === 0 || ci < 3 && ri < 2) && prevci[ci] && prevci[ci].innerText.trimSingleLine() === c) {
+                prevri[ri] = prevci[ci];
                 prevci[ci].setAttribute("rowspan", (prevci[ci].getAttribute("rowspan") || 1) * 1 + 1);
                 return;
             }
             var td = document.createElement("td"); tr.appendChild(td);
-            if (ri === 1 && ci > 2) {
-                td.style.backgroundColor
-            }
-            if (ri == 1 && ci > 13 || ci === 0) {
+            if (ri === 0) { td.style.verticalAlign = "bottom"; td.style.textAlign = "center";}
+            if (ri === 0 && ci === 2 || ri === 2 && ci === 0) { td.style.backgroundColor = "#BFBFBF"; }
+            if (ri === 1 && ci > 2) { td.style.backgroundColor = prevci[ci].style.backgroundColor; }
+            if (ri === 1 && ci > 13 || ci === 0 || ri === 0 && ci === 2) {
                 var div = document.createElement("div"); td.appendChild(div);
                 div.style.transform = "rotate(-90.0deg)";
                 div.style.marginBottom = "8px";
                 div.textContent = c;
             } else { td.textContent = c; }
             if (ri < 4 || ci < 3) { td.style.border = "1px solid black"; }
-            if (ri > 2 && ci > 1) {
-                td.style.textAlign = "center";
-                td.style.backgroundColor = getColorForPercentage(c / 100);
+            if (ri >= 2 && ci === 1) {
+                td.style.backgroundColor = prevri[ri].style.backgroundColor;
+            }
+            if (ri > 2 && ci > 1) { td.style.textAlign = "center"; td.style.backgroundColor = getColorForPercentage(c / 100); }
+            if (ri >= 4 && ci === 0) {
+                for (var i = 0, ss = c2[1].split(";").map(s => s.split(":")); i < ss.length && ss[i][0]; i++) { td.style[ss[i][0]] = ss[i][1]; }
             }
             if (ci < 3) { td.style.fontWeight = "bold"; }
             if (ri === 0) {
                 if (ci === 3) { td.style.backgroundColor = "#DDEBF7"; }
                 else if (ci === 5) { td.style.backgroundColor = "#FCE4D6"; }
                 if (wi != 28) { td.style.width = wi + "px"; }
-                prevri = td;
             }
+            prevri[ri] = td;
             prevci[ci] = td;
         });
     });

@@ -194,7 +194,7 @@ function ADDCONSTRAINT(table, name, type, cols, reftable, refcols, expre = null)
     if (typeof reftable === "string") { reftable = WHERE(t[1], [[t[1].cols[1], reftable]])[0]; if (!reftable) { throw ("reftable not found"); } }
     cols.forEach(function(c, i) {
         if (typeof c[0] === "string") {
-            c[0] = WHERE(t[0], [[t[0].cols[1], table], [t[0].cols[2], c[0]]])[0]; 
+            c[0] = WHERE(t[0], [[t[0].cols[1], table], [t[0].cols[2], c[0]]])[0];
             if (!c[0]) { throw ("col not found"); }
         }
         c[1] = c[1] ? c[1] : 1;
@@ -205,7 +205,7 @@ function ADDCONSTRAINT(table, name, type, cols, reftable, refcols, expre = null)
             if (!refcols[i].constraints.find(function(cc) { return cc[3][0] < 3; })) { throw ("FK contraint is not unique"); }
         });
     }
-    if (!name) { 
+    if (!name) {
         name = "{0}_{1}{2}".format(
             type[0] === 1 ? "PK" : type[0] === 2 ? "IX" : type[0] === 4 ? "DEF" : "FK",
             table[1],
@@ -225,7 +225,7 @@ function ADDCONSTRAINT(table, name, type, cols, reftable, refcols, expre = null)
         c = INSERT(t[5], t[5].cols, c1);
         if (type[0] === 1) { c[1].PK = c1; }
         else if (type[0] === 3) { c[1].FK = c[3]; }
-        else if(type[0] === 4){ c[1].DEF = c[4]; }
+        else if (type[0] === 4) { c[1].DEF = c[4]; }
         return c;
     });
     cols.forEach(function(c, i) { c[0].constraints.push(constr); });
@@ -287,10 +287,10 @@ function INSERT(table, cols, vals) {
         c = table.cols[ci];
         if (c[6]) { val = c[6]++; } else { val = vals[cols.indexOf(c)]; }
         if (c.FK && Array.isArray(val)) { val = val[cddf(c.FK)]; }
-        if (c.DEF && !val && val !== 0){ val = eval(c.DEF); }
+        if (c.DEF && !val && val !== 0) { val = eval(c.DEF); }
         if (typeof val === "string") { val = val.trimSingleLine(); }
         if (!val && val !== 0) {
-            if(!c[7]) { throw ("Value required"); }
+            if (!c[7]) { throw ("Value required"); }
             val = null;
         } else if (!Array.isArray(val)) {
             if (c[3][1] === "nvarchar") {
@@ -399,7 +399,7 @@ function CREATE_TABLE(table, column_definition, table_constraint) {
     return table;
 }
 function insertCol(t, c, at) {
-    if(!at){ at = t.cols.length; }
+    if (!at) { at = t.cols.length; }
     if (c[3] === null) { c[3] = 1; }
     if (c[4]) { c[4] = 1; }
     var c1 = ccc([t, c[0], aaa(c[1]), c[2], c[3], c[4], dn[c[5]]]);
@@ -407,7 +407,7 @@ function insertCol(t, c, at) {
     t.cols.insertAt(c1, at);
     if (c[6]) {
         c[6].forEach(function(cc) { ADDCONSTRAINT(t, cc[0], cc[1], [[c1]], cc[2], cc[3] ? [cc[3]] : null, cc[4]); });
-        if(c1.DEF && t.rows.length){ for (var i = 0; i < t.rows.length; i++) { t.rows[i].insertAt(eval(c1.DEF), at); } }
+        if (c1.DEF && t.rows.length) { for (var i = 0; i < t.rows.length; i++) { t.rows[i].insertAt(eval(c1.DEF), at); } }
     }
     return c1;
 }
