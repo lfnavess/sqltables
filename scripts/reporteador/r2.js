@@ -94,7 +94,11 @@ t[2].rows.push([3, "smallint", -32768, 32767]);
 t[2].rows.push([4, "int", -2147483648, 2147483647]);
 t[2].rows.push([5, "bigint", -9223372036854775808, 9223372036854775807]);
 t[2].rows.push([6, "nvarchar", null, null]);
-t[2].rows.push([7, "promedio", null, null]);
+t[2].rows.push([7, "date", -62135575200000, 253402236000000]);
+t[2].rows.push([8, "smalldatetime", -2208967200000, 3453339599000]);
+t[2].rows.push([9, "datetime", -6847783200000, 253402322399997]);
+t[2].rows.push([10, "duration", -2208967200000, 3453339599000]);
+t[2].rows.push([10, "promedio", null, null]);
 CREATE_TABLE(
     "CONSTRAINTTYPES",
     [
@@ -296,7 +300,15 @@ function INSERT(table, cols, vals) {
             if (c[3][1] === "nvarchar") {
                 if (typeof val !== "string") { val = val + ""; }
                 if (val.length > c[4]) { throw ("Maxlength reached"); }
-            } else {
+            } else if(c[3][0] === 8){ //smalldatetime
+                if(typeof val === "string"){ val = moment.tz(val, "DD/MM/YYYY HH:mm", true, "America/Mexico_City"); }
+                if (val < c[3][2]) { throw ("Min date value reached"); }
+                else if (val > c[3][3]) { throw ("Max date value reached"); }
+            } else if(c[3][0] === 7){ //date
+                if(typeof val === "string"){ val = moment.tz(val, "DD/MM/YYYY", true, "America/Mexico_City"); }
+                if (val < c[3][2]) { throw ("Min date value reached"); }
+                else if (val > c[3][3]) { throw ("Max date value reached"); }
+            }else {
                 if (isNaN(val)) { throw ("Value is not a number"); } else if (typeof val !== "number") { val = Number(val); }
                 if (val < c[3][2]) { throw ("Min value reached"); }
                 else if (val > c[3][3]) { throw ("Max value reached"); }
