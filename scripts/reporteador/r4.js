@@ -59,7 +59,34 @@ function work(data) {
     }
     
     var filtered = [];
-    var conditions = '"Alumno >Posición >Lugar >Empresa >Tipo" = \'INT COMEX [C]\' AND "Curso" IN() AND "Estado" IN(\'Completado\',\'Incompleto\',\'Sin iniciar\')';
+    var c = '"Alumno >Posición >Lugar >Empresa >Tipo" = \'INT COMEX [C]\' AND "Curso" IN() AND "Estado" IN(\'Completado\',\'Incompleto\',\'Sin iniciar\')';
+    var from = '"Inscripciones"';
+    var r = "";
+    t[0] = Inscripciones[1];
+    t[Inscripciones[0]] = Inscripciones;
+    
+    for (var i = 0, s, e; i < c.length; i++) {
+        if (c.indexOf("\"", i) === i) {
+            s = ++i;
+            i = c.indexOf("\"", i);
+            e = c.substring(s, i - 1);
+            if (c[i + 1] === ".") {
+                i++;
+                r += "t[{0}]".format(t.indexOf(e));
+                s = ++i;
+                i = c.indexOf("\"", i);
+                e = c.substring(s, i -1);
+            } else {
+
+            }
+        }
+    }
+    function it() {
+        for (var i = 0, a; i < t.length; i++) {
+            a = t[i].cols.indexOf(e);
+        }
+    }
+
     var selcols = formats[1].map(c => c[0]);
     for(var i = 0, row; i < ori.rows.length; i++){
         row = SELECT(ori, ori.rows[i], selcols);
