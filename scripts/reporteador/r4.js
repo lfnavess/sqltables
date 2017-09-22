@@ -1,92 +1,83 @@
 function work(data) {
     //data = data.split("\n").map(function(a) { return a.split("\t"); });
-    var Posiciones = CREATE_TABLE(
-        "Posiciones",
-        [
-            ["Posición ID", "int", null, null, "IDENTITY", "NULL", [[null, "PRIMARY KEY", null, null]]],
-            ["Email", "nvarchar", 50, null, null, "NULL", [[null, "UNIQUE", null, null]]]
-        ]
-        
-    )
-    var Colaboradores = CREATE_TABLE(
-        "Colaboradores",
-        [
-            ["Colaborador ID", "int", null, null, null, "NOT NULL", [[null, "PRIMARY KEY", null, null]]],
-            ["Nombre corto", "nvarchar", 50, null, null, "NOT NULL", null],
-            ["Usuario", "nvarchar", 6, null, null, "NOT NULL", [[null, "UNIQUE", null, null]]],
-            ["Posición", "int", null, null, null, "NULL", [[null, "UNIQUE", null, null], [null, "FOREING KEY", Posiciones, "Posición ID"]]]
-        ]
-    );
     var Inscripciones = CREATE_TABLE(
         "Inscripciones",
         [
             ["Fecha corte", "smalldatetime", null, null, null, "NOT NULL", null],
             ["Estado", "nvarchar", 50, null, null, "NOT NULL", null],
+            ["Fecha inicio", "date", null, null, null, "NOT NULL", null],
             ["Alumno >Nombre corto", "nvarchar", 50, null, null, "NOT NULL", null],
             ["Alumno >Usuario", "nvarchar", 6, null, null, "NOT NULL", null],
             ["Curso >Nombre", "nvarchar", 100, null, null, "NOT NULL", null],
             ["Estado2", "nvarchar", 50, null, null, "NULL", null],
             ["Progreso", "tinyint", null, null, null, "NOT NULL", null],
             ["Último progreso", "smalldatetime", null, null, null, "NULL", null],
+            ["Alumno >Posición >Lugar", "nvarchar", 50, null, null, "NULL", null],
+            ["Alumno >Posición >Lugar >Empresa", "nvarchar", 50, null, null, "NULL", null],
+            ["Alumno >Posición >Lugar >Municipio >Entidad", "nvarchar", 50, null, null, "NULL", null],
+            ["Alumno >Posición >CC >COMEX ID", "int", null, null, null, "NULL", null],
+            ["Alumno >Posición >CC >Nombre", "nvarchar", 50, null, null, "NULL", null],
+            ["Alumno >Posición >Puesto >Nombre", "nvarchar", 50, null, null, "NULL", null],
+            ["Alumno >Posición >Puesto >Nivel", "nvarchar", 50, null, null, "NULL", null],
+            ["Alumno >Posición >Dirección", "nvarchar", 50, null, null, "NULL", null],
+            ["Alumno >Posición >Dirección >Posición BP >Colaborador >Nombre corto", "nvarchar", 50, null, null, "NULL", null],
+            ["Alumno >Posición >Posición jefe >Colaborador >Nombre corto", "nvarchar", 50, null, null, "NULL", null],
+            ["Alumno >Posición >Posición jefe >Email", "nvarchar", 50, null, null, "NULL", null],
+            ["Alumno >Posición >Posición director >Colaborador >Nombre corto", "nvarchar", 50, null, null, "NULL", null],
             ["Alumno >Posición >Email", "nvarchar", 50, null, null, "NULL", null],
-            ["Alumno >Posición >Teléfono", "nvarchar", 50, null, null, "NULL", null],
-            ["Alumno >Posición >Teléfono Móvil", "nvarchar", 50, null, null, "NULL", null],
-            ["Alumno >Posición >Lugar", "nvarchar", 50, null, null, "NULL", null]
+            ["Fecha creado", "smalldatetime", null, null, null, "NULL", null],
+            ["Inscripción ID", "int", null, null, null, "NULL", null],
+            ["Alumno >Posición >Lugar >Empresa >Tipo", "nvarchar", null, null, null, "NULL", null],
+            ["Curso", "int", null, null, null, "NULL", null]
         ]
     );
-    var formats = [
-        "Inscripciones",
-        [
-            ["Fecha corte", "DD/MM/YYYY hh:mm:ss a", "DD/MM/YYYY HH:mm"],
-            ["Estado", null, null],
-            ["Alumno >Nombre corto", null, null],
-            ["Alumno >Usuario", null, null],
-            ["Curso >Nombre", null, null, null],
-            ["Estado2", null, null, null],
-            ["Progreso", null, null, null],
-            ["Último progreso", null, "DD/MM/YYYY hh:mm:ss a", "DD/MM/YYYY HH:mm"],
-            ["Alumno >Posición >Email", null, null, null],
-            ["Alumno >Posición >Teléfono", null, null, null],
-            ["Alumno >Posición >Teléfono Móvil", null, null, null],
-            ["Alumno >Posición >Lugar", null, null, null]
-        ]
-    ];
-    var ori = CREATE_TABLE("ori", data.splice(1)[0].map(c => [c, "nvarchar", 200, null, null, "NULL", null]));
-    for(var i = 0; i < data.length; i++){ if(!data[i]){ break; } }
-    ori.rows =  i < data.length ? data.slice(0, i) : data;
-    var exp = {
-        "IN": function(left, data){ return data.indexOf(left) > -1; }
-    }
-    
+    //var ori = CREATE_TABLE("ori", data.splice(1)[0].map(c => [c, "nvarchar", 200, null, null, "NULL", null]));
+    //for(var i = 0; i < data.length; i++){ if(!data[i]){ break; } }
+    //ori.rows =  i < data.length ? data.slice(0, i) : data;
+
     var filtered = [];
-    var c = '"Alumno >Posición >Lugar >Empresa >Tipo" = \'INT COMEX [C]\' AND "Curso" IN() AND "Estado" IN(\'Completado\',\'Incompleto\',\'Sin iniciar\')';
-    var from = '"Inscripciones"';
-    var r = "";
-    t[0] = Inscripciones[1];
-    t[Inscripciones[0]] = Inscripciones;
+    var c = '"Alumno >Posición >Lugar >Empresa >Tipo" = \'INT COMEX [C]\' AND "Curso" IN(3853,3855,3806,3811,3896,3822,3838,3837,3830,3885,3813,3815,3829,3820,3800,3835,3865,3974) AND "Estado" IN(\'Completado\',\'Incompleto\',\'Sin iniciar\')';
     
-    for (var i = 0, s, e; i < c.length; i++) {
-        if (c.indexOf("\"", i) === i) {
-            s = ++i;
-            i = c.indexOf("\"", i);
-            e = c.substring(s, i - 1);
-            if (c[i + 1] === ".") {
-                i++;
-                r += "t[{0}]".format(t.indexOf(e));
-                s = ++i;
-                i = c.indexOf("\"", i);
-                e = c.substring(s, i -1);
-            } else {
-
+    var r = "";
+    var ins = [];
+    var objs = { f: [Inscripciones], refs: [] };
+    for (var i = 0, s, e, u, m, b = [], br; i < c.length; i++) {
+        if(!s){
+            if (c[i] === "\"") { s = i + 1; u = /"/; }
+            else if (c[i] === "=") { b.push("==="); br = true; }
+            else if (c[i] === "'") { s = i; u = /'/; }
+            else if (/\w/.test(c[i])){ s = i; u = /[ (=]/; }
+            else if (c[i] === "("){ s = i + 1; u = /\)/; }
+        } else if(u.test(c[i])) {
+            if (u.toString() === '/"/'){
+                b.push(`this.f[0][${objs.f[0].cols.indexOf(tableCol(objs.f[0], c.substring(s, i)))}]`);
+            } else if (u.toString() === "/'/"){
+                b.push(c.substring(s, i + 1));
+                if(br){ ins.push(b); br = false; b = []; }
+            } else if (u.toString() === "/[ (=]/"){
+                m = c.substring(s, i--);
+                if(m === "OR"){ ins.push("||"); }
+                else if(m === "AND"){ ins.push("&&"); }
+                else if(m === "IN"){ br = true; }
+            } else if(u.toString() === "/\\)/"){
+                objs.refs.push(c.substring(s, i).split(",").map(m => isNaN(m) ? m.replace(/'/g,"") : Number(m)));
+                if(br){ ins.push(`this.refs[${objs.refs.length - 1}].indexOf(${b[0]})>-1`); br = false; b = [];}
             }
+            s = undefined;
         }
     }
-    function it() {
-        for (var i = 0, a; i < t.length; i++) {
-            a = t[i].cols.indexOf(e);
-        }
-    }
+    var tmp1 = new Function(`return ${ins.map(i => Array.isArray(i) ? i.join("") : i).join("")};`);
+    //var tmp1 = function(){
+    //    return t[0][24] === 'INT COMEX [C]' && refs[0].indexOf(t[0][25]) > -1 && refs[1].indexOf(t[0][1]) > - 1;
+    //}
+    objs.f = [[]];
+    objs.f[0][25] = 3813;
+    objs.f[0][1] = "Sin iniciar";
+    objs.f[0][24] = 'INT COMEX [C]';
 
+    tmp1.call(objs);
+    
+    function dsdfsd(){
     var selcols = formats[1].map(c => c[0]);
     for(var i = 0, row; i < ori.rows.length; i++){
         row = SELECT(ori, ori.rows[i], selcols);
@@ -180,4 +171,5 @@ function work(data) {
         }
         return [!r ? b : null, s];
     }
+}
 }

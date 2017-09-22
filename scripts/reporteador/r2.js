@@ -64,7 +64,7 @@ CREATE_TABLE(
     [
         ["ColumnID", "int", null, null, "IDENTITY", "NOT NULL", null],
         ["Table", "int", null, null, null, "NOT NULL", null],
-        ["column_name", "nvarchar", 50, null, null, "NOT NULL", null],
+        ["column_name", "nvarchar", 128, null, null, "NOT NULL", null],
         ["data_type", "int", null, null, null, "NOT NULL", null],
         ["precision", "int", null, null, null, null, null],
         ["COLLATE", "int", null, null, null, "NOT NULL", null],
@@ -98,7 +98,7 @@ t[2].rows.push([7, "date", -62135575200000, 253402236000000]);
 t[2].rows.push([8, "smalldatetime", -2208967200000, 3453339599000]);
 t[2].rows.push([9, "datetime", -6847783200000, 253402322399997]);
 t[2].rows.push([10, "duration", -2208967200000, 3453339599000]);
-t[2].rows.push([10, "promedio", null, null]);
+t[2].rows.push([11, "promedio", null, null]);
 CREATE_TABLE(
     "CONSTRAINTTYPES",
     [
@@ -156,41 +156,6 @@ ADDCONSTRAINT("CONSTRAINTSCOLUMNS", null, "FOREING KEY", [["column"]], "Columns"
 ADDCONSTRAINT("CONSTRAINTSCOLUMNS", null, "FOREING KEY", [["ref_column"]], "Columns", ["ColumnID"]);
 ADDCONSTRAINT("CONSTRAINTSCOLUMNS", null, "PRIMARY KEY", [["Constraint"], ["column"]], null, null);
 
-
-CREATE_TABLE(
-    "Puestos",
-    [
-        ["PuestoID", "smallint", null, null, "IDENTITY", "NOT NULL", [[null, "PRIMARY KEY", null, null]]],
-        ["Puesto", "nvarchar", 50, null, null, "NOT NULL", [[null, "UNIQUE", null, null]]]
-    ]
-);
-CREATE_TABLE(
-    "Colaboradores",
-    [
-        ["Colaborador ID", "int", null, null, "IDENTITY", "NOT NULL", [[null, "PRIMARY KEY", null, null]]],
-        ["Nombre(s)", "nvarchar", 50, null, null, "NOT NULL", null],
-        ["Apellido paterno", "nvarchar", 50, null, null, "NOT NULL", null],
-        ["Apellido materno", "nvarchar", 50, null, null, "NULL", null],
-        ["Puesto", "smallint", null, null, null, "NULL", [[null, "FOREING KEY", "Puestos", "PuestoID"]]],
-        ["Email", "nvarchar", 50, null, null, "NULL", [[null, "UNIQUE", null, null]]]
-    ]
-);
-
-
-INSERT("Puestos", ["Puesto"], ["JEFE DE CAPACITACION"]);
-INSERT("Puestos", ["Puesto"], ["INTEGRADOR Y ASESOR DE CAPACITACION MULTIMEDIA"]);
-INSERT(
-    "Colaboradores",
-    ["Nombre(s)", "Apellido paterno", "Apellido materno", "Puesto", "Email"],
-    ["Albert Gonzalo", "Mejía", "Rodríguez", 1, "agmejiar@ppg.com"]
-);
-INSERT(
-    "Colaboradores",
-    ["Nombre(s)", "Apellido paterno", "Apellido materno", "Puesto", "Email"],
-    ["Luis Fernando", "Naves", "Santoyo", 2, "lfnavess@ppg.com"]
-);
-
-function hp() { }
 
 function ADDCONSTRAINT(table, name, type, cols, reftable, refcols, expre = null) {
     if (typeof table === "string") { table = WHERE(t[1], [[t[1].cols[1], table]])[0]; if (!table) { throw ("table not found"); } }
@@ -252,6 +217,11 @@ function cdde(cn) {
     return r;
 }
 function cddf(col) { return col[1].cols.indexOf(col); }
+function tableCol(table, col){
+    var c =  WHERE(t[0], [[t[0].cols[1], table], [t[0].cols[2], col]])[0];
+    if(!c){ throw(`Columna "${col}" no encontrada en tabla "${table[1]}"`); }
+    return c;
+}
 function getval(row, col) { return row[col[1].cols.indexOf(col)]; }
 function compare(cnc, a, b) {
     if (cnc[1].FK) { a = a.length ? a[cddf(cnc[1].FK)] : a; b = b.length ? b[cddf(cnc[1].FK)] : b; }
