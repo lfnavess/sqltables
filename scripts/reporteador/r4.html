@@ -51,10 +51,12 @@
     </script>
 </head>
 <body>
+    <input type="button" id="button" value="work" />
+    <textarea id="textarea" required></textarea>
     <script>
         (function() {
-            work();
-            //document.getElementById("button").addEventListener("click", function (e) { work(document.getElementById("textarea").value); });
+            //work();
+            document.getElementById("button").addEventListener("click", function (e) { work(document.getElementById("textarea").value); });
         })();
     </script>
 </body>
