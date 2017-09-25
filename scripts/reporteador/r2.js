@@ -251,19 +251,19 @@ function cdde(cn) {
 function cddf(col) { return col[1].cols.indexOf(col); }
 function table(table) {
     var r = WHERE(t[1], [[t[1].cols[1], table]])[0];
-    if(!r) {throw (`Tabla "${table}" no encontrada`); }
+    if (!r) { throw (`Invalid object name '${table}'`); }
     return r;
 }
 function tableCol(table, col){
     var c = WHERE(t[0], [[t[0].cols[1], table], [t[0].cols[2], col]])[0];
-    if(!c){ throw(`Columna "${col}" no encontrada en tabla "${table[1]}"`); }
+    if (!c) { throw (`Invalid column name '${col}'.`); }
     return c;
 }
 function getval(row, col) { return row[col[1].cols.indexOf(col)]; }
 function compare(cnc, a, b) {
-    if (cnc[1].FK) { a = a.length ? a[cddf(cnc[1].FK)] : a; b = b.length ? b[cddf(cnc[1].FK)] : b; }
+    if (cnc[1].FK) { a = a && a.length ? a[cddf(cnc[1].FK)] : a; b = b && b.length ? b[cddf(cnc[1].FK)] : b; }
     a = collate(cnc[1][5], a); b = collate(cnc[1][5], b);
-    return a === null ? 1 : b === null ? -1 : (a > b ? 1 : a < b ? -1 : 0) * cnc[2];
+    return a === null ? (b === null ? 0 : 1) : b === null ? (a === null ? 0 : -1) : (a > b ? 1 : a < b ? -1 : 0) * cnc[2];
 }
 function collate(collate, v) {
     if (typeof v === "string") { return v.toLocaleUpperCase().accentFold(); }
@@ -289,10 +289,13 @@ function WHERE(table, conditions) {
 }
 function INSERT(table, cols, vals) {
     table = tablestr(table); if (!table) { throw ("Tabla no existe"); }
-    cols = cols.map(function(c) {
-        var c2 = colstr(table, c); if (!c2) { throw ("Columna {0} no existe".format(c)); }
-        return c2;
-    });
+    if (!cols) { cols = table.cols; }
+    else {
+        cols = cols.map(function(c) {
+            var c2 = colstr(table, c); if (!c2) { throw ("Columna {0} no existe".format(c)); }
+            return c2;
+        });
+    }
     var row = [];
     for (var ci = 0, c, val, tttt; ci < table.cols.length; ci++) {
         c = table.cols[ci];
@@ -301,7 +304,7 @@ function INSERT(table, cols, vals) {
         if (c.DEF && !val && val !== 0) { val = eval(c.DEF); }
         if (typeof val === "string") { val = val.trimSingleLine(); }
         if (!val && val !== 0) {
-            if (!c[7]) { throw ("Value required"); }
+            if (!c[7]) { throw (`Cannot insert the value NULL into column '${c[2]}', table '${table[1]}'; column does not allow nulls. INSERT fails.`); }
             val = null;
         } else if (!Array.isArray(val)) {
             if (c[3][1] === "nvarchar") {
@@ -316,7 +319,7 @@ function INSERT(table, cols, vals) {
                 if (val < c[3][2]) { throw (`${c[2]} Min date value reached`); }
                 else if (val > c[3][3]) { throw (`${c[2]} "Max date value reached`); }
             }else {
-                if (isNaN(val)) { throw ("Value is not a number"); } else if (typeof val !== "number") { val = Number(val); }
+                if (isNaN(val)) { throw (`Conversion failed when converting the varchar value '${val}' to data type ${c[3][1]}.`); } else if (typeof val !== "number") { val = Number(val); }
                 if (val < c[3][2]) { throw ("Min value reached"); }
                 else if (val > c[3][3]) { throw ("Max value reached"); }
             }
@@ -325,7 +328,7 @@ function INSERT(table, cols, vals) {
                 tttt = constorow(cc, row);
                 if (cc[3][0] < 3) {
                     tttt[ci] = val;
-                    if (cddd(cc, tttt)) { continue; }
+                    //if (cddd(cc, tttt)) { continue; }
                     if (dsfdsd(cc, tttt)[0]) { throw (`Valor ${val} repetido en columna ${c[2]}`); }
                 } else {
                     cc = c.FK.constraints[0];
@@ -341,7 +344,7 @@ function INSERT(table, cols, vals) {
         cc = table.constraints[i];
         if (cc[3][0] === 4) { continue; }
         if (cc[3][0] < 3) {
-            if (cddd(cc, row)) { continue; }
+            //if (cddd(cc, row)) { continue; }
             cc.rows.insertAt(row, dsfdsd(cc, row)[1]);
         } else {
             cc2 = cc.ccols[0][3].constraints[0];

@@ -1,4 +1,5 @@
 function work(data) {
+    "use strict";
     //data = data.split("\n").map(function(a) { return a.split("\t"); });
     var Categorias = CREATE_TABLE(
         "Categorias",
@@ -50,28 +51,29 @@ function work(data) {
     INSERT(Resultados, Resultados.cols, [1, 1, 2]);
     for (var i = 1, row = [2]; i < Resultados.cols.length; i++) { row[i] = Resultados.cols[i][2]; }
     INSERT(Resultados, Resultados.cols, row);
-    INSERT(Resultados, Resultados.cols, [3, "Categoría", "Pregunta"]);//Row col vals
+    for (var i = 1, row = [3]; i < Resultados.cols.length; i++) { row[i] = Resultados.cols[i][2]; }
+    INSERT(Resultados, Resultados.cols, row);
     var rcont = rsc([4, "Totales", "1.Encuestas"]);
     var rcat = rsc([4, "Totales", "2.Promedio"]);
 
     var ColPK = [0, 1, 3];
-    var cit = csc([2, ".", "Totales", "Totales"]);
-    var vcs = vCols.map(function(c) { return c[0]; });
+    var cit = csc([2, 0, "Totales", "Totales"]);
+    var vcs = vCols.map(c => c[0]);
 
     for (var i = 1, length = data.length - 1, row, result, ci; i < length; i++) {
         row = INSERT(Interacciones, data[0], data[i]);
         countD(row, rcont[cit]);
-        prome(row, rcat[cit]);
+        AVG(row, rcat[cit]);
         result = SELECT(Interacciones, row, vcs);
         result = rsc([5, result[0], result[1]]);
-        prome(row, result[cit]);
+        AVG(row, result[cit]);
         for (j = 0; j < hCols.length; j++) {
             ci = [3, j, hCols[j][0]];
             ci[3] = SELECT(Interacciones, row, [ci[2]]);
             ci = csc(ci);
             countD(row, rcont[ci]);
-            prome(row, rcat[ci]);
-            prome(row, result[ci]);
+            AVG(row, rcat[ci]);
+            AVG(row, result[ci]);
         }
     }
     Resultados.rows.remove(0, 2);
@@ -161,7 +163,7 @@ function work(data) {
         //return 'rgb(' + [color.r, color.g, color.b].join(',') + ')';
     }
     function csc(data) {
-        var ci = indexCol(ColPK.map(function(c) { return data[c]; }));
+        var ci = indexCol(ColPK.map(c => data[c]));
         if (ci[0]) { ci = ci[1]; }
         else {
             ci = ci[1];
@@ -174,7 +176,7 @@ function work(data) {
         var s = WHERE(Resultados, [["CR", row[0]], ["Categoría", row[1]], ["Pregunta", row[2]]])[0];
         return s || INSERT(Resultados, ["CR", "Categoría", "Pregunta"], row);
     }
-    function prome(row, pp) {
+    function AVG(row, pp) {
         pp[1]++;
         pp[2] += SELECT(Interacciones, row, ["Peso"]);
         pp[0] = pp[2] / pp[1];

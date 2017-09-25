@@ -1,5 +1,6 @@
 function work(data) {
-    data = data.split("\n").map(function(a) { return a.split("\t"); });
+    "use strict";
+    data = data.split("\n").map(a => a.split("\t"));
     var Inscripciones = CREATE_TABLE(
         "Inscripciones",
         [
@@ -61,70 +62,91 @@ function work(data) {
         ['"Curso"', '"Curso ID"'],
         ['CASE WHEN "Progreso" = \'100\' THEN 100 ELSE 0 END', '"Completado"']
     ];
-    var ori = CREATE_TABLE("ori", data.splice(0,1)[0].map(c => [c, "nvarchar", 200, null, null, "NULL", null]));
-    function sel(row, select_list){
+    var ori = CREATE_TABLE("ori", data.splice(0, 1)[0].map(c => [c, "nvarchar", 200, null, null, "NULL", null]));
+    function sel(row, select_list) {
         for (var i = 0, si; i < select_list.length; i++) {
             si = colconv(select_list[i]);
         }
     }
     var parts, p;
-    var orisel = new Function("r", `return [${mat.map(m => colconv(m[0])).join(",")}];`);
+    // var orisel = new Function("r", `return[${mat.map(m => colconv(m[0], ori)).join(",")}];`);
+    var orisel = colconv(mat.map(m => m[0]).join(), ori);
     var descol = mat.map(m => colde(m[1] ? m[1] : m[0]));
-    function ccol(col) {
-        return `r[${cddf(tableCol(ori, col))}]`;
-    }
-    function colins(i, t) {
-        if (!t) {
-            if (i === "CASE") { p = i; }
-            else if (i === "WHEN") { if (p === "CASE") { p = i; } }
-            else if (i === "THEN") { parts.push("?"); p = i; }
-            else if (i === "ELSE") { parts.push(":"); p = i; }
-            else if (i === "END") { p = i; }
-            else if (i === "IN") { t = i; }
-            else if (i === "=") { parts.push("==="); t = "lo"; }
-            else if (i === ">=") { parts.push(i); t = "lo"; }
-            else if (i === "<=") { parts.push(i); t = "lo"; }
-            else if (i === "!=" || i === "<>") { parts.push("!=="); t = "lo"; }
-            else if (i === "<") { parts.push(i); t = "lo"; }
-            else if (i === ">") { parts.push(i); t = "lo"; }
-            else if (!isNaN(i)) { parts.push(Number(i)); }
-            else { parts.push(ccol(i)); }
-        }
-        if (t === 1) { parts.push(ccol(i)); }
-        else if (t === 2) { parts.push(i); }
-        else if (t === 3) {
-            if (p === "IN") {
-                objs.refs.push(i.split(",").map(m => isNaN(m) ? m.replace(/'/g, "") : Number(m)));
-                parts[parts.length - 1] = `this.refs[${objs.refs.length - 1}].indexOf(${parts[parts.length - 1]})>=0`;
-            }
-        }
-        p = t;
-    }
-    function colconv(t) {
-        parts = [];
-        for (var i = 0,c, s, u; i < t.length; i++) {
-            c = t[i];
+
+    function colconv(s, t) {
+        var parts = [], ccc = [];
+        ccc.push(parts);
+        for (var i = 0, c, si, u; i < s.length; i++) {
+            c = s[i];
             if (!u && /\S/.test(c)) {
-                s = i;
-                if (c === '"') { s++; u = /"/; }
+                si = i;
+                if (c === '"') { si++; u = /"/; }
                 else if (c === "'") { u = /'/; }
-                else if (c === "(") { s++; u = /\)/; }
-                else { u = /[\s"'(]/; }
+                else if (c === "(") { si++; u = /\)/; }
+                else if (c === ",") { colins(c); }
+                else { u = /[\s"'(,]/; }
             } else if (u && u.test(c)) {
-                if (u.toString() === '/"/') { colins(t.substring(s, i), 1); }
-                else if (u.toString() === "/'/") { colins(t.substring(s, i + 1), 2); }
-                else if (u.toString() === "/\\)/") { colins(t.substring(s, i), 3); }
-                else { colins(t.substring(s, i--)); }
+                if (u.toString() === '/"/') { colins(s.substring(si, i), 1); }
+                else if (u.toString() === "/'/") { colins(s.substring(si, i + 1), 2); }
+                else if (u.toString() === "/\\)/") { colins(s.substring(si, i), 3); }
+                else { colins(s.substring(si, i--)); }
                 u = undefined;
             }
         }
         if (u) {
-            if (u.toString() === "/[\\s\"'(]/") { colins(t.substring(s)); }
+            if (u.toString() === "/[\\s\"'(,]/") { colins(s.substring(si)); }
             else { throw ("error"); }
         }
-        return parts.join("");
+        return new Function("r", `return[${ccc.map(c => c.join("")).join()}];`);
+        function ccol(col) { return `r[${cddf(tableCol(t, col))}]`; }
+        function colins(i, t) {
+            if (!t) {
+                if (i === "CASE") { p = i; }
+                else if (i === "WHEN") { if (p === "CASE") { p = i; } }
+                else if (i === "THEN") { parts.push("?"); p = i; }
+                else if (i === "ELSE") { parts.push(":"); p = i; }
+                else if (i === "END") { p = i; }
+                else if (i === "IN") { t = i; }
+                else if (i === "=") { parts.push("==="); t = "lo"; }
+                else if (i === ">=") { parts.push(i); t = "lo"; }
+                else if (i === "<=") { parts.push(i); t = "lo"; }
+                else if (i === "!=" || i === "<>") { parts.push("!=="); t = "lo"; }
+                else if (i === "<") { parts.push(i); t = "lo"; }
+                else if (i === ">") { parts.push(i); t = "lo"; }
+                else if (i === ",") { parts = []; ccc.push(parts); }
+                else if (funcs[i]) { t = i; }
+                else if (!isNaN(i)) { parts.push(Number(i)); }
+                else { parts.push(ccol(i)); }
+            }
+            if (t === 1) { parts.push(ccol(i)); }
+            else if (t === 2) { parts.push(i); }
+            else if (t === 3) {
+                if (p === "IN") {
+                    objs.refs.push(i.split(",").map(m => isNaN(m) ? m.replace(/'/g, "") : Number(m)));
+                    parts[parts.length - 1] = `this.refs[${objs.refs.length - 1}].indexOf(${parts[parts.length - 1]})>=0`;
+                }
+                else if (funcs[p]) {
+                    parts.push(`funcs[${P}].Accumulate.call(${ccol()},${})`);
+                }
+            }
+            p = t;
+        }
     }
- 
+
+    var funcs = {
+        MAX: {
+            Accumulate: function(value) { if (!this.prev) { this.prev = value; } else if (this.prev < value) { this.prev = value; } }
+        },
+        MIN: {
+            Accumulate: function(value) { if (!this.prev) { this.prev = value; } else if (this.prev > value) { this.prev = value; } }   
+        },
+        AVG: {
+            Accumulate: function(value) { if (!this.count) { this.count = 0; this.sum = 0; } this.count++; this.sum += value; }
+        },
+        COUNT{
+            Accumulate: function(value) { if (!this.count) { this.count = 0; } this.count++; }
+        }
+    }
 
     function colde2(i, t) {
         return tableCol(Inscripciones, i);
@@ -228,12 +250,97 @@ function work(data) {
     }
 
     var tmp1 = new Function(`return ${search_condition.map(i => Array.isArray(i) ? i.join("") : i).join("")};`);
-    for (var i = 0, r; i < data.length; i++) {
-        if (!data[i]) { break; }
-        objs._r = [INSERT(Inscripciones, descol, orisel(data[i]))];
-        if (tmp1.call(objs)) { filtered.push(objs._r); }
+    var dCols = [['Dirección', 1]];
+    var dRows = ['Curso'];
+    var dVals = [['Completado', 'AVG']];
+    var Completado = CREATE_TABLE(
+        "Completado",
+        [
+            ["CR", "tinyint", null, null, null, "NOT NULL", null],
+            ["Curso", "nvarchar", 50, null, null, "NOT NULL", null]
+        ],
+        [[null, "PRIMARY KEY", [["CR"], ["Curso"]], null, null]]
+    )
+    INSERT(Completado, Completado.cols, [0, 1]);
+    INSERT(Completado, Completado.cols, [1, 0]);
+    for (var i = 1, row = [2]; i < Completado.cols.length; i++) { row[i] = Completado.cols[i][2]; }
+    INSERT(Completado, Completado.cols, row);
+    for (var i = 1, row = [3]; i < Completado.cols.length; i++) { row[i] = Completado.cols[i][2]; }
+    INSERT(Completado, Completado.cols, row);
+    var avgRow = rsc([4, "Completado"]);
+    var ColPK = [0, 1, 3];
+    var cit = csc([2, 0, "Completado", "Completado"]);
+    var vcs = dCols.map(c => c[0]);
+    var dsVals = colconv('Completado', Inscripciones);
+    var dsRows = colconv('5,"Curso"', Inscripciones);
+    var dsCols = dCols.map((c, i) => colconv(`3,${i},'${c[0]}',"${c[0]}"`, Inscripciones));
+
+    var alumnos = {
+        select: 'MAX("Fecha corte")AS"Fecha corte",CASE WHEN AVG("Completado")=100 THEN\'Completado\'WHEN MAX("Último progreso")IS NOT NULL THEN\'Incompleto\'ELSE\'Sin iniciar\'END AS"Estado",MIN("Fecha inicio")AS"Fecha inicio","Alumno","PPGID",COUNT("Curso")AS"Cursos",NULL AS"Estado2",AVG("Progreso")AS"Progreso",MAX("Último progreso")AS"Último progreso","Lugar","Empresa","Entidad","Centro de costos ID","Centro de costos","Puesto","Nivel","Dirección","Business Partner","Jefe","Jefe email","Director","Email",MAX("Fecha creado")AS"Fecha creado",MAX("Inscripción ID")AS"Inscripción ID","Empresa tipo",NULL AS"Curso ID",AVG("Completado")AS"Completado"',
+        from: Inscripciones,
+        group: '"Alumno","PPGID","Lugar","Empresa","Entidad","Centro de costos ID","Centro de costos","Puesto","Nivel","Dirección","Business Partner","Jefe","Jefe email","Director","Email","Empresa tipo"'
     }
-    
+    alumnos.sgroup = colconv(alumnos.group, alumnos.from);
+    alumnos.tgroup = CREATE_TABLE("table1", alumnos.sgroup(alumnos.from.cols).map(c => [c[2], c[3][1], c[4], c[5], c[6], c[7] ? "NULL" : "NOT NULL", null]), [[null, "PRIMARY KEY", alumnos.sgroup(alumnos.from.cols).map(c => [c[2]]), null, null]]);
+
+    for (var i = 0, row, drow, j, dcol; i < data.length; i++) {
+        row = data[i];
+        if (!row[0]) { break; }
+        row = objs._r[0] = INSERT(Inscripciones, descol, orisel(row));
+        if (!tmp1.call(objs)) { continue; }
+        var alumno = alumnos.sgroup(row);
+        alumno = WHERE(alumnos.tgroup, alumnos.tgroup.cols.map((c, i) => [c, alumno[i]]))[0];
+        if (!alumno) { alumno = INSERT(alumnos.tgroup, null, alumnos.sgroup(row)); alumno.rows = []; }
+        alumno.rows.push(row);
+        //AVG(row, avgRow[cit]);
+        //drow = rsc(dsRows(row));
+        //AVG(row, drow[cit]);
+        //for (j = 0; j < dsCols.length; j++) {
+        //    dcol = csc(dsCols[j](row));
+        //    AVG(row, avgRow[dcol]);
+        //    AVG(row, drow[dcol]);
+        //}
+    }
+    filtered;
+    function rsc(row) {
+        var s = WHERE(Completado, [["CR", row[0]], ["Curso", row[1]]])[0];
+        return s || INSERT(Completado, ["CR", "Curso"], row);
+    }
+    function csc(data) {
+        var ci = indexCol(ColPK.map(c => data[c]));
+        if (ci[0]) { ci = ci[1]; }
+        else {
+            ci = ci[1];
+            insertCol(Completado, ["{0}|{1}".format(data[2], data[3]), "tinyint", null, null, null, "NOT NULL", [[null, "DEFAULT", null, null, "[0,0,0,[]]"]]], ci);
+            for (var i = 0; i < 4; i++) { Completado.rows[i][ci] = data[i]; }
+        }
+        return ci;
+    }
+    function indexCol(a, e) {
+        if (!e && e != 0) { e = Completado.cols.length - 1; }
+        for (var s = 0, i, r, b; s <= e;) {
+            i = s + Math.round((e - s) / 2);
+            b = ColPK.map(c => Completado.rows[c][i]);
+            r = cddc(a, b);
+            if (r > 0) { s = i + 1; } else if (r) { e = i - 1; } else { s = i; break; }
+        }
+        return [!r ? b : null, s];
+    }
+    function cddc(a, b) {
+        for (var i = 0, r = 0; i < a.length && !r; i++) { r = compare(a[i], b[i]); }
+        return r;
+    }
+    function compare(a, b) {
+        a = collate(1, a); b = collate(1, b);
+        return a === null ? (b === null ? 0 : 1) : b === null ? (a === null ? 0 : -1) : (a > b ? 1 : a < b ? -1 : 0) * 1
+    }
+    function AVG(row, pp) {
+        pp[1]++;
+        pp[2] += dsVals(row)[0];
+        pp[0] = pp[2] / pp[1];
+        pp[3].push(row);
+    }
+
     function dsdfsd() {
         var selcols = formats[1].map(c => c[0]);
         for (var i = 0, row; i < ori.rows.length; i++) {
