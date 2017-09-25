@@ -306,7 +306,7 @@ function INSERT(table, cols, vals) {
         if (!val && val !== 0) {
             if (!c[7]) { throw (`Cannot insert the value NULL into column '${c[2]}', table '${table[1]}'; column does not allow nulls. INSERT fails.`); }
             val = null;
-        } else if (!Array.isArray(val)) {
+        } else if (!Array.isArray(val) && typeof(val) !== "object") {
             if (c[3][1] === "nvarchar") {
                 if (typeof val !== "string") { val = val + ""; }
                 if (val.length > c[4]) { throw (`${c[2]} Maxlength reached`); }

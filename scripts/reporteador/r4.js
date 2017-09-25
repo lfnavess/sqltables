@@ -8,7 +8,7 @@ function work(data) {
             ["Estado", "nvarchar", 50, null, null, "NOT NULL", null],
             ["Fecha inicio", "date", null, null, null, "NOT NULL", null],
             ["Alumno", "nvarchar", 50, null, null, "NOT NULL", null],
-            ["PPGID", "nvarchar", 7, null, null, "NOT NULL", null],
+            ["PPG ID", "nvarchar", 7, null, null, "NOT NULL", null],
             ["Curso", "nvarchar", 100, null, null, "NOT NULL", null],
             ["Estado2", "nvarchar", 50, null, null, "NULL", null],
             ["Progreso", "tinyint", null, null, null, "NOT NULL", null],
@@ -38,7 +38,7 @@ function work(data) {
         ['"Estado"'],
         ['"Fecha inicio"'],
         ['"Alumno >Nombre corto"', '"Alumno"'],
-        ['"Alumno >Usuario"', '"PPGID"'],
+        ['"Alumno >Usuario"', '"PPG ID"'],
         ['"Curso >Nombre"', '"Curso"'],
         ['"Estado2"'],
         ['"Progreso"'],
@@ -60,8 +60,27 @@ function work(data) {
         ['"Inscripción ID"'],
         ['"Alumno >Posición >Lugar >Empresa >Tipo"', '"Empresa tipo"'],
         ['"Curso"', '"Curso ID"'],
-        ['CASE WHEN "Progreso" = \'100\' THEN 100 ELSE 0 END', '"Completado"']
+        ['CASE WHEN"Progreso"=\'100\'THEN 100 ELSE 0 END', '"Completado"']
     ];
+    
+    window.funcs = {
+        MAX: { 
+            Accumulate (value) {  if (value != null) { if (!this.prev) { this.prev = value; } else if (this.prev < value) { this.prev = value; } } },
+            Create(){ return { Accumulate: this.Accumulate }; }
+        },
+        MIN: {
+            Accumulate (value) { if (!this.prev) { this.prev = value; } else if (this.prev > value) { this.prev = value; } },
+            Create(){ return { Accumulate: this.Accumulate }; }
+        },
+        AVG: {
+            Accumulate (value) { if (value != null) { this.count++; this.sum += value; } },
+            Create(){ return { Accumulate: this.Accumulate, count: 0, sum: 0 }; }
+        },
+        COUNT: {
+            Accumulate (value) { if (value != null) { this.count++; } },
+            Create(){ return { Accumulate: this.Accumulate, count: 0 }; }
+        }
+    }
     var ori = CREATE_TABLE("ori", data.splice(0, 1)[0].map(c => [c, "nvarchar", 200, null, null, "NULL", null]));
     function sel(row, select_list) {
         for (var i = 0, si; i < select_list.length; i++) {
@@ -126,27 +145,13 @@ function work(data) {
                     parts[parts.length - 1] = `this.refs[${objs.refs.length - 1}].indexOf(${parts[parts.length - 1]})>=0`;
                 }
                 else if (funcs[p]) {
-                    parts.push(`funcs[${P}].Accumulate.call(${ccol()},${})`);
+                    //parts.push(`funcs[${P}].Accumulate.call(${ccol()},${})`);
                 }
             }
             p = t;
         }
     }
 
-    var funcs = {
-        MAX: {
-            Accumulate: function(value) { if (!this.prev) { this.prev = value; } else if (this.prev < value) { this.prev = value; } }
-        },
-        MIN: {
-            Accumulate: function(value) { if (!this.prev) { this.prev = value; } else if (this.prev > value) { this.prev = value; } }   
-        },
-        AVG: {
-            Accumulate: function(value) { if (!this.count) { this.count = 0; this.sum = 0; } this.count++; this.sum += value; }
-        },
-        COUNT{
-            Accumulate: function(value) { if (!this.count) { this.count = 0; } this.count++; }
-        }
-    }
 
     function colde2(i, t) {
         return tableCol(Inscripciones, i);
@@ -276,13 +281,48 @@ function work(data) {
     var dsCols = dCols.map((c, i) => colconv(`3,${i},'${c[0]}',"${c[0]}"`, Inscripciones));
 
     var alumnos = {
+        st: ',CASE WHEN AVG("Completado")=100 THEN\'Completado\'WHEN MAX("Último progreso")IS NOT NULL THEN\'Incompleto\'ELSE\'Sin iniciar\'END AS"Estado",MIN("Fecha inicio")AS"Fecha inicio",COUNT("Curso")AS"Cursos",AVG("Progreso")AS"Progreso",MAX("Último progreso")AS"Último progreso",MAX("Fecha creado")AS"Fecha creado",MAX("Inscripción ID")AS"Inscripción ID",AVG("Completado")AS"Completado"',
         select: 'MAX("Fecha corte")AS"Fecha corte",CASE WHEN AVG("Completado")=100 THEN\'Completado\'WHEN MAX("Último progreso")IS NOT NULL THEN\'Incompleto\'ELSE\'Sin iniciar\'END AS"Estado",MIN("Fecha inicio")AS"Fecha inicio","Alumno","PPGID",COUNT("Curso")AS"Cursos",NULL AS"Estado2",AVG("Progreso")AS"Progreso",MAX("Último progreso")AS"Último progreso","Lugar","Empresa","Entidad","Centro de costos ID","Centro de costos","Puesto","Nivel","Dirección","Business Partner","Jefe","Jefe email","Director","Email",MAX("Fecha creado")AS"Fecha creado",MAX("Inscripción ID")AS"Inscripción ID","Empresa tipo",NULL AS"Curso ID",AVG("Completado")AS"Completado"',
         from: Inscripciones,
         group: '"Alumno","PPGID","Lugar","Empresa","Entidad","Centro de costos ID","Centro de costos","Puesto","Nivel","Dirección","Business Partner","Jefe","Jefe email","Director","Email","Empresa tipo"'
     }
-    alumnos.sgroup = colconv(alumnos.group, alumnos.from);
-    alumnos.tgroup = CREATE_TABLE("table1", alumnos.sgroup(alumnos.from.cols).map(c => [c[2], c[3][1], c[4], c[5], c[6], c[7] ? "NULL" : "NOT NULL", null]), [[null, "PRIMARY KEY", alumnos.sgroup(alumnos.from.cols).map(c => [c[2]]), null, null]]);
-
+    var alumnos = {
+        select: '"PPG ID",MAX("Fecha corte")',
+        from: Inscripciones,
+        group: '"PPG ID"',
+        where: '"Empresa tipo" = \'INT COMEX [E]\' AND "Curso ID" IN(3853,3855,3806,3811,3896,3822,3838,3837,3830,3885,3813,3815,3829,3820,3800,3835,3865,3974) AND "inscripciones"."Estado" IN(\'Completado\',\'Incompleto\',\'Sin iniciar\')'
+    }
+    g(alumnos);
+    function g(g){
+        g.sgroup = colconv(g.group, g.from);
+        g.tgroup = CREATE_TABLE("table1", g.sgroup(g.from.cols).map(c => [c[2], c[3][1], c[4], c[5], c[6], c[7] ? "NULL" : "NOT NULL", null]), [[null, "PRIMARY KEY", g.sgroup(g.from.cols).map(c => [c[2]]), null, null]]);
+        g.from = [[g.from],[[g.tgroup.cols[0],g.from.cols[4]]]];
+        //Insert nuevas columnas en table1 todas las de agregate function
+        insertCol(g.tgroup, ['MAX0', "tinyint", null, null, null, "NOT NULL", [[null, "DEFAULT", null, null, "funcs.MAX.Create()"]]]);
+        insertCol(g.tgroup, ['AVG26', "tinyint", null, null, null, "NOT NULL", [[null, "DEFAULT", null, null, "funcs.AVG.Create()"]]]);
+        insertCol(g.tgroup, ['MAX8', "tinyint", null, null, null, "NOT NULL", [[null, "DEFAULT", null, null, "funcs.MAX.Create()"]]]);
+        insertCol(g.tgroup, ['MIN2', "tinyint", null, null, null, "NOT NULL", [[null, "DEFAULT", null, null, "funcs.MIN.Create()"]]]);
+        
+        
+        for(var i = 0, row, j,k; i < data.length; i++){
+            row = data[i];
+            if (!row[0]) { break; }
+            row = objs._r[0] = INSERT(Inscripciones, descol, orisel(row));
+            if (!tmp1.call(objs)) { continue; }
+            //preparar todas las filas relacionadas
+            g.fr = [row];
+            for(j = 1; j < g.from.length; j++){
+                g.fr[j] = WHERE(g.from[j][0][0][1], g.from[j].map(c => [c[0],getval(row,c[1])]))[0];
+                if(!g.fr[j]){ g.fr[j] = INSERT(g.from[j][0][0][1], g.from[j].map(c => c[0]), g.from[j].map(c => getval(row,c[1]))); }
+            }
+            //
+            g.fr[1][1].Accumulate(g.fr[0][0]);
+            g.fr[1][2].Accumulate(g.fr[0][26]);
+            g.fr[1][3].Accumulate(g.fr[0][8]);
+            g.fr[1][4].Accumulate(g.fr[0][2]);
+        }
+    }
+    
     for (var i = 0, row, drow, j, dcol; i < data.length; i++) {
         row = data[i];
         if (!row[0]) { break; }
