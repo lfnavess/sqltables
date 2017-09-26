@@ -1,18 +1,12 @@
 function work(data) {
     "use strict";
     data = data.split("\n").map(a => a.split("\t"));
-    var Inscripciones = CREATE_TABLE(
-        "Inscripciones",
+    var Colaboradores = CREATE_TABLE(
+        "Colaboradores",
         [
-            ["Fecha corte", "smalldatetime", null, null, null, "NOT NULL", null],
-            ["Estado", "nvarchar", 50, null, null, "NOT NULL", null],
-            ["Fecha inicio", "date", null, null, null, "NOT NULL", null],
-            ["Alumno", "nvarchar", 50, null, null, "NULL", null],
-            ["PPG ID", "nvarchar", 7, null, null, "NULL", null],
-            ["Curso", "nvarchar", 100, null, null, "NOT NULL", null],
-            ["Estado2", "nvarchar", 50, null, null, "NULL", null],
-            ["Progreso", "tinyint", null, null, null, "NOT NULL", null],
-            ["Último progreso", "smalldatetime", null, null, null, "NULL", null],
+            ["Colaborador ID", "int", null, null, null, "NOT NULL", [[null, "PRIMARY KEY", null, null]]],
+            ["Colaborador", "nvarchar", 50, null, null, "NULL", null],
+            ["PPG ID", "nvarchar", 7, null, null, "NULL", [[null, "UNIQUE", null, null]]],
             ["Lugar", "nvarchar", 50, null, null, "NULL", null],
             ["Empresa", "nvarchar", 50, null, null, "NULL", null],
             ["Entidad", "nvarchar", 50, null, null, "NULL", null],
@@ -25,25 +19,31 @@ function work(data) {
             ["Jefe", "nvarchar", 50, null, null, "NULL", null],
             ["Jefe email", "nvarchar", 50, null, null, "NULL", null],
             ["Director", "nvarchar", 50, null, null, "NULL", null],
-            ["Email", "nvarchar", 50, null, null, "NULL", null],
-            ["Fecha creado", "smalldatetime", null, null, null, "NOT NULL", null],
-            ["Inscripción ID", "int", null, null, null, "NOT NULL", [[null, "PRIMARY KEY", null, null]]],
-            ["Alumno ID", "int", null, null, null, "NOT NULL", null],
-            ["Curso ID", "int", null, null, null, "NOT NULL", null],
-            ["Empresa tipo", "nvarchar", 50, null, null, "NULL", null],
-            ["Completado", "tinyint", null, null, null, "NOT NULL", null]
+            ["Email", "nvarchar", 50, null, null, "NULL", [[null, "UNIQUE", null, null]]],
+            ["Empresa tipo", "nvarchar", 50, null, null, "NULL", null]
         ]
     );
-    var mat = [
-        ['"Fecha corte"'],
-        ['"Estado"'],
-        ['"Fecha inicio"'],
-        ['"Alumno >Nombre corto"', '"Alumno"'],
+    var Inscripciones = CREATE_TABLE(
+        "Inscripciones",
+        [
+            ["Inscripción ID", "int", null, null, null, "NOT NULL", [[null, "PRIMARY KEY", null, null]]],
+            ["Fecha corte", "smalldatetime", null, null, null, "NOT NULL", null],
+            ["Estado", "nvarchar", 50, null, null, "NOT NULL", null],
+            ["Fecha inicio", "date", null, null, null, "NOT NULL", null],
+            ["Curso", "nvarchar", 100, null, null, "NOT NULL", null],
+            ["Estado2", "nvarchar", 50, null, null, "NULL", null],
+            ["Progreso", "tinyint", null, null, null, "NOT NULL", null],
+            ["Último progreso", "smalldatetime", null, null, null, "NULL", null],
+            ["Alumno ID", "int", null, null, null, "NOT NULL", [[null, "FOREING KEY", Colaboradores, "Colaborador ID"]]],
+            ["Curso ID", "int", null, null, null, "NOT NULL", null],
+            ["Completado", "tinyint", null, null, null, "NOT NULL", null],
+            ["Fecha creado", "smalldatetime", null, null, null, "NOT NULL", null],
+        ]
+    );
+    var matuser = [
+        ['"Alumno ID"', '"Colaborador ID"'],
+        ['"Alumno >Nombre corto"', '"Colaborador"'],
         ['"Alumno >Usuario"', '"PPG ID"'],
-        ['"Curso >Nombre"', '"Curso"'],
-        ['"Estado2"'],
-        ['"Progreso"'],
-        ['"Último progreso"'],
         ['"Alumno >Posición >Lugar"', '"Lugar"'],
         ['"Alumno >Posición >Lugar >Empresa"', '"Empresa"'],
         ['"Alumno >Posición >Lugar >Municipio >Entidad"', '"Entidad"'],
@@ -57,32 +57,22 @@ function work(data) {
         ['"Alumno >Posición >Posición jefe >Email"', '"Jefe email"'],
         ['"Alumno >Posición >Posición director >Colaborador >Nombre corto"', '"Director"'],
         ['"Alumno >Posición >Email"', '"Email"'],
-        ['"Fecha creado"'],
+        ['"Alumno >Posición >Lugar >Empresa >Tipo"', '"Empresa tipo"']
+    ];
+    var mat = [
         ['"Inscripción ID"'],
+        ['"Fecha corte"'],
+        ['"Estado"'],
+        ['"Fecha inicio"'],
+        ['"Curso >Nombre"', '"Curso"'],
+        ['"Estado2"'],
+        ['"Progreso"'],
+        ['"Último progreso"'],
+        ['"Fecha creado"'],
         ['"Alumno ID"'],
         ['"Curso ID"'],
-        ['"Alumno >Posición >Lugar >Empresa >Tipo"', '"Empresa tipo"'],
         ['CASE WHEN"Progreso"=\'100\'THEN 100 ELSE 0 END', '"Completado"']
     ];
-
-    window.funcs = {
-        MAX: class MAX {
-            constructor() { }
-            Accumulate(value) { if (value != null) { if (!this.prev) { this.prev = value; } else if (this.prev < value) { this.prev = value; } } return this.prev; }
-        },
-        MIN: class MIN {
-            constructor() { }
-            Accumulate(value) { if (value != null) { if (!this.prev) { this.prev = value; } else if (this.prev > value) { this.prev = value; } } return this.prev; }
-        },
-        AVG: class AVG {
-            constructor() { this.count = 0; this.sum = 0; }
-            Accumulate(value) { if (value != null) { this.count++; this.sum += value; } return this.sum / this.count; }
-        },
-        COUNT: class COUNT {
-            constructor() { this.count = 0; }
-            Accumulate(value) { if (value != null) { this.count++; } return this.count; }
-        }
-    }
 
     var ori = CREATE_TABLE("ori", data.splice(0, 1)[0].map(c => [c, "nvarchar", 200, null, null, "NULL", null]));
     function sel(row, select_list) {
@@ -92,8 +82,10 @@ function work(data) {
     }
     var parts, p;
     // var orisel = new Function("r", `return[${mat.map(m => colconv(m[0], ori)).join(",")}];`);
-    var orisel = colconv(mat.map(m => m[0]).join(), ori);
-    var descol = mat.map(m => colde(m[1] ? m[1] : m[0]));
+    var dcColaborador = matuser.map(m => colde(m[1] ? m[1] : m[0], Colaboradores));
+    var osColaborador = colconv(matuser.map(m => m[0]).join(), [[ori]]);
+    var dsInscripcion = mat.map(m => colde(m[1] ? m[1] : m[0], Inscripciones));
+    var osInscripcion = colconv(mat.map(m => m[0]).join(), [[ori]]);
 
     function colconv(s, t) {
         var parts = [], ccc = [];
@@ -106,7 +98,8 @@ function work(data) {
                 else if (c === "'") { u = /'/; }
                 else if (c === "(") { si++; u = /\)/; }
                 else if (c === ",") { colins(c); }
-                else { u = /[\s"'(,]/; }
+                else if (c === ".") { colins(c); }
+                else { u = /[\s"'(,.]/; }
             } else if (u && u.test(c)) {
                 if (u.toString() === '/"/') { colins(s.substring(si, i), 1); }
                 else if (u.toString() === "/'/") { colins(s.substring(si, i + 1), 2); }
@@ -120,8 +113,22 @@ function work(data) {
             else { throw ("error"); }
         }
         return new Function("r", `return[${ccc.map(c => c.join("")).join()}];`);
-        function ccol(col) { return `r[${cddf(tableCol(t, col))}]`; }
+        function colexp(ti, ci) { return `r[${ti}][${ci}]`; }
+        function ttable(tt) { return t.indexOf(t.find(t => (t[1] || t[0][1])===tt)); }
+        function ccol(ti, c){ return colexp(ti,cddf(tableCol(t[ti][0],c)); }
+        function onlyCol(c) {
+            for(var i = 0, ti,ci; i < t.length; i++){
+                ti = t[i].cols.indexOf(t[i].cols.find(cc => cc[1] === c));
+                if(ti){
+                    if(ci){ throw(`Nombre de columna '${c}' ambiguo`); }
+                    ci = [i,ti];
+                }
+            }
+            if(!ci){ throw(`Columna '${c}' no econtrada`); }
+            return colexp(ci[0], ci[1]);
+        }
         function colins(i, t) {
+            else if(p === 1){ parts[parts.length-1] = onlyCol(parts[parts.length-1]); }
             if (!t) {
                 if (i === "CASE") { p = i; }
                 else if (i === "WHEN") { if (p === "CASE") { p = i; } }
@@ -136,11 +143,13 @@ function work(data) {
                 else if (i === "<") { parts.push(i); t = "lo"; }
                 else if (i === ">") { parts.push(i); t = "lo"; }
                 else if (i === ",") { parts = []; ccc.push(parts); }
+                else if (i === ".") { parts[parts.length-1] = ttable(parts[parts.length-1]); }
                 else if (funcs[i]) { t = i; }
                 else if (!isNaN(i)) { parts.push(Number(i)); }
-                else { parts.push(ccol(i)); }
+                else if (p === "."){parts[parts.length-1] = ccol(parts[parts.length-1], t) }
+                else { parts.push(i); }
             }
-            if (t === 1) { parts.push(ccol(i)); }
+            if (t === 1) { parts.push(i); }
             else if (t === 2) { parts.push(i); }
             else if (t === 3) {
                 if (p === "IN") {
@@ -156,10 +165,7 @@ function work(data) {
     }
 
 
-    function colde2(i, t) {
-        return tableCol(Inscripciones, i);
-    }
-    function colde(t) {
+    function colde(t,ta) {
         for (var i = 0, c, s, u; i < t.length; i++) {
             c = t[i];
             if (!u && /\S/.test(c)) {
@@ -177,6 +183,7 @@ function work(data) {
             else { throw ("error"); }
         }
         return parts;
+        function colde2(i, t) { return tableCol(ta, i); }
     }
     var filtered = [];
     var s = '"Fecha corte", "Estado", "Fecha inicio", "Alumno", "PPGID", "Curso", "Estado2", "Progreso", "Último progreso", "Lugar", "Empresa", "Entidad", "Centro de costos ID", "Centro de costos", "Puesto", "Nivel", "Dirección", "Business Partner", "Jefe", "Jefe email", "Director", "Email", "Fecha creado", "Inscripción ID"';
@@ -193,6 +200,55 @@ function work(data) {
             return this._r[i];
         }, _r: []
     };
+    var alumnos = {
+        select: '"Alumno ID",MAX("Fecha corte"),CASE WHEN AVG("Completado")=100 THEN\'Completado\'WHEN MAX("Último progreso")IS NOT NULL THEN\'Incompleto\'ELSE\'Sin iniciar\'END',
+        from: [[ori, null],[Colaboradores, null, [[Colaboradores.cols[0],ori.cols[17]]],dcColaborador,osColaborador],[Inscripciones, null,[[Inscripciones.cols[0],ori.cols[67]]],dsInscripcion,osInscripcion]],
+        group: '"Colaboradores"."Alumno ID"',
+        where: '"Colaboradores"."Empresa tipo"=\'INT COMEX [E]\'AND"Inscripciones"."Curso ID"IN(3853,3855,3806,3811,3896,3822,3838,3837,3830,3885,3813,3815,3829,3820,3800,3835,3865,3974)AND"inscripciones"."Estado"IN(\'Completado\',\'Incompleto\',\'Sin iniciar\')'
+    }
+    g(alumnos);
+    function g(g) {
+        g.sgroup = colconv(g.group, g.from);
+        // g.tgroup = CREATE_TABLE("table1", g.sgroup(g.from.cols).map(c => [c[2], c[3][1], c[4], c[5], c[6], c[7] ? "NULL" : "NOT NULL", null]), [[null, "PRIMARY KEY", g.sgroup(g.from.cols).map(c => [c[2]]), null, null]]);
+        // g.from.push([[g.tgroup.cols[0],Colaboradores.cols[0]]]);
+        //Insert nuevas columnas en table1 todas las de agregate function
+        // insertCol(g.tgroup, ['ROWS', "smalldatetime", null, null, null, "NOT NULL", [[null, "DEFAULT", null, null, "new funcs.ROWS"]]]);
+        // insertCol(g.tgroup, ['MAX0', "smalldatetime", null, null, null, "NOT NULL", [[null, "DEFAULT", null, null, "new funcs.MAX"]]]);
+        // insertCol(g.tgroup, ['AVG27', "tinyint", null, null, null, "NOT NULL", [[null, "DEFAULT", null, null, "new funcs.AVG"]]]);
+        // insertCol(g.tgroup, ['MAX8', "smalldatetime", null, null, null, "NOT NULL", [[null, "DEFAULT", null, null, "new funcs.MAX"]]]);
+        // insertCol(g.tgroup, ['MIN2', "date", null, null, null, "NOT NULL", [[null, "DEFAULT", null, null, "new funcs.MIN"]]]);
+
+        for (var i = 0, colaborador, row, j, fr; i < data.length; i++) {
+            row = data[i];
+            if (!row[0]) { break; }
+            //preparar todas las filas relacionadas
+            fr = [row];
+            for (j = 1, f; j < g.from.length; j++) {
+                f = g.from[j];
+                fr[j] = WHERE(f[0], f[2].map(c => [c[0], parseInt(getval(row, c[1]))]))[0];
+                if(!fr[j] && f[3]) { fr[j] =  INSERT(f[0], f[3], f[4](row)); }
+                else if (!fr[j]) { fr[j] = INSERT(f[0], f.map(c => c[0]), f.map(c => parseInt(getval(row, c[1])))); }
+            }
+            
+            colaborador =  WHERE(Colaboradores,  g.from[j].map(c => [c[0], getval(row, c[1])]))[0];
+            if(!colaborador){ colaborador = INSERT(Colaboradores, dcColaborador, orisel(row)); }
+            
+            row = objs._r[0] = INSERT(Inscripciones, descol, orisel(row));
+            if (!tmp1.call(objs)) { continue; }
+            //
+            fr[1][1].v = fr;
+            fr[1][2].v = fr[0][0];
+            fr[1][3].v = fr[0][27];
+            fr[1][4].v = fr[0][8];
+            fr[1][5].v = fr[0][2];
+        }
+        for (var i = 0, r, r2, rows = []; i < g.tgroup.rows.length; i++){
+            r = g.tgroup.rows[i];
+            r2 = [r[0],r[2].v,r[3].v===100?'Completado':r[4].v!==null?'Incompleto':'Sin iniciar',r[5].v,'Capacitación 2017',r[3].v,r[4].v];
+            r2.rs = r[1].v;
+            rows.push(r2);
+        }
+    }
     var parts = [];
     var search_condition = [parts];
     var p;
@@ -236,28 +292,28 @@ function work(data) {
         }
         p = t;
     }
-    for (var i = 0, s, e, u, m, b = [], br, cl, c; i < w.length; i++) {
-        c = w[i];
-        if (!u && /\S/.test(c)) {
-            s = i;
-            if (c === '"') { s++; u = /"/; }
-            else if (c === "'") { u = /'/; }
-            else if (c === "(") { s++; u = /\)/; }
-            else { u = /[\s"'(]/; }
-        } else if (u && u.test(c)) {
-            if (u.toString() === '/"/') { ins2(w.substring(s, i), 1); }
-            else if (u.toString() === "/'/") { ins2(w.substring(s, i + 1), 2); }
-            else if (u.toString() === "/\\)/") { ins2(w.substring(s, i), 3); }
-            else { ins2(w.substring(s, i--)); }
-            u = undefined;
-        }
-    }
-    if (u) {
-        if (u.toString() === "/[\\s\"'(]/") { ins2(w.substring(s)); }
-        else { throw ("error"); }
-    }
+    // for (var i = 0, s, e, u, m, b = [], br, cl, c; i < w.length; i++) {
+        // c = w[i];
+        // if (!u && /\S/.test(c)) {
+            // s = i;
+            // if (c === '"') { s++; u = /"/; }
+            // else if (c === "'") { u = /'/; }
+            // else if (c === "(") { s++; u = /\)/; }
+            // else { u = /[\s"'(]/; }
+        // } else if (u && u.test(c)) {
+            // if (u.toString() === '/"/') { ins2(w.substring(s, i), 1); }
+            // else if (u.toString() === "/'/") { ins2(w.substring(s, i + 1), 2); }
+            // else if (u.toString() === "/\\)/") { ins2(w.substring(s, i), 3); }
+            // else { ins2(w.substring(s, i--)); }
+            // u = undefined;
+        // }
+    // }
+    // if (u) {
+        // if (u.toString() === "/[\\s\"'(]/") { ins2(w.substring(s)); }
+        // else { throw ("error"); }
+    // }
 
-    var tmp1 = new Function(`return ${search_condition.map(i => Array.isArray(i) ? i.join("") : i).join("")};`);
+    //var tmp1 = new Function(`return ${search_condition.map(i => Array.isArray(i) ? i.join("") : i).join("")};`);
     var dCols = [['Dirección', 1]];
     var dRows = ['Curso'];
     var dVals = [['Completado', 'AVG']];
@@ -284,52 +340,10 @@ function work(data) {
     var dsCols = dCols.map((c, i) => colconv(`3,${i},'${c[0]}',"${c[0]}"`, Inscripciones));
 
     var alumnos = {
-        st: ',CASE WHEN AVG("Completado")=100 THEN\'Completado\'WHEN MAX("Último progreso")IS NOT NULL THEN\'Incompleto\'ELSE\'Sin iniciar\'END AS"Estado",MIN("Fecha inicio")AS"Fecha inicio",COUNT("Curso")AS"Cursos",AVG("Progreso")AS"Progreso",MAX("Último progreso")AS"Último progreso",MAX("Fecha creado")AS"Fecha creado",MAX("Inscripción ID")AS"Inscripción ID",AVG("Completado")AS"Completado"',
+        st: ',MIN("Fecha inicio")AS"Fecha inicio",\'Capacitación 2017\')AS"Curso",AVG("Completado")AS"Progreso",MAX("Último progreso")AS"Último progreso",MAX("Fecha creado")AS"Fecha creado",MAX("Inscripción ID")AS"Inscripción ID",AVG("Completado")AS"Completado"',
         select: 'MAX("Fecha corte")AS"Fecha corte",CASE WHEN AVG("Completado")=100 THEN\'Completado\'WHEN MAX("Último progreso")IS NOT NULL THEN\'Incompleto\'ELSE\'Sin iniciar\'END AS"Estado",MIN("Fecha inicio")AS"Fecha inicio","Alumno","PPGID",COUNT("Curso")AS"Cursos",NULL AS"Estado2",AVG("Progreso")AS"Progreso",MAX("Último progreso")AS"Último progreso","Lugar","Empresa","Entidad","Centro de costos ID","Centro de costos","Puesto","Nivel","Dirección","Business Partner","Jefe","Jefe email","Director","Email",MAX("Fecha creado")AS"Fecha creado",MAX("Inscripción ID")AS"Inscripción ID","Empresa tipo",NULL AS"Curso ID",AVG("Completado")AS"Completado"',
         from: Inscripciones,
         group: '"Alumno","PPGID","Lugar","Empresa","Entidad","Centro de costos ID","Centro de costos","Puesto","Nivel","Dirección","Business Partner","Jefe","Jefe email","Director","Email","Empresa tipo"'
-    }
-    var alumnos = {
-        select: '"Alumno ID",MAX("Fecha corte")',
-        from: Inscripciones,
-        group: '"Alumno ID"',
-        where: '"Empresa tipo" = \'INT COMEX [E]\' AND "Curso ID" IN(3853,3855,3806,3811,3896,3822,3838,3837,3830,3885,3813,3815,3829,3820,3800,3835,3865,3974) AND "inscripciones"."Estado" IN(\'Completado\',\'Incompleto\',\'Sin iniciar\')'
-    }
-    g(alumnos);
-    function g(g) {
-        g.sgroup = colconv(g.group, g.from);
-        g.tgroup = CREATE_TABLE("table1", g.sgroup(g.from.cols).map(c => [c[2], c[3][1], c[4], c[5], c[6], c[7] ? "NULL" : "NOT NULL", null]), [[null, "PRIMARY KEY", g.sgroup(g.from.cols).map(c => [c[2]]), null, null]]);
-        g.egroup = CREATE_TABLE("table2", g.sgroup(g.from.cols).map(c => [c[2], c[3][1], c[4], c[5], c[6], c[7] ? "NULL" : "NOT NULL", null]), [[null, "PRIMARY KEY", g.sgroup(g.from.cols).map(c => [c[2]]), null, null]])
-        g.from = [[g.from], [[g.tgroup.cols[0], g.from.cols[24]]], [[g.egroup.cols[0], g.from.cols[24]]]];
-        //Insert nuevas columnas en table1 todas las de agregate function
-        insertCol(g.tgroup, ['MAX0', "tinyint", null, null, null, "NOT NULL", [[null, "DEFAULT", null, null, "new funcs.MAX"]]]);
-        insertCol(g.tgroup, ['AVG27', "tinyint", null, null, null, "NOT NULL", [[null, "DEFAULT", null, null, "new funcs.AVG"]]]);
-        insertCol(g.tgroup, ['MAX8', "tinyint", null, null, null, "NOT NULL", [[null, "DEFAULT", null, null, "new funcs.MAX"]]]);
-        insertCol(g.tgroup, ['MIN2', "tinyint", null, null, null, "NOT NULL", [[null, "DEFAULT", null, null, "new funcs.MIN"]]]);
-
-        insertCol(g.egroup, ['MAX0', "smalldatetime", null, null, null, "NULL", null]);
-        insertCol(g.egroup, ['AVG27', "tinyint", null, null, null, "NULL", null]);
-        insertCol(g.egroup, ['MAX8', "smalldatetime", null, null, null, "NULL", null]);
-        insertCol(g.egroup, ['MIN2', "date", null, null, null, "NULL", null]);
-
-        for (var i = 0, row, j, fr; i < data.length; i++) {
-            row = data[i];
-            if (!row[0]) { break; }
-            row = objs._r[0] = INSERT(Inscripciones, descol, orisel(row));
-            if (!tmp1.call(objs)) { continue; }
-            //preparar todas las filas relacionadas
-            fr = [row];
-            for (j = 1; j < g.from.length; j++) {
-                fr[j] = WHERE(g.from[j][0][0][1], g.from[j].map(c => [c[0], getval(row, c[1])]))[0];
-                if (!fr[j]) { fr[j] = INSERT(g.from[j][0][0][1], g.from[j].map(c => c[0]), g.from[j].map(c => getval(row, c[1]))); }
-            }
-            //
-            fr[2][1] = fr[1][1].Accumulate(fr[0][0]);
-            fr[2][2] = fr[1][2].Accumulate(fr[0][27]);
-            fr[2][3] = fr[1][3].Accumulate(fr[0][8]);
-            fr[2][4] = fr[1][4].Accumulate(fr[0][2]);
-        }
-
     }
 
     for (var i = 0, row, drow, j, dcol; i < data.length; i++) {
@@ -337,6 +351,8 @@ function work(data) {
         if (!row[0]) { break; }
         row = objs._r[0] = INSERT(Inscripciones, descol, orisel(row));
         if (!tmp1.call(objs)) { continue; }
+        
+        
         var alumno = alumnos.sgroup(row);
         alumno = WHERE(alumnos.tgroup, alumnos.tgroup.cols.map((c, i) => [c, alumno[i]]))[0];
         if (!alumno) { alumno = INSERT(alumnos.tgroup, null, alumnos.sgroup(row)); alumno.rows = []; }
