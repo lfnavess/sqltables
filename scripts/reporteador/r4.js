@@ -7,8 +7,8 @@ function work(data) {
             ["Fecha corte", "smalldatetime", null, null, null, "NOT NULL", null],
             ["Estado", "nvarchar", 50, null, null, "NOT NULL", null],
             ["Fecha inicio", "date", null, null, null, "NOT NULL", null],
-            ["Alumno", "nvarchar", 50, null, null, "NOT NULL", null],
-            ["PPG ID", "nvarchar", 7, null, null, "NOT NULL", null],
+            ["Alumno", "nvarchar", 50, null, null, "NULL", null],
+            ["PPG ID", "nvarchar", 7, null, null, "NULL", null],
             ["Curso", "nvarchar", 100, null, null, "NOT NULL", null],
             ["Estado2", "nvarchar", 50, null, null, "NULL", null],
             ["Progreso", "tinyint", null, null, null, "NOT NULL", null],
@@ -26,10 +26,11 @@ function work(data) {
             ["Jefe email", "nvarchar", 50, null, null, "NULL", null],
             ["Director", "nvarchar", 50, null, null, "NULL", null],
             ["Email", "nvarchar", 50, null, null, "NULL", null],
-            ["Fecha creado", "smalldatetime", null, null, null, "NULL", null],
-            ["Inscripción ID", "int", null, null, null, "NULL", [[null, "PRIMARY KEY", null, null]]],
+            ["Fecha creado", "smalldatetime", null, null, null, "NOT NULL", null],
+            ["Inscripción ID", "int", null, null, null, "NOT NULL", [[null, "PRIMARY KEY", null, null]]],
+            ["Alumno ID", "int", null, null, null, "NOT NULL", null],
+            ["Curso ID", "int", null, null, null, "NOT NULL", null],
             ["Empresa tipo", "nvarchar", 50, null, null, "NULL", null],
-            ["Curso ID", "int", null, null, null, "NULL", null],
             ["Completado", "tinyint", null, null, null, "NOT NULL", null]
         ]
     );
@@ -58,29 +59,31 @@ function work(data) {
         ['"Alumno >Posición >Email"', '"Email"'],
         ['"Fecha creado"'],
         ['"Inscripción ID"'],
+        ['"Alumno ID"'],
+        ['"Curso ID"'],
         ['"Alumno >Posición >Lugar >Empresa >Tipo"', '"Empresa tipo"'],
-        ['"Curso"', '"Curso ID"'],
         ['CASE WHEN"Progreso"=\'100\'THEN 100 ELSE 0 END', '"Completado"']
     ];
-    
+
     window.funcs = {
-        MAX: { 
-            Accumulate (value) {  if (value != null) { if (!this.prev) { this.prev = value; } else if (this.prev < value) { this.prev = value; } } },
-            Create(){ return { Accumulate: this.Accumulate }; }
+        MAX: class MAX {
+            constructor() { }
+            Accumulate(value) { if (value != null) { if (!this.prev) { this.prev = value; } else if (this.prev < value) { this.prev = value; } } return this.prev; }
         },
-        MIN: {
-            Accumulate (value) { if (!this.prev) { this.prev = value; } else if (this.prev > value) { this.prev = value; } },
-            Create(){ return { Accumulate: this.Accumulate }; }
+        MIN: class MIN {
+            constructor() { }
+            Accumulate(value) { if (value != null) { if (!this.prev) { this.prev = value; } else if (this.prev > value) { this.prev = value; } } return this.prev; }
         },
-        AVG: {
-            Accumulate (value) { if (value != null) { this.count++; this.sum += value; } },
-            Create(){ return { Accumulate: this.Accumulate, count: 0, sum: 0 }; }
+        AVG: class AVG {
+            constructor() { this.count = 0; this.sum = 0; }
+            Accumulate(value) { if (value != null) { this.count++; this.sum += value; } return this.sum / this.count; }
         },
-        COUNT: {
-            Accumulate (value) { if (value != null) { this.count++; } },
-            Create(){ return { Accumulate: this.Accumulate, count: 0 }; }
+        COUNT: class COUNT {
+            constructor() { this.count = 0; }
+            Accumulate(value) { if (value != null) { this.count++; } return this.count; }
         }
     }
+
     var ori = CREATE_TABLE("ori", data.splice(0, 1)[0].map(c => [c, "nvarchar", 200, null, null, "NULL", null]));
     function sel(row, select_list) {
         for (var i = 0, si; i < select_list.length; i++) {
@@ -287,42 +290,48 @@ function work(data) {
         group: '"Alumno","PPGID","Lugar","Empresa","Entidad","Centro de costos ID","Centro de costos","Puesto","Nivel","Dirección","Business Partner","Jefe","Jefe email","Director","Email","Empresa tipo"'
     }
     var alumnos = {
-        select: '"PPG ID",MAX("Fecha corte")',
+        select: '"Alumno ID",MAX("Fecha corte")',
         from: Inscripciones,
-        group: '"PPG ID"',
+        group: '"Alumno ID"',
         where: '"Empresa tipo" = \'INT COMEX [E]\' AND "Curso ID" IN(3853,3855,3806,3811,3896,3822,3838,3837,3830,3885,3813,3815,3829,3820,3800,3835,3865,3974) AND "inscripciones"."Estado" IN(\'Completado\',\'Incompleto\',\'Sin iniciar\')'
     }
     g(alumnos);
-    function g(g){
+    function g(g) {
         g.sgroup = colconv(g.group, g.from);
         g.tgroup = CREATE_TABLE("table1", g.sgroup(g.from.cols).map(c => [c[2], c[3][1], c[4], c[5], c[6], c[7] ? "NULL" : "NOT NULL", null]), [[null, "PRIMARY KEY", g.sgroup(g.from.cols).map(c => [c[2]]), null, null]]);
-        g.from = [[g.from],[[g.tgroup.cols[0],g.from.cols[4]]]];
+        g.egroup = CREATE_TABLE("table2", g.sgroup(g.from.cols).map(c => [c[2], c[3][1], c[4], c[5], c[6], c[7] ? "NULL" : "NOT NULL", null]), [[null, "PRIMARY KEY", g.sgroup(g.from.cols).map(c => [c[2]]), null, null]])
+        g.from = [[g.from], [[g.tgroup.cols[0], g.from.cols[24]]], [[g.egroup.cols[0], g.from.cols[24]]]];
         //Insert nuevas columnas en table1 todas las de agregate function
-        insertCol(g.tgroup, ['MAX0', "tinyint", null, null, null, "NOT NULL", [[null, "DEFAULT", null, null, "funcs.MAX.Create()"]]]);
-        insertCol(g.tgroup, ['AVG26', "tinyint", null, null, null, "NOT NULL", [[null, "DEFAULT", null, null, "funcs.AVG.Create()"]]]);
-        insertCol(g.tgroup, ['MAX8', "tinyint", null, null, null, "NOT NULL", [[null, "DEFAULT", null, null, "funcs.MAX.Create()"]]]);
-        insertCol(g.tgroup, ['MIN2', "tinyint", null, null, null, "NOT NULL", [[null, "DEFAULT", null, null, "funcs.MIN.Create()"]]]);
-        
-        
-        for(var i = 0, row, j,k; i < data.length; i++){
+        insertCol(g.tgroup, ['MAX0', "tinyint", null, null, null, "NOT NULL", [[null, "DEFAULT", null, null, "new funcs.MAX"]]]);
+        insertCol(g.tgroup, ['AVG27', "tinyint", null, null, null, "NOT NULL", [[null, "DEFAULT", null, null, "new funcs.AVG"]]]);
+        insertCol(g.tgroup, ['MAX8', "tinyint", null, null, null, "NOT NULL", [[null, "DEFAULT", null, null, "new funcs.MAX"]]]);
+        insertCol(g.tgroup, ['MIN2', "tinyint", null, null, null, "NOT NULL", [[null, "DEFAULT", null, null, "new funcs.MIN"]]]);
+
+        insertCol(g.egroup, ['MAX0', "smalldatetime", null, null, null, "NULL", null]);
+        insertCol(g.egroup, ['AVG27', "tinyint", null, null, null, "NULL", null]);
+        insertCol(g.egroup, ['MAX8', "smalldatetime", null, null, null, "NULL", null]);
+        insertCol(g.egroup, ['MIN2', "date", null, null, null, "NULL", null]);
+
+        for (var i = 0, row, j, fr; i < data.length; i++) {
             row = data[i];
             if (!row[0]) { break; }
             row = objs._r[0] = INSERT(Inscripciones, descol, orisel(row));
             if (!tmp1.call(objs)) { continue; }
             //preparar todas las filas relacionadas
-            g.fr = [row];
-            for(j = 1; j < g.from.length; j++){
-                g.fr[j] = WHERE(g.from[j][0][0][1], g.from[j].map(c => [c[0],getval(row,c[1])]))[0];
-                if(!g.fr[j]){ g.fr[j] = INSERT(g.from[j][0][0][1], g.from[j].map(c => c[0]), g.from[j].map(c => getval(row,c[1]))); }
+            fr = [row];
+            for (j = 1; j < g.from.length; j++) {
+                fr[j] = WHERE(g.from[j][0][0][1], g.from[j].map(c => [c[0], getval(row, c[1])]))[0];
+                if (!fr[j]) { fr[j] = INSERT(g.from[j][0][0][1], g.from[j].map(c => c[0]), g.from[j].map(c => getval(row, c[1]))); }
             }
             //
-            g.fr[1][1].Accumulate(g.fr[0][0]);
-            g.fr[1][2].Accumulate(g.fr[0][26]);
-            g.fr[1][3].Accumulate(g.fr[0][8]);
-            g.fr[1][4].Accumulate(g.fr[0][2]);
+            fr[2][1] = fr[1][1].Accumulate(fr[0][0]);
+            fr[2][2] = fr[1][2].Accumulate(fr[0][27]);
+            fr[2][3] = fr[1][3].Accumulate(fr[0][8]);
+            fr[2][4] = fr[1][4].Accumulate(fr[0][2]);
         }
+
     }
-    
+
     for (var i = 0, row, drow, j, dcol; i < data.length; i++) {
         row = data[i];
         if (!row[0]) { break; }

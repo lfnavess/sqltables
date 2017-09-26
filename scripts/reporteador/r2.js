@@ -319,7 +319,7 @@ function INSERT(table, cols, vals) {
                 if (val < c[3][2]) { throw (`${c[2]} Min date value reached`); }
                 else if (val > c[3][3]) { throw (`${c[2]} "Max date value reached`); }
             }else {
-                if (isNaN(val)) { throw (`Conversion failed when converting the varchar value '${val}' to data type ${c[3][1]}.`); } else if (typeof val !== "number") { val = Number(val); }
+                if (isNaN(val)) { throw (`Conversion failed when converting the varchar value '${val}' to data type ${c[3][1]}.`); } else { val = parseInt(val); }
                 if (val < c[3][2]) { throw ("Min value reached"); }
                 else if (val > c[3][3]) { throw ("Max value reached"); }
             }
