@@ -90,7 +90,7 @@ function work(data) {
     function colconv(s, t) {
         var parts = [], ccc = [];
         ccc.push(parts);
-        for (var i = 0, c, si, u; i < s.length; i++) {
+        for (var i = 0, c, si, u, p; i < s.length; i++) {
             c = s[i];
             if (!u && /\S/.test(c)) {
                 si = i;
@@ -109,26 +109,26 @@ function work(data) {
             }
         }
         if (u) {
-            if (u.toString() === "/[\\s\"'(,]/") { colins(s.substring(si)); }
+            if (u.toString() === "/[\\s\"'(,.]/") { colins(s.substring(si)); }
             else { throw ("error"); }
-        }
+        } else if (p === 1) { colins(); }
         return new Function("r", `return[${ccc.map(c => c.join("")).join()}];`);
         function colexp(ti, ci) { return `r[${ti}][${ci}]`; }
-        function ttable(tt) { return t.indexOf(t.find(t => (t[1] || t[0][1])===tt)); }
-        function ccol(ti, c){ return colexp(ti,cddf(tableCol(t[ti][0],c)); }
+        function ttable(tt) { return t.indexOf(t.find(t => (t[1] || t[0][1]) === tt)); }
+        function ccol(ti, c) { return colexp(ti, cddf(tableCol(t[ti][0], c))); }
         function onlyCol(c) {
-            for(var i = 0, ti,ci; i < t.length; i++){
-                ti = t[i].cols.indexOf(t[i].cols.find(cc => cc[1] === c));
-                if(ti){
-                    if(ci){ throw(`Nombre de columna '${c}' ambiguo`); }
-                    ci = [i,ti];
+            for (var i = 0, ti, ci; i < t.length; i++) {
+                ti = t[i][0].cols.indexOf(t[i][0].cols.find(cc => cc[2] === c));
+                if (ti >= 0) {
+                    if (ci) { throw (`Nombre de columna '${c}' ambiguo`); }
+                    ci = [i, ti];
                 }
             }
-            if(!ci){ throw(`Columna '${c}' no econtrada`); }
+            if (!ci) { throw (`Columna '${c}' no econtrada`); }
             return colexp(ci[0], ci[1]);
         }
         function colins(i, t) {
-            else if(p === 1){ parts[parts.length-1] = onlyCol(parts[parts.length-1]); }
+            if (p === 1 && i != ".") { parts[parts.length - 1] = onlyCol(parts[parts.length - 1]); }
             if (!t) {
                 if (i === "CASE") { p = i; }
                 else if (i === "WHEN") { if (p === "CASE") { p = i; } }
@@ -143,13 +143,14 @@ function work(data) {
                 else if (i === "<") { parts.push(i); t = "lo"; }
                 else if (i === ">") { parts.push(i); t = "lo"; }
                 else if (i === ",") { parts = []; ccc.push(parts); }
-                else if (i === ".") { parts[parts.length-1] = ttable(parts[parts.length-1]); }
+                else if (i === ".") { parts[parts.length - 1] = ttable(parts[parts.length - 1]); t = i; }
                 else if (funcs[i]) { t = i; }
                 else if (!isNaN(i)) { parts.push(Number(i)); }
-                else if (p === "."){parts[parts.length-1] = ccol(parts[parts.length-1], t) }
+                else if (p === ".") { parts[parts.length - 1] = ccol(parts[parts.length - 1], t) }
                 else { parts.push(i); }
             }
-            if (t === 1) { parts.push(i); }
+            if (p === ".") { parts[parts.length - 1] = ccol(parts[parts.length - 1], i); t = undefined; }
+            else if (t === 1) { parts.push(i); }
             else if (t === 2) { parts.push(i); }
             else if (t === 3) {
                 if (p === "IN") {
@@ -165,7 +166,7 @@ function work(data) {
     }
 
 
-    function colde(t,ta) {
+    function colde(t, ta) {
         for (var i = 0, c, s, u; i < t.length; i++) {
             c = t[i];
             if (!u && /\S/.test(c)) {
@@ -202,21 +203,21 @@ function work(data) {
     };
     var alumnos = {
         select: '"Alumno ID",MAX("Fecha corte"),CASE WHEN AVG("Completado")=100 THEN\'Completado\'WHEN MAX("Último progreso")IS NOT NULL THEN\'Incompleto\'ELSE\'Sin iniciar\'END',
-        from: [[ori, null],[Colaboradores, null, [[Colaboradores.cols[0],ori.cols[17]]],dcColaborador,osColaborador],[Inscripciones, null,[[Inscripciones.cols[0],ori.cols[67]]],dsInscripcion,osInscripcion]],
-        group: '"Colaboradores"."Alumno ID"',
+        from: [[ori, null], [Colaboradores, null, [[Colaboradores.cols[0], ori.cols[17]]], dcColaborador, osColaborador], [Inscripciones, null, [[Inscripciones.cols[0], ori.cols[67]]], dsInscripcion, osInscripcion]],
+        group: '"Colaboradores"."Colaborador ID"',
         where: '"Colaboradores"."Empresa tipo"=\'INT COMEX [E]\'AND"Inscripciones"."Curso ID"IN(3853,3855,3806,3811,3896,3822,3838,3837,3830,3885,3813,3815,3829,3820,3800,3835,3865,3974)AND"inscripciones"."Estado"IN(\'Completado\',\'Incompleto\',\'Sin iniciar\')'
     }
     g(alumnos);
     function g(g) {
         g.sgroup = colconv(g.group, g.from);
-        // g.tgroup = CREATE_TABLE("table1", g.sgroup(g.from.cols).map(c => [c[2], c[3][1], c[4], c[5], c[6], c[7] ? "NULL" : "NOT NULL", null]), [[null, "PRIMARY KEY", g.sgroup(g.from.cols).map(c => [c[2]]), null, null]]);
-        // g.from.push([[g.tgroup.cols[0],Colaboradores.cols[0]]]);
+        g.tgroup = CREATE_TABLE("table1", g.sgroup([, g.from[1][0].cols]).map(c => [c[2], c[3][1], c[4], c[5], c[6], c[7] ? "NULL" : "NOT NULL", null]), [[null, "PRIMARY KEY", g.sgroup([, g.from[1][0].cols]).map(c => [c[2]]), null, null]]);
+        g.from.push([g.tgroup,null,[[g.tgroup.cols[0], Colaboradores.cols[0]]]]);
         //Insert nuevas columnas en table1 todas las de agregate function
-        // insertCol(g.tgroup, ['ROWS', "smalldatetime", null, null, null, "NOT NULL", [[null, "DEFAULT", null, null, "new funcs.ROWS"]]]);
-        // insertCol(g.tgroup, ['MAX0', "smalldatetime", null, null, null, "NOT NULL", [[null, "DEFAULT", null, null, "new funcs.MAX"]]]);
-        // insertCol(g.tgroup, ['AVG27', "tinyint", null, null, null, "NOT NULL", [[null, "DEFAULT", null, null, "new funcs.AVG"]]]);
-        // insertCol(g.tgroup, ['MAX8', "smalldatetime", null, null, null, "NOT NULL", [[null, "DEFAULT", null, null, "new funcs.MAX"]]]);
-        // insertCol(g.tgroup, ['MIN2', "date", null, null, null, "NOT NULL", [[null, "DEFAULT", null, null, "new funcs.MIN"]]]);
+        insertCol(g.tgroup, ['ROWS', "smalldatetime", null, null, null, "NOT NULL", [[null, "DEFAULT", null, null, "new funcs.ROWS"]]]);
+        insertCol(g.tgroup, ['MAX1', "smalldatetime", null, null, null, "NOT NULL", [[null, "DEFAULT", null, null, "new funcs.MAX"]]]);
+        insertCol(g.tgroup, ['AVG10', "tinyint", null, null, null, "NOT NULL", [[null, "DEFAULT", null, null, "new funcs.AVG"]]]);
+        insertCol(g.tgroup, ['MAX7', "smalldatetime", null, null, null, "NOT NULL", [[null, "DEFAULT", null, null, "new funcs.MAX"]]]);
+        insertCol(g.tgroup, ['MIN3', "date", null, null, null, "NOT NULL", [[null, "DEFAULT", null, null, "new funcs.MIN"]]]);
 
         for (var i = 0, colaborador, row, j, fr; i < data.length; i++) {
             row = data[i];
@@ -226,25 +227,22 @@ function work(data) {
             for (j = 1, f; j < g.from.length; j++) {
                 f = g.from[j];
                 fr[j] = WHERE(f[0], f[2].map(c => [c[0], parseInt(getval(row, c[1]))]))[0];
-                if(!fr[j] && f[3]) { fr[j] =  INSERT(f[0], f[3], f[4](row)); }
+                if (!fr[j] && f[3]) { fr[j] = INSERT(f[0], f[3], f[4](row)); }
                 else if (!fr[j]) { fr[j] = INSERT(f[0], f.map(c => c[0]), f.map(c => parseInt(getval(row, c[1])))); }
             }
-            
-            colaborador =  WHERE(Colaboradores,  g.from[j].map(c => [c[0], getval(row, c[1])]))[0];
-            if(!colaborador){ colaborador = INSERT(Colaboradores, dcColaborador, orisel(row)); }
-            
+
             row = objs._r[0] = INSERT(Inscripciones, descol, orisel(row));
             if (!tmp1.call(objs)) { continue; }
             //
             fr[1][1].v = fr;
-            fr[1][2].v = fr[0][0];
-            fr[1][3].v = fr[0][27];
-            fr[1][4].v = fr[0][8];
-            fr[1][5].v = fr[0][2];
+            fr[1][2].v = fr[0][1];
+            fr[1][3].v = fr[0][10];
+            fr[1][4].v = fr[0][7];
+            fr[1][5].v = fr[0][3];
         }
-        for (var i = 0, r, r2, rows = []; i < g.tgroup.rows.length; i++){
+        for (var i = 0, r, r2, rows = []; i < g.tgroup.rows.length; i++) {
             r = g.tgroup.rows[i];
-            r2 = [r[0],r[2].v,r[3].v===100?'Completado':r[4].v!==null?'Incompleto':'Sin iniciar',r[5].v,'Capacitación 2017',r[3].v,r[4].v];
+            r2 = [r[0], r[2].v, r[3].v === 100 ? 'Completado' : r[4].v !== null ? 'Incompleto' : 'Sin iniciar', r[5].v, 'Capacitación 2017', r[3].v, r[4].v];
             r2.rs = r[1].v;
             rows.push(r2);
         }
@@ -293,24 +291,24 @@ function work(data) {
         p = t;
     }
     // for (var i = 0, s, e, u, m, b = [], br, cl, c; i < w.length; i++) {
-        // c = w[i];
-        // if (!u && /\S/.test(c)) {
-            // s = i;
-            // if (c === '"') { s++; u = /"/; }
-            // else if (c === "'") { u = /'/; }
-            // else if (c === "(") { s++; u = /\)/; }
-            // else { u = /[\s"'(]/; }
-        // } else if (u && u.test(c)) {
-            // if (u.toString() === '/"/') { ins2(w.substring(s, i), 1); }
-            // else if (u.toString() === "/'/") { ins2(w.substring(s, i + 1), 2); }
-            // else if (u.toString() === "/\\)/") { ins2(w.substring(s, i), 3); }
-            // else { ins2(w.substring(s, i--)); }
-            // u = undefined;
-        // }
+    // c = w[i];
+    // if (!u && /\S/.test(c)) {
+    // s = i;
+    // if (c === '"') { s++; u = /"/; }
+    // else if (c === "'") { u = /'/; }
+    // else if (c === "(") { s++; u = /\)/; }
+    // else { u = /[\s"'(]/; }
+    // } else if (u && u.test(c)) {
+    // if (u.toString() === '/"/') { ins2(w.substring(s, i), 1); }
+    // else if (u.toString() === "/'/") { ins2(w.substring(s, i + 1), 2); }
+    // else if (u.toString() === "/\\)/") { ins2(w.substring(s, i), 3); }
+    // else { ins2(w.substring(s, i--)); }
+    // u = undefined;
+    // }
     // }
     // if (u) {
-        // if (u.toString() === "/[\\s\"'(]/") { ins2(w.substring(s)); }
-        // else { throw ("error"); }
+    // if (u.toString() === "/[\\s\"'(]/") { ins2(w.substring(s)); }
+    // else { throw ("error"); }
     // }
 
     //var tmp1 = new Function(`return ${search_condition.map(i => Array.isArray(i) ? i.join("") : i).join("")};`);
@@ -351,8 +349,8 @@ function work(data) {
         if (!row[0]) { break; }
         row = objs._r[0] = INSERT(Inscripciones, descol, orisel(row));
         if (!tmp1.call(objs)) { continue; }
-        
-        
+
+
         var alumno = alumnos.sgroup(row);
         alumno = WHERE(alumnos.tgroup, alumnos.tgroup.cols.map((c, i) => [c, alumno[i]]))[0];
         if (!alumno) { alumno = INSERT(alumnos.tgroup, null, alumnos.sgroup(row)); alumno.rows = []; }
