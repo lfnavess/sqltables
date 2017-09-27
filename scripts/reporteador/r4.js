@@ -87,8 +87,8 @@ function work(data) {
     var dsInscripcion = mat.map(m => colde(m[1] ? m[1] : m[0], Inscripciones));
     var osInscripcion = colconv(mat.map(m => m[0]).join(), [[ori]]);
 
-    function colconv(s, t) {
-        var parts = [], ccc = [];
+    function colconv(s, f) {
+        var parts = [], ccc = [], o = [], isSearch;
         ccc.push(parts);
         for (var i = 0, c, si, u, p; i < s.length; i++) {
             c = s[i];
@@ -96,29 +96,34 @@ function work(data) {
                 si = i;
                 if (c === '"') { si++; u = /"/; }
                 else if (c === "'") { u = /'/; }
-                else if (c === "(") { si++; u = /\)/; }
+                else if (c === "(") { colins(c); }
+                else if (c === ")") { colins(c); }
                 else if (c === ",") { colins(c); }
                 else if (c === ".") { colins(c); }
-                else { u = /[\s"'(,.]/; }
+                else { u = /[\s"'(),.]/; }
             } else if (u && u.test(c)) {
                 if (u.toString() === '/"/') { colins(s.substring(si, i), 1); }
                 else if (u.toString() === "/'/") { colins(s.substring(si, i + 1), 2); }
-                else if (u.toString() === "/\\)/") { colins(s.substring(si, i), 3); }
                 else { colins(s.substring(si, i--)); }
                 u = undefined;
             }
         }
         if (u) {
-            if (u.toString() === "/[\\s\"'(,.]/") { colins(s.substring(si)); }
+        if (u.toString() === "/[\\s\"'(),.]/") { colins(s.substring(si)); }
             else { throw ("error"); }
         } else if (p === 1) { colins(); }
-        return new Function("r", `return[${ccc.map(c => c.join("")).join()}];`);
-        function colexp(ti, ci) { return `r[${ti}][${ci}]`; }
-        function ttable(tt) { return t.indexOf(t.find(t => (t[1] || t[0][1]) === tt)); }
-        function ccol(ti, c) { return colexp(ti, cddf(tableCol(t[ti][0], c))); }
+        var ff;
+        if(isSearch) { ff = new Function("f", `return ${ccc.map(c => c.join("")).join("")};`); }
+        else { ff = new Function("f", `return[${ccc.map(c => c.join("")).join()}];`); }
+        if(o.length) { ff.o = o; }
+        return ff;
+        
+        function colexp(ti, ci) { return `f[${ti}][${ci}]`; }
+        function ttable(tt) { return f.indexOf(f.find(f => (f[1] || f[0][1]) === tt)); }
+        function ccol(ti, c) { return colexp(ti, cddf(tableCol(f[ti][0], c))); }
         function onlyCol(c) {
-            for (var i = 0, ti, ci; i < t.length; i++) {
-                ti = t[i][0].cols.indexOf(t[i][0].cols.find(cc => cc[2] === c));
+            for (var i = 0, ti, ci; i < f.length; i++) {
+                ti = f[i][0].cols.indexOf(f[i][0].cols.find(cc => cc[2] === c));
                 if (ti >= 0) {
                     if (ci) { throw (`Nombre de columna '${c}' ambiguo`); }
                     ci = [i, ti];
@@ -128,38 +133,41 @@ function work(data) {
             return colexp(ci[0], ci[1]);
         }
         function colins(i, t) {
-            if (p === 1 && i != ".") { parts[parts.length - 1] = onlyCol(parts[parts.length - 1]); }
-            if (!t) {
-                if (i === "CASE") { p = i; }
+            if (p === 1 && t !== 1 && i !== ".") { parts[parts.length - 1] = onlyCol(parts[parts.length - 1]); p = undefined; }
+            
+            if(p === 1){
+                if(i === ".") { parts[parts.length - 1] = ttable(parts[parts.length - 1]); t = 1; }
+                else { parts[parts.length - 1] = ccol(parts[parts.length - 1], i); t = undefined; }
+            }
+            else if(p === "(") { 
+                if (i === ",") { t = p; }
+                else if(i === ")") { parts[parts.length - 1] = `this.o[${o.length - 1}].indexOf(${parts[parts.length - 1]})>=0`; }
+                else { o[o.length - 1].push(isNaN(i) ? i.replace(/'/g, "") : Number(i)); t = p; }
+            } else if(t) { parts.push(i); }
+            else {
+                if(i === "AND"){ parts = ["&&"]; ccc.push(parts); isSearch = true; }
+                else if(i === "OR"){ parts = ["||"]; ccc.push(parts); isSearch = true; }
+                else if (i === ",") { parts = []; ccc.push(parts); }
+                else if (i === "NOT") { parts.push("!"); }
+                else if (i === "CASE") { p = i; }
                 else if (i === "WHEN") { if (p === "CASE") { p = i; } }
                 else if (i === "THEN") { parts.push("?"); p = i; }
                 else if (i === "ELSE") { parts.push(":"); p = i; }
                 else if (i === "END") { p = i; }
-                else if (i === "IN") { t = i; }
+                else if (i === "AND") { p = i; }
+                else if (i === "IN") { o.push([]); t = i; }
                 else if (i === "=") { parts.push("==="); t = "lo"; }
                 else if (i === ">=") { parts.push(i); t = "lo"; }
                 else if (i === "<=") { parts.push(i); t = "lo"; }
                 else if (i === "!=" || i === "<>") { parts.push("!=="); t = "lo"; }
                 else if (i === "<") { parts.push(i); t = "lo"; }
                 else if (i === ">") { parts.push(i); t = "lo"; }
-                else if (i === ",") { parts = []; ccc.push(parts); }
+                else if (i === "(") { t = i; }
                 else if (i === ".") { parts[parts.length - 1] = ttable(parts[parts.length - 1]); t = i; }
                 else if (funcs[i]) { t = i; }
                 else if (!isNaN(i)) { parts.push(Number(i)); }
                 else if (p === ".") { parts[parts.length - 1] = ccol(parts[parts.length - 1], t) }
                 else { parts.push(i); }
-            }
-            if (p === ".") { parts[parts.length - 1] = ccol(parts[parts.length - 1], i); t = undefined; }
-            else if (t === 1) { parts.push(i); }
-            else if (t === 2) { parts.push(i); }
-            else if (t === 3) {
-                if (p === "IN") {
-                    objs.refs.push(i.split(",").map(m => isNaN(m) ? m.replace(/'/g, "") : Number(m)));
-                    parts[parts.length - 1] = `this.refs[${objs.refs.length - 1}].indexOf(${parts[parts.length - 1]})>=0`;
-                }
-                else if (funcs[p]) {
-                    //parts.push(`funcs[${P}].Accumulate.call(${ccol()},${})`);
-                }
             }
             p = t;
         }
@@ -203,22 +211,42 @@ function work(data) {
     };
     var alumnos = {
         select: '"Alumno ID",MAX("Fecha corte"),CASE WHEN AVG("Completado")=100 THEN\'Completado\'WHEN MAX("Último progreso")IS NOT NULL THEN\'Incompleto\'ELSE\'Sin iniciar\'END',
-        from: [[ori, null], [Colaboradores, null, [[Colaboradores.cols[0], ori.cols[17]]], dcColaborador, osColaborador], [Inscripciones, null, [[Inscripciones.cols[0], ori.cols[67]]], dsInscripcion, osInscripcion]],
+        from: [[ori, null], [Colaboradores, null, [[f => f[1][0], f => f[0][17]]], dcColaborador, osColaborador], [Inscripciones, null, [[f => f[2][0], f => f[0][67]]], dsInscripcion, osInscripcion]],
         group: '"Colaboradores"."Colaborador ID"',
-        where: '"Colaboradores"."Empresa tipo"=\'INT COMEX [E]\'AND"Inscripciones"."Curso ID"IN(3853,3855,3806,3811,3896,3822,3838,3837,3830,3885,3813,3815,3829,3820,3800,3835,3865,3974)AND"inscripciones"."Estado"IN(\'Completado\',\'Incompleto\',\'Sin iniciar\')'
+        where: '"Colaboradores"."Empresa tipo"=\'INT COMEX [E]\'AND"Inscripciones"."Curso ID"IN(3853,3855,3806,3811,3896,3822,3838,3837,3830,3885,3813,3815,3829,3820,3800,3835,3865,3974)AND"Inscripciones"."Estado"IN(\'Completado\',\'Incompleto\',\'Sin iniciar\')'
     }
+    var wh = colconv(alumnos.where, alumnos.from);
     g(alumnos);
     function g(g) {
-        g.sgroup = colconv(g.group, g.from);
-        g.tgroup = CREATE_TABLE("table1", g.sgroup([, g.from[1][0].cols]).map(c => [c[2], c[3][1], c[4], c[5], c[6], c[7] ? "NULL" : "NOT NULL", null]), [[null, "PRIMARY KEY", g.sgroup([, g.from[1][0].cols]).map(c => [c[2]]), null, null]]);
-        g.from.push([g.tgroup,null,[[g.tgroup.cols[0], Colaboradores.cols[0]]]]);
+        g.fc = g.from.map(f => f[0].cols);
+        g.group = colconv(g.group, g.from);
+        g.tgroup = CREATE_TABLE(
+            "table1",
+            g.group(g.fc).map(c => [c[2], c[3][1], c[4], c[5], c[6], c[7] ? "NULL" : "NOT NULL", null]),
+            [[null, "PRIMARY KEY", g.group(g.fc).map(c => [c[2]]), null, null]]
+        );
+        g.from.push([g.tgroup,null,[[f => f[3][0], f => f[1][0]]]]);
+        
+        g.fc = g.from.map(f => f[0].cols);
         //Insert nuevas columnas en table1 todas las de agregate function
-        insertCol(g.tgroup, ['ROWS', "smalldatetime", null, null, null, "NOT NULL", [[null, "DEFAULT", null, null, "new funcs.ROWS"]]]);
-        insertCol(g.tgroup, ['MAX1', "smalldatetime", null, null, null, "NOT NULL", [[null, "DEFAULT", null, null, "new funcs.MAX"]]]);
-        insertCol(g.tgroup, ['AVG10', "tinyint", null, null, null, "NOT NULL", [[null, "DEFAULT", null, null, "new funcs.AVG"]]]);
-        insertCol(g.tgroup, ['MAX7', "smalldatetime", null, null, null, "NOT NULL", [[null, "DEFAULT", null, null, "new funcs.MAX"]]]);
-        insertCol(g.tgroup, ['MIN3', "date", null, null, null, "NOT NULL", [[null, "DEFAULT", null, null, "new funcs.MIN"]]]);
-
+        insertCol(g.tgroup, ['MAX1', "smalldatetime", null, null, null, "NOT NULL", [[null, "DEFAULT", null, null, "new funcs.MAX(f => f[2][1])"]]]);
+        insertCol(g.tgroup, ['AVG10', "tinyint", null, null, null, "NOT NULL", [[null, "DEFAULT", null, null, "new funcs.AVG(f => f[2][10])"]]]);
+        insertCol(g.tgroup, ['MAX7', "smalldatetime", null, null, null, "NOT NULL", [[null, "DEFAULT", null, null, "new funcs.MAX(f => f[2][7])"]]]);
+        insertCol(g.tgroup, ['MIN3', "date", null, null, null, "NOT NULL", [[null, "DEFAULT", null, null, "new funcs.MIN(f => f[2][3])"]]]);
+        var CursosD = {
+            group: colconv('"Inscripciones"."Curso"', g.from),
+            tgroup: CREATE_TABLE(
+                "CurosDirecciónes",
+                cdrow(g.fc).map(c => [c[2], c[3][1], c[4], c[5], c[6], c[7] ? "NULL" : "NOT NULL", null]),
+                [[null, "PRIMARY KEY", cdrow(g.fc).map(c => [c[2]]), null, null]]
+            ),
+            from: [[Inscripciones, null]]
+        }
+        CursosD.from.push([g.tgroup, null, [[f => f[2][0], f => f[0][4]]], null, null]);
+        CursosD.fc = CursosD.from.map(f => f[0].cols);
+        insertCol(CursosD.tgroup, ['Completado', "tinyint", null, null, null, "NOT NULL", [[null, "DEFAULT", null, null, "new funcs.AVG(f => f[0][10])"]]]);
+        
+        
         for (var i = 0, colaborador, row, j, fr; i < data.length; i++) {
             row = data[i];
             if (!row[0]) { break; }
@@ -226,19 +254,19 @@ function work(data) {
             fr = [row];
             for (j = 1, f; j < g.from.length; j++) {
                 f = g.from[j];
-                fr[j] = WHERE(f[0], f[2].map(c => [c[0], parseInt(getval(row, c[1]))]))[0];
-                if (!fr[j] && f[3]) { fr[j] = INSERT(f[0], f[3], f[4](row)); }
-                else if (!fr[j]) { fr[j] = INSERT(f[0], f.map(c => c[0]), f.map(c => parseInt(getval(row, c[1])))); }
+                fr[j] = WHERE(f[0], f[2].map(c => [c[0](g.fc), parseInt(c[1](fr))]))[0];
+                if (!fr[j] && f[3]) { fr[j] = INSERT(f[0], f[3], f[4](fr)); }
+                else if (!fr[j]) { fr[j] = INSERT(f[0], f[2].map(c => c[0](g.fc)), f[2].map(c => c[1](fr))); }
             }
-
-            row = objs._r[0] = INSERT(Inscripciones, descol, orisel(row));
-            if (!tmp1.call(objs)) { continue; }
+            if (!wh.call(wh, fr)) { continue; }
+            
+            fr2 = [row, INSERT(CursosD.from[1][0], CursosD.from[1][2].map(c => c[0](CursosD.fc)), CursosD.from[1][2].map(c => c[1]([row])))]
+            
             //
-            fr[1][1].v = fr;
-            fr[1][2].v = fr[0][1];
-            fr[1][3].v = fr[0][10];
-            fr[1][4].v = fr[0][7];
-            fr[1][5].v = fr[0][3];
+            fr[3][1].v = fr;
+            fr[3][2].v = fr;
+            fr[3][3].v = fr;
+            fr[3][4].v = fr;
         }
         for (var i = 0, r, r2, rows = []; i < g.tgroup.rows.length; i++) {
             r = g.tgroup.rows[i];

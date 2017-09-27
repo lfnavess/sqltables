@@ -59,25 +59,42 @@ var t = [];
 var aaa = function(a) { return a; }
 var bbb = function(b) { b = [tiden++, b]; t.push(b); return b; }
 var ccc = function(c) { c.unshift(tciden++); t[0].rows.push(c); return c; }
+var Collator = new Intl.Collator(undefined,{sensitivity: 'base', numeric: true});
 var funcs = {
         MAX: class MAX {
-            constructor() { }
-            set v(v) { if (!this._v) { this._v = v; } else if (this._v < v) { this._v = v; } }
+            constructor(expresion) { this.e = expresion; this.rs = []; this._v = null; }
+            set v(f) {
+                this.rs.push(f);
+                f = this.e(f);
+                if (!this._v) { this._v = f; } else if (this._v < f) { this._v = f; }
+            }
             get v() { return this._v; }
         },
         MIN: class MIN {
-            constructor() { this._v = null; }
-            set v(v) { if (!this._v) { this._v = v; } else if (this._v > v) { this._v = v; } }
+            constructor(expresion) { this.e = expresion; this.rs = []; this._v = null; }
+            set v(f) {
+                this.rs.push(f);
+                f = this.e(f);
+                if (!this._v) { this._v = f; } else if (this._v > f) { this._v = f; }
+            }
             get v() { return this._v; }
         },
         AVG: class AVG {
-            constructor() { }
-            set v(v) { if (v != null) { if(!this.count){ this.count = 0; this.sum = 0; } this.count++; this.sum += v; } }
-            get v() { return this.count ? this.sum / this.count : null; }
+            constructor(expresion) { this.e = expresion; this.rs = []; this.c = null;  }
+            set v(f) {
+                this.rs.push(f);
+                f = this.e(f);
+                if (f != null) { if(!this.c){ this.c = 0; this.s = 0; } this.c++; this.s += f; }
+            }
+            get v() { return this.c ? this.s / this.c : null; }
         },
         COUNT: class COUNT {
-            constructor() { this._v = null; }
-            set v(v) { if (v != null) { if(!this._v){ this._v = 0; } this._v++; } }
+            constructor(expresion) { this.e = expresion; this.rs = []; this._v = null; }
+            set v(f) {
+                this.rs.push(f);
+                f = this.e(f);
+                if (f != null) { if(!this._v){ this._v = 0; } this._v++; }
+            }
             get v() { return this._v; }
         },
         ROWS: class ROWS {
@@ -258,9 +275,10 @@ function tableCol(table, col){
 }
 function getval(row, col) { return row[col[1].cols.indexOf(col)]; }
 function compare(cnc, a, b) {
-    if (cnc[1].FK) { a = a && a.length ? a[cddf(cnc[1].FK)] : a; b = b && b.length ? b[cddf(cnc[1].FK)] : b; }
-    a = collate(cnc[1][5], a); b = collate(cnc[1][5], b);
-    return a === null ? (b === null ? 0 : 1) : b === null ? (a === null ? 0 : -1) : (a > b ? 1 : a < b ? -1 : 0) * cnc[2];
+    if (cnc[1].FK) { a = Array.isArray(a) ? a[cddf(cnc[1].FK)] : a; b = Array.isArray(b) ? b[cddf(cnc[1].FK)] : b; }
+    return a === null ? (b === null ? 0 : 1) : b === null ? (a === null ? 0 : -1) : Collator.compare(a, b) * cnc[2];
+    //a = collate(cnc[1][5], a); b = collate(cnc[1][5], b);
+    //return a === null ? (b === null ? 0 : 1) : b === null ? (a === null ? 0 : -1) : (a > b ? 1 : a < b ? -1 : 0) * cnc[2];
 }
 function collate(collate, v) {
     if (typeof v === "string") { return v.toLocaleUpperCase().accentFold(); }
@@ -325,7 +343,7 @@ function INSERT(table, cols, vals) {
                 tttt = constorow(cc, row);
                 if (cc[3][0] < 3) {
                     tttt[ci] = val;
-                    //if (cddd(cc, tttt)) { continue; }
+                    if (cddd(cc, tttt)) { continue; }
                     if (dsfdsd(cc, tttt)[0]) { throw (`Valor ${val} repetido en columna ${c[2]}`); }
                 } else {
                     cc = c.FK.constraints[0];
@@ -341,7 +359,7 @@ function INSERT(table, cols, vals) {
         cc = table.constraints[i];
         if (cc[3][0] === 4) { continue; }
         if (cc[3][0] < 3) {
-            //if (cddd(cc, row)) { continue; }
+            if (cddd(cc, row)) { continue; }
             cc.rows.insertAt(row, dsfdsd(cc, row)[1]);
         } else {
             cc2 = cc.ccols[0][3].constraints[0];
