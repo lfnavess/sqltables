@@ -109,15 +109,15 @@ function work(data) {
             }
         }
         if (u) {
-        if (u.toString() === "/[\\s\"'(),.]/") { colins(s.substring(si)); }
+            if (u.toString() === "/[\\s\"'(),.]/") { colins(s.substring(si)); }
             else { throw ("error"); }
         } else if (p === 1) { colins(); }
         var ff;
-        if(isSearch) { ff = new Function("f", `return ${ccc.map(c => c.join("")).join("")};`); }
+        if (isSearch) { ff = new Function("f", `return ${ccc.map(c => c.join("")).join("")};`); }
         else { ff = new Function("f", `return[${ccc.map(c => c.join("")).join()}];`); }
-        if(o.length) { ff.o = o; }
+        if (o.length) { ff.o = o; }
         return ff;
-        
+
         function colexp(ti, ci) { return `f[${ti}][${ci}]`; }
         function ttable(tt) { return f.indexOf(f.find(f => (f[1] || f[0][1]) === tt)); }
         function ccol(ti, c) { return colexp(ti, cddf(tableCol(f[ti][0], c))); }
@@ -134,19 +134,19 @@ function work(data) {
         }
         function colins(i, t) {
             if (p === 1 && t !== 1 && i !== ".") { parts[parts.length - 1] = onlyCol(parts[parts.length - 1]); p = undefined; }
-            
-            if(p === 1){
-                if(i === ".") { parts[parts.length - 1] = ttable(parts[parts.length - 1]); t = 1; }
+
+            if (p === 1) {
+                if (i === ".") { parts[parts.length - 1] = ttable(parts[parts.length - 1]); t = 1; }
                 else { parts[parts.length - 1] = ccol(parts[parts.length - 1], i); t = undefined; }
             }
-            else if(p === "(") { 
+            else if (p === "(") {
                 if (i === ",") { t = p; }
-                else if(i === ")") { parts[parts.length - 1] = `this.o[${o.length - 1}].indexOf(${parts[parts.length - 1]})>=0`; }
+                else if (i === ")") { parts[parts.length - 1] = `this.o[${o.length - 1}].indexOf(${parts[parts.length - 1]})>=0`; }
                 else { o[o.length - 1].push(isNaN(i) ? i.replace(/'/g, "") : Number(i)); t = p; }
-            } else if(t) { parts.push(i); }
+            } else if (t) { parts.push(i); }
             else {
-                if(i === "AND"){ parts = ["&&"]; ccc.push(parts); isSearch = true; }
-                else if(i === "OR"){ parts = ["||"]; ccc.push(parts); isSearch = true; }
+                if (i === "AND") { parts = ["&&"]; ccc.push(parts); isSearch = true; }
+                else if (i === "OR") { parts = ["||"]; ccc.push(parts); isSearch = true; }
                 else if (i === ",") { parts = []; ccc.push(parts); }
                 else if (i === "NOT") { parts.push("!"); }
                 else if (i === "CASE") { p = i; }
@@ -225,8 +225,7 @@ function work(data) {
             g.group(g.fc).map(c => [c[2], c[3][1], c[4], c[5], c[6], c[7] ? "NULL" : "NOT NULL", null]),
             [[null, "PRIMARY KEY", g.group(g.fc).map(c => [c[2]]), null, null]]
         );
-        g.from.push([g.tgroup,null,[[f => f[3][0], f => f[1][0]]]]);
-        
+        g.from.push([g.tgroup, null, [[f => f[3][0], f => f[1][0]]]]);
         g.fc = g.from.map(f => f[0].cols);
         //Insert nuevas columnas en table1 todas las de agregate function
         insertCol(g.tgroup, ['MAX1', "smalldatetime", null, null, null, "NOT NULL", [[null, "DEFAULT", null, null, "new funcs.MAX(f => f[2][1])"]]]);
@@ -234,19 +233,22 @@ function work(data) {
         insertCol(g.tgroup, ['MAX7', "smalldatetime", null, null, null, "NOT NULL", [[null, "DEFAULT", null, null, "new funcs.MAX(f => f[2][7])"]]]);
         insertCol(g.tgroup, ['MIN3', "date", null, null, null, "NOT NULL", [[null, "DEFAULT", null, null, "new funcs.MIN(f => f[2][3])"]]]);
         var CursosD = {
-            group: colconv('"Inscripciones"."Curso"', g.from),
-            tgroup: CREATE_TABLE(
-                "CurosDirecciónes",
-                cdrow(g.fc).map(c => [c[2], c[3][1], c[4], c[5], c[6], c[7] ? "NULL" : "NOT NULL", null]),
-                [[null, "PRIMARY KEY", cdrow(g.fc).map(c => [c[2]]), null, null]]
-            ),
-            from: [[Inscripciones, null]]
+            group: colconv('"Inscripciones"."Curso"', g.from)
         }
-        CursosD.from.push([g.tgroup, null, [[f => f[2][0], f => f[0][4]]], null, null]);
-        CursosD.fc = CursosD.from.map(f => f[0].cols);
-        insertCol(CursosD.tgroup, ['Completado', "tinyint", null, null, null, "NOT NULL", [[null, "DEFAULT", null, null, "new funcs.AVG(f => f[0][10])"]]]);
-        
-        
+        var tmp = CursosD.group(g.fc).map(c => [c[2], c[3][1], c[4], c[5], c[6], c[7] ? "NULL" : "NOT NULL", null]);
+        tmp.unshift(['RI', "tinyint", null, null, null, "NOT NULL", null]);
+        CursosD.tgroup = CREATE_TABLE(
+            "CurosDirecciónes",
+            tmp,
+            [[null, "PRIMARY KEY", CursosD.group(g.fc).map(c => [c[2]]), null, null]]
+        )
+        insertCol(CursosD.tgroup, );
+        CursosD.f = [CursosD.tgroup, null, [[f => f[4][0], f => f[2][4]]], null, null];
+        g.from.push(CursosD.f);
+        g.fc = g.from.map(f => f[0].cols);
+        CursosD.tc = cddf(insertCol(CursosD.tgroup, ['Completado', "tinyint", null, null, null, "NOT NULL", [[null, "DEFAULT", null, null, "new funcs.AVG(f => f[2][10])"]]]));
+        CursosD.tr = INSERT(CursosD.f[0], CursosD.f[2].map(c => c[0](g.fc)), CursosD.f[2].map(c => 'Completado'));
+
         for (var i = 0, colaborador, row, j, fr; i < data.length; i++) {
             row = data[i];
             if (!row[0]) { break; }
@@ -256,12 +258,14 @@ function work(data) {
                 f = g.from[j];
                 fr[j] = WHERE(f[0], f[2].map(c => [c[0](g.fc), parseInt(c[1](fr))]))[0];
                 if (!fr[j] && f[3]) { fr[j] = INSERT(f[0], f[3], f[4](fr)); }
-                else if (!fr[j]) { fr[j] = INSERT(f[0], f[2].map(c => c[0](g.fc)), f[2].map(c => c[1](fr))); }
+                //else if (!fr[j]) { fr[j] = INSERT(f[0], f[2].map(c => c[0](g.fc)), f[2].map(c => c[1](fr))); }
             }
             if (!wh.call(wh, fr)) { continue; }
-            
-            fr2 = [row, INSERT(CursosD.from[1][0], CursosD.from[1][2].map(c => c[0](CursosD.fc)), CursosD.from[1][2].map(c => c[1]([row])))]
-            
+            for (var j = 0, f; j < g.from.length; j++) {
+                f = g.from[j];
+                if (!fr[j]) { fr[j] = INSERT(f[0], f[2].map(c => c[0](g.fc)), f[2].map(c => c[1](fr))); }
+            }
+            CursosD.tr[CursosD.tc].v = fr;
             //
             fr[3][1].v = fr;
             fr[3][2].v = fr;
