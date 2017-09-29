@@ -232,22 +232,35 @@ function work(data) {
         insertCol(g.tgroup, ['AVG10', "tinyint", null, null, null, "NOT NULL", [[null, "DEFAULT", null, null, "new funcs.AVG(f => f[2][10])"]]]);
         insertCol(g.tgroup, ['MAX7', "smalldatetime", null, null, null, "NOT NULL", [[null, "DEFAULT", null, null, "new funcs.MAX(f => f[2][7])"]]]);
         insertCol(g.tgroup, ['MIN3', "date", null, null, null, "NOT NULL", [[null, "DEFAULT", null, null, "new funcs.MIN(f => f[2][3])"]]]);
-        var CursosD = {
-            group: colconv('"Inscripciones"."Curso"', g.from)
-        }
-        var tmp = CursosD.group(g.fc).map(c => [c[2], c[3][1], c[4], c[5], c[6], c[7] ? "NULL" : "NOT NULL", null]);
-        tmp.unshift(['RI', "tinyint", null, null, null, "NOT NULL", null]);
+        var CursosDC = { group: colconv('"Inscripciones"."Curso"', g.from) };
+        CursosDC.tgroup = CREATE_TABLE(
+            "CurosDirecciónesC",
+            [
+                ['RI', "tinyint", null, null, null, "NOT NULL", null],
+                ...CursosDC.group(g.fc).map(c => [c[2], c[3][1], c[4], c[5], c[6], c[7] ? "NULL" : "NOT NULL", null]),
+                ['Inscripciones', "tinyint", null, null, null, "NOT NULL", [[null, "DEFAULT", null, null, "new funcs.COUNT(f => f[2][10])"]]]
+            ],
+            [[null, "PRIMARY KEY", [['RI'], ...CursosDC.group(g.fc).map(c => [c[2]])], null, null]]
+        )
+        CursosDC.f = [CursosDC.tgroup, null, [[f => f[4][1], f => f[2][4]]], null, null];
+        g.from.push(CursosDC.f);
+        g.fc = g.from.map(f => f[0].cols);
+        CursosDC.tr = INSERT(CursosDC.f[0], ['RI', ...CursosDC.f[2].map(c => c[0](g.fc))], [1, ...CursosDC.f[2].map(c => 'Inscripciones')]);
+
+        var CursosD = { group: colconv('"Inscripciones"."Curso"', g.from) }
         CursosD.tgroup = CREATE_TABLE(
             "CurosDirecciónes",
-            tmp,
-            [[null, "PRIMARY KEY", CursosD.group(g.fc).map(c => [c[2]]), null, null]]
+            [
+                ['RI', "tinyint", null, null, null, "NOT NULL", null],
+                ...CursosD.group(g.fc).map(c => [c[2], c[3][1], c[4], c[5], c[6], c[7] ? "NULL" : "NOT NULL", null]),
+                ['Completado', "tinyint", null, null, null, "NOT NULL", [[null, "DEFAULT", null, null, "new funcs.AVG(f => f[2][10])"]]]
+            ],
+            [[null, "PRIMARY KEY", [['RI'], ...CursosD.group(g.fc).map(c => [c[2]])], null, null]]
         )
-        insertCol(CursosD.tgroup, );
-        CursosD.f = [CursosD.tgroup, null, [[f => f[4][0], f => f[2][4]]], null, null];
+        CursosD.f = [CursosD.tgroup, null, [[f => f[5][1], f => f[2][4]]], null, null];
         g.from.push(CursosD.f);
         g.fc = g.from.map(f => f[0].cols);
-        CursosD.tc = cddf(insertCol(CursosD.tgroup, ['Completado', "tinyint", null, null, null, "NOT NULL", [[null, "DEFAULT", null, null, "new funcs.AVG(f => f[2][10])"]]]));
-        CursosD.tr = INSERT(CursosD.f[0], CursosD.f[2].map(c => c[0](g.fc)), CursosD.f[2].map(c => 'Completado'));
+        CursosD.tr = INSERT(CursosD.f[0], ['RI', ...CursosD.f[2].map(c => c[0](g.fc))], [1, ...CursosD.f[2].map(c => 'Inscripciones')]);
 
         for (var i = 0, colaborador, row, j, fr; i < data.length; i++) {
             row = data[i];
@@ -265,6 +278,7 @@ function work(data) {
                 f = g.from[j];
                 if (!fr[j]) { fr[j] = INSERT(f[0], f[2].map(c => c[0](g.fc)), f[2].map(c => c[1](fr))); }
             }
+            CursosDC.tr[CursosD.tc].v = fr;
             CursosD.tr[CursosD.tc].v = fr;
             //
             fr[3][1].v = fr;
