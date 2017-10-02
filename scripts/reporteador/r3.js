@@ -59,21 +59,19 @@ function work(data) {
     var ColPK = [0, 1, 3];
     var cit = csc([2, 0, "Totales", "Totales"]);
     var vcs = vCols.map(c => c[0]);
-
-    for (var i = 1, length = data.length - 1, row, result, ci; i < length; i++) {
+    var ñ = '5,"Categoría","Pregunta"'; ñ = function(f) { return [5, f[1], f[2]]; }
+    hCols = hCols.map((c, i, n) => { n = cddf(tableCol(Interacciones, c[0])); return f => [3, i, c[0], f[n]]; });
+    for (var i = 1, length = data.length - 1, row, result, ci, j; i < length; i++) {
         row = INSERT(Interacciones, data[0], data[i]);
-        countD(row, rcont[cit]);
-        AVG(row, rcat[cit]);
-        result = SELECT(Interacciones, row, vcs);
-        result = rsc([5, result[0], result[1]]);
-        AVG(row, result[cit]);
+        rcont[cit].v = row;
+        rcat[cit].v = row;
+        result = rsc(ñ(row));
+        result[cit].v = row;
         for (j = 0; j < hCols.length; j++) {
-            ci = [3, j, hCols[j][0]];
-            ci[3] = SELECT(Interacciones, row, [ci[2]]);
-            ci = csc(ci);
-            countD(row, rcont[ci]);
-            AVG(row, rcat[ci]);
-            AVG(row, result[ci]);
+            ci = csc(hCols[j](row));
+            rcont[ci].v = row;
+            rcat[ci].v = row;
+            result[ci].v = row;
         }
     }
     Resultados.rows.remove(0, 2);
@@ -90,7 +88,7 @@ function work(data) {
         if (ri < 4) { tr.style.fontWeight = "bold"; }
         r.forEach(function(c, ci) {
             var c2 = c;
-            c = Array.isArray(c) ? ci < 2 ? c[0] : c[0].toFixed(0) : c;
+            c = c !== null && typeof c === "object" ? ci < 2 ? c[0] : c.v.toFixed(0) : c;
             if (ri === 0) {
                 var wi = ci === 1 ? 200 : 28;
                 if (prevri[ri] && prevri[ri].innerText.trimSingleLine() === c) {
@@ -108,7 +106,7 @@ function work(data) {
                 return;
             }
             var td = document.createElement("td"); tr.appendChild(td);
-            if (ri === 0) { td.style.verticalAlign = "bottom"; td.style.textAlign = "center";}
+            if (ri === 0) { td.style.verticalAlign = "bottom"; td.style.textAlign = "center"; }
             if (ri === 0 && ci === 2 || ri === 2 && ci === 0) { td.style.backgroundColor = "#BFBFBF"; }
             if (ri === 1 && ci > 2) { td.style.backgroundColor = prevci[ci].style.backgroundColor; }
             if (ri === 1 && ci > 13 || ci === 0 || ri === 0 && ci === 2) {
@@ -167,20 +165,15 @@ function work(data) {
         if (ci[0]) { ci = ci[1]; }
         else {
             ci = ci[1];
-            insertCol(Resultados, ["{0}|{1}".format(data[2], data[3]), "tinyint", null, null, null, "NOT NULL", [[null, "DEFAULT", null, null, "[0,0,0,[]]"]]], ci);
+            insertCol(Resultados, ["{0}|{1}".format(data[2], data[3]), "tinyint", null, null, null, "NOT NULL", [[null, "DEFAULT", null, null, "new funcs.AVG(f => f[3])"]]], ci);
             for (var i = 0; i < 4; i++) { Resultados.rows[i][ci] = data[i]; }
+            Resultados.rows[4][ci] = new funcs.COUNT(f => f[0]);
         }
         return ci;
     }
     function rsc(row) {
         var s = WHERE(Resultados, [["CR", row[0]], ["Categoría", row[1]], ["Pregunta", row[2]]])[0];
         return s || INSERT(Resultados, ["CR", "Categoría", "Pregunta"], row);
-    }
-    function AVG(row, pp) {
-        pp[1]++;
-        pp[2] += SELECT(Interacciones, row, ["Peso"]);
-        pp[0] = pp[2] / pp[1];
-        pp[3].push(row);
     }
     function countD(row, pp) {
         var tmp = [SELECT(Interacciones, row, ["Inscripcion"])];

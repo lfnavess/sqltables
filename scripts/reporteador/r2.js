@@ -59,50 +59,60 @@ var t = [];
 var aaa = function(a) { return a; }
 var bbb = function(b) { b = [tiden++, b]; t.push(b); return b; }
 var ccc = function(c) { c.unshift(tciden++); t[0].rows.push(c); return c; }
-var Collator = new Intl.Collator(undefined,{sensitivity: 'base', numeric: true});
+var Collator = new Intl.Collator("es-MX", { sensitivity: 'base', numeric: true });
 var funcs = {
-        MAX: class MAX {
-            constructor(expresion) { this.e = expresion; this.rs = []; this._v = null; }
-            set v(f) {
-                this.rs.push(f);
-                f = this.e(f);
-                if (!this._v) { this._v = f; } else if (this._v < f) { this._v = f; }
-            }
-            get v() { return this._v; }
-        },
-        MIN: class MIN {
-            constructor(expresion) { this.e = expresion; this.rs = []; this._v = null; }
-            set v(f) {
-                this.rs.push(f);
-                f = this.e(f);
-                if (!this._v) { this._v = f; } else if (this._v > f) { this._v = f; }
-            }
-            get v() { return this._v; }
-        },
-        AVG: class AVG {
-            constructor(expresion) { this.e = expresion; this.rs = []; this.c = null;  }
-            set v(f) {
-                this.rs.push(f);
-                f = this.e(f);
-                if (f != null) { if(!this.c){ this.c = 0; this.s = 0; } this.c++; this.s += f; }
-            }
-            get v() { return this.c ? this.s / this.c : null; }
-        },
-        COUNT: class COUNT {
-            constructor(expresion) { this.e = expresion; this.rs = []; this._v = null; }
-            set v(f) {
-                this.rs.push(f);
-                f = this.e(f);
-                if (f != null) { if(!this._v){ this._v = 0; } this._v++; }
-            }
-            get v() { return this._v; }
-        },
-        ROWS: class ROWS {
-            constructor() { this._v = []; }
-            set v(v) { this._v.push(v); }
-            get v() { return this._v; }
+    MAX: class MAX {
+        constructor(expresion) { this.e = expresion; this.rs = []; this._v = null; }
+        set v(f) {
+            this.rs.push(f);
+            f = this.e(f);
+            if (this._v === null || compare(undefined, f, this._v) > 0) { this._v = f; }
         }
+        get v() { return this._v; }
+    },
+    MIN: class MIN {
+        constructor(expresion) { this.e = expresion; this.rs = []; this._v = null; }
+        set v(f) {
+            this.rs.push(f);
+            f = this.e(f);
+            if (compare(undefined, f, this._v) < 0) { this._v = f; }
+        }
+        get v() { return this._v; }
+    },
+    AVG: class AVG {
+        constructor(expresion) { this.e = expresion; this.rs = []; this.s = 0; this.c = 0; this._v = null; }
+        set v(f) {
+            this.rs.push(f);
+            f = this.e(f);
+            if (f !== null) { this.s += f; this.c++; this._v = this.s / this.c; }
+        }
+        get v() { return this._v; }
+    },
+    COUNT: class COUNT {
+        constructor(expresion) { this.e = expresion[1]; this.rs = []; this._v = null; this.u = e[0] ? [] : null; }
+        set v(f) {
+            this.rs.push(f);
+            f = this.e(f);
+            if (f !== null) {
+                if (!this._v) { this._v = 0; }
+                if (this.u) {
+                    for (var s = 0, e = this.u.length - 1, i, r; s <= e;) {
+                        i = s + Math.round((e - s) / 2);
+                        r = compare(undefined, f, this.u[i][0]);
+                        if (r > 0) { s = i + 1; } else if (r) { e = i - 1; } else { s = i; break; }
+                    }
+                    if (r) { this.u.insertAt(f, s); this._v++; }
+                } else { this._v++; }
+            }
+        }
+        get v() { return this._v; }
+    },
+    ROWS: class ROWS {
+        constructor() { this._v = []; }
+        set v(v) { this._v.push(v); }
+        get v() { return this._v; }
     }
+}
 
 
 CREATE_TABLE(
@@ -268,13 +278,13 @@ function table(table) {
     if (!r) { throw (`Invalid object name '${table}'`); }
     return r;
 }
-function tableCol(table, col){
+function tableCol(table, col) {
     var c = WHERE(t[0], [[t[0].cols[1], table], [t[0].cols[2], col]])[0];
     if (!c) { throw (`Invalid column name '${col}'.`); }
     return c;
 }
 function getval(row, col) { return row[col[1].cols.indexOf(col)]; }
-function compare(cnc, a, b) {
+function compare(cnc = [null, [], 1], a, b) {
     if (cnc[1].FK) { a = Array.isArray(a) ? a[cddf(cnc[1].FK)] : a; b = Array.isArray(b) ? b[cddf(cnc[1].FK)] : b; }
     return a === null ? (b === null ? 0 : 1) : b === null ? (a === null ? 0 : -1) : Collator.compare(a, b) * cnc[2];
     //a = collate(cnc[1][5], a); b = collate(cnc[1][5], b);
@@ -316,24 +326,28 @@ function INSERT(table, cols, vals) {
         c = table.cols[ci];
         if (c[6]) { val = c[6]++; } else { val = vals[cols.indexOf(c)]; }
         if (c.FK && Array.isArray(val)) { val = val[cddf(c.FK)]; }
+        if (moment.isMoment(val)) {
+            if (c[3][0] === 7) { val = moment.format("DD/MM/YYYY"); }
+            else if (c[3][0] === 8) { val = moment.format("DD/MM/YYYY HH:mm"); }
+        }
         if (c.DEF && !val && val !== 0) { val = eval(c.DEF); }
         if (typeof val === "string") { val = val.trimSingleLine(); }
         if (!val && val !== 0) {
             if (!c[7]) { throw (`Cannot insert the value NULL into column '${c[2]}', table '${table[1]}'; column does not allow nulls. INSERT fails.`); }
             val = null;
-        } else if (!Array.isArray(val) && typeof(val) !== "object") {
+        } else if (!Array.isArray(val) && typeof (val) !== "object") {
             if (c[3][1] === "nvarchar") {
                 if (typeof val !== "string") { val = val + ""; }
                 if (val.length > c[4]) { throw (`${c[2]} Maxlength reached`); }
-            } else if(c[3][0] === 8){ //smalldatetime
-                if(typeof val === "string"){ val = moment.tz(val, "DD/MM/YYYY HH:mm", true, "America/Mexico_City"); }
+            } else if (c[3][0] === 8) { //smalldatetime
+                if (typeof val === "string") { val = moment.tz(val, "DD/MM/YYYY HH:mm", true, "America/Mexico_City"); }
                 if (val < c[3][2]) { throw (`${c[2]} Min date value reached`); }
                 else if (val > c[3][3]) { throw (`${c[2]} Max date value reached`); }
-            } else if(c[3][0] === 7){ //date
-                if(typeof val === "string"){ val = moment.tz(val, "DD/MM/YYYY", true, "America/Mexico_City"); }
+            } else if (c[3][0] === 7) { //date
+                if (typeof val === "string") { val = moment.tz(val, "DD/MM/YYYY", true, "America/Mexico_City"); }
                 if (val < c[3][2]) { throw (`${c[2]} Min date value reached`); }
                 else if (val > c[3][3]) { throw (`${c[2]} "Max date value reached`); }
-            }else {
+            } else {
                 if (isNaN(val)) { throw (`Conversion failed when converting the varchar value '${val}' to data type ${c[3][1]}.`); } else { val = parseInt(val); }
                 if (val < c[3][2]) { throw ("Min value reached"); }
                 else if (val > c[3][3]) { throw ("Max value reached"); }

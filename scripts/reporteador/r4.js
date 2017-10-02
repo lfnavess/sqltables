@@ -4,23 +4,25 @@ function work(data) {
     var Colaboradores = CREATE_TABLE(
         "Colaboradores",
         [
-            ["Colaborador ID", "int", null, null, null, "NOT NULL", [[null, "PRIMARY KEY", null, null]]],
+            ["Colaborador ID", "nvarchar", 7, null, null, "NOT NULL", [[null, "PRIMARY KEY", null, null]]],
             ["Colaborador", "nvarchar", 50, null, null, "NULL", null],
-            ["PPG ID", "nvarchar", 7, null, null, "NULL", [[null, "UNIQUE", null, null]]],
+            ["Email", "nvarchar", 50, null, null, "NULL", [[null, "UNIQUE", null, null]]],
             ["Lugar", "nvarchar", 50, null, null, "NULL", null],
             ["Empresa", "nvarchar", 50, null, null, "NULL", null],
+            ["Empresa tipo", "nvarchar", 50, null, null, "NULL", null],
             ["Entidad", "nvarchar", 50, null, null, "NULL", null],
             ["Centro de costos ID", "int", null, null, null, "NULL", null],
             ["Centro de costos", "nvarchar", 50, null, null, "NULL", null],
             ["Puesto", "nvarchar", 50, null, null, "NULL", null],
             ["Nivel", "nvarchar", 50, null, null, "NULL", null],
             ["Dirección", "nvarchar", 50, null, null, "NULL", null],
+            ["Dirección categoría", "nvarchar", 50, null, null, "NULL", null],
+            ["Business Partner ID", "nvarchar", 7, null, null, "NULL", null],
             ["Business Partner", "nvarchar", 50, null, null, "NULL", null],
+            ["Jefe ID", "nvarchar", 7, null, null, "NULL", null],
             ["Jefe", "nvarchar", 50, null, null, "NULL", null],
             ["Jefe email", "nvarchar", 50, null, null, "NULL", null],
-            ["Director", "nvarchar", 50, null, null, "NULL", null],
-            ["Email", "nvarchar", 50, null, null, "NULL", [[null, "UNIQUE", null, null]]],
-            ["Empresa tipo", "nvarchar", 50, null, null, "NULL", null]
+            ["Director", "nvarchar", 50, null, null, "NULL", null]
         ]
     );
     var Inscripciones = CREATE_TABLE(
@@ -28,36 +30,67 @@ function work(data) {
         [
             ["Inscripción ID", "int", null, null, null, "NOT NULL", [[null, "PRIMARY KEY", null, null]]],
             ["Fecha corte", "smalldatetime", null, null, null, "NOT NULL", null],
+            ["Alumno ID", "nvarchar", 7, null, null, "NOT NULL", [[null, "FOREING KEY", Colaboradores, "Colaborador ID"]]],
+            ["Curso ID", "int", null, null, null, "NOT NULL", null],
             ["Estado", "nvarchar", 50, null, null, "NOT NULL", null],
             ["Fecha inicio", "date", null, null, null, "NOT NULL", null],
             ["Curso", "nvarchar", 100, null, null, "NOT NULL", null],
             ["Estado2", "nvarchar", 50, null, null, "NULL", null],
             ["Progreso", "tinyint", null, null, null, "NOT NULL", null],
             ["Último progreso", "smalldatetime", null, null, null, "NULL", null],
-            ["Alumno ID", "int", null, null, null, "NOT NULL", [[null, "FOREING KEY", Colaboradores, "Colaborador ID"]]],
-            ["Curso ID", "int", null, null, null, "NOT NULL", null],
             ["Completado", "tinyint", null, null, null, "NOT NULL", null],
             ["Fecha creado", "smalldatetime", null, null, null, "NOT NULL", null],
         ]
     );
+    var s = `
+		"Inscripciones"."Fecha corte",
+		"Inscripciones"."Estado",
+		"Inscripciones"."Fecha inicio",
+		"Colaboradores"."Colaborador ID",
+		"Colaboradores"."Colaborador",
+		"Inscripciones"."Fecha inicio",
+		"Inscripciones"."Curso",
+		"Inscripciones"."Estado2",
+		"Inscripciones"."Progreso",
+		"Inscripciones"."Último progreso",
+		"Colaboradores"."Email",
+		"Colaboradores"."Lugar",
+		"Colaboradores"."Empresa",
+		"Colaboradores"."Entidad",
+		"Colaboradores"."Centro de costos ID",
+		"Colaboradores"."Centro de costos",
+		"Colaboradores"."Puesto",
+		"Colaboradores"."Nivel",
+		"Colaboradores"."Dirección",
+		"Colaboradores"."Dirección categoría",
+		"Colaboradores"."Business Partner",
+		"Colaboradores"."Jefe ID",
+		"Colaboradores"."Jefe",
+		"Colaboradores"."Jefe email",
+		"Colaboradores"."Director",
+		"Inscripciones"."Fecha creado",
+		"Inscripciones"."Inscripción ID"
+	`;
     var matuser = [
-        ['"Alumno ID"', '"Colaborador ID"'],
+        ['"Alumno >PPG ID"', '"Colaborador ID"'],
         ['"Alumno >Nombre corto"', '"Colaborador"'],
-        ['"Alumno >Usuario"', '"PPG ID"'],
-        ['"Alumno >Posición >Lugar"', '"Lugar"'],
-        ['"Alumno >Posición >Lugar >Empresa"', '"Empresa"'],
-        ['"Alumno >Posición >Lugar >Municipio >Entidad"', '"Entidad"'],
-        ['"Alumno >Posición >CC >COMEX ID"', '"Centro de costos ID"'],
-        ['"Alumno >Posición >CC >Nombre"', '"Centro de costos"'],
-        ['"Alumno >Posición >Puesto >Nombre"', '"Puesto"'],
-        ['"Alumno >Posición >Puesto >Nivel"', '"Nivel"'],
-        ['"Alumno >Posición >Dirección"', '"Dirección"'],
-        ['"Alumno >Posición >Dirección >Posición BP >Colaborador >Nombre corto"', '"Business Partner"'],
-        ['"Alumno >Posición >Posición jefe >Colaborador >Nombre corto"', '"Jefe"'],
-        ['"Alumno >Posición >Posición jefe >Email"', '"Jefe email"'],
-        ['"Alumno >Posición >Posición director >Colaborador >Nombre corto"', '"Director"'],
-        ['"Alumno >Posición >Email"', '"Email"'],
-        ['"Alumno >Posición >Lugar >Empresa >Tipo"', '"Empresa tipo"']
+        ['"Alumno >Email"', '"Email"'],
+        ['"Alumno >Lugar"', '"Lugar"'],
+        ['"Alumno >Lugar >Empresa"', '"Empresa"'],
+        ['"Alumno >Lugar >Empresa >Tipo"', '"Empresa tipo"'],
+        ['"Alumno >Lugar >Municipio >Entidad"', '"Entidad"'],
+        ['"Alumno >Centro de costos >Nombre"', '"Centro de costos"'],
+        ['"Alumno >Centro de costos >COMEX ID"', '"Centro de costos ID"'],
+        ['"Alumno >Puesto >Nombre"', '"Puesto"'],
+        ['"Alumno >Puesto >Nivel"', '"Nivel"'],
+        ['"Alumno >Dirección"', '"Dirección"'],
+        ['"Alumno >Dirección >Categoría"', '"Dirección categoría"'],
+        ['"Alumno >Dirección >Business Partner >PPG ID"', '"Business Partner ID"'],
+        ['"Alumno >Dirección >Business Partner >Nombre corto"', '"Business Partner"'],
+        ['"Alumno >Jefe >PPG ID"', '"Jefe ID"'],
+        ['"Alumno >Jefe >Nombre corto"', '"Jefe"'],
+        ['"Alumno >Jefe >Email"', '"Jefe email"'],
+        ['"Alumno >Director >Nombre corto"', '"Director"']
     ];
     var mat = [
         ['"Inscripción ID"'],
@@ -69,7 +102,7 @@ function work(data) {
         ['"Progreso"'],
         ['"Último progreso"'],
         ['"Fecha creado"'],
-        ['"Alumno ID"'],
+        ['"Alumno >PPG ID"', '"Alumno ID"'],
         ['"Curso ID"'],
         ['CASE WHEN"Progreso"=\'100\'THEN 100 ELSE 0 END', '"Completado"']
     ];
@@ -195,31 +228,23 @@ function work(data) {
         function colde2(i, t) { return tableCol(ta, i); }
     }
     var filtered = [];
-    var s = '"Fecha corte", "Estado", "Fecha inicio", "Alumno", "PPGID", "Curso", "Estado2", "Progreso", "Último progreso", "Lugar", "Empresa", "Entidad", "Centro de costos ID", "Centro de costos", "Puesto", "Nivel", "Dirección", "Business Partner", "Jefe", "Jefe email", "Director", "Email", "Fecha creado", "Inscripción ID"';
     var f = '"Inscripciones"';
     var w = '"Empresa tipo" = \'INT COMEX [E]\' AND "Curso ID" IN(3853,3855,3806,3811,3896,3822,3838,3837,3830,3885,3813,3815,3829,3820,3800,3835,3865,3974) AND "inscripciones"."Estado" IN(\'Completado\',\'Incompleto\',\'Sin iniciar\')';
 
     var r = "";
     var ins = [];
-    var objs = {
-        f: [[Inscripciones]], refs: [], r: function(i) {
-            if (!this._r[i]) {
-
-            }
-            return this._r[i];
-        }, _r: []
-    };
     var alumnos = {
         select: '"Alumno ID",MAX("Fecha corte"),CASE WHEN AVG("Completado")=100 THEN\'Completado\'WHEN MAX("Último progreso")IS NOT NULL THEN\'Incompleto\'ELSE\'Sin iniciar\'END',
         from: [[ori, null], [Colaboradores, null, [[f => f[1][0], f => f[0][17]]], dcColaborador, osColaborador], [Inscripciones, null, [[f => f[2][0], f => f[0][67]]], dsInscripcion, osInscripcion]],
         group: '"Colaboradores"."Colaborador ID"',
         where: '"Colaboradores"."Empresa tipo"=\'INT COMEX [E]\'AND"Inscripciones"."Curso ID"IN(3853,3855,3806,3811,3896,3822,3838,3837,3830,3885,3813,3815,3829,3820,3800,3835,3865,3974)AND"Inscripciones"."Estado"IN(\'Completado\',\'Incompleto\',\'Sin iniciar\')'
     }
-    var wh = colconv(alumnos.where, alumnos.from);
+    alumnos.where = colconv(alumnos.where, alumnos.from);
     g(alumnos);
     function g(g) {
         g.fc = g.from.map(f => f[0].cols);
         g.group = colconv(g.group, g.from);
+		s = colconv(s, g.from);
         g.tgroup = CREATE_TABLE(
             "table1",
             g.group(g.fc).map(c => [c[2], c[3][1], c[4], c[5], c[6], c[7] ? "NULL" : "NOT NULL", null]),
@@ -263,17 +288,17 @@ function work(data) {
         CursosD.tr = INSERT(CursosD.f[0], ['RI', ...CursosD.f[2].map(c => c[0](g.fc))], [1, ...CursosD.f[2].map(c => 'Inscripciones')]);
 
         for (var i = 0, colaborador, row, j, fr; i < data.length; i++) {
-            row = data[i];
-            if (!row[0]) { break; }
+            fr = [data[i]];
+            if (!fr[0][0]) { break; }
             //preparar todas las filas relacionadas
-            fr = [row];
             for (j = 1, f; j < g.from.length; j++) {
                 f = g.from[j];
                 fr[j] = WHERE(f[0], f[2].map(c => [c[0](g.fc), parseInt(c[1](fr))]))[0];
                 if (!fr[j] && f[3]) { fr[j] = INSERT(f[0], f[3], f[4](fr)); }
                 //else if (!fr[j]) { fr[j] = INSERT(f[0], f[2].map(c => c[0](g.fc)), f[2].map(c => c[1](fr))); }
             }
-            if (!wh.call(wh, fr)) { continue; }
+            if (!g.where.call(g.where, fr)) { continue; }
+			row = s(fr);
             for (var j = 0, f; j < g.from.length; j++) {
                 f = g.from[j];
                 if (!fr[j]) { fr[j] = INSERT(f[0], f[2].map(c => c[0](g.fc)), f[2].map(c => c[1](fr))); }
