@@ -1,0 +1,63 @@
+﻿<!DOCTYPE html>
+<html lang="es-mx">
+<head>
+    <title>TEST</title>
+    <meta charset="UTF-8">
+    <meta name="description" content="The description of my page" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link href="normalize.min.css" rel="stylesheet" />
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        html {
+            min-height: 100%;
+        }
+
+        body {
+            display: inline-block;
+            min-width: 100%;
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            background-color: lightgray;
+        }
+
+        table {
+            table-layout: fixed;
+            position: relative;
+            width: 855px;
+            margin-bottom: -4px;
+            border-collapse: collapse;
+        }
+
+            table > tbody > tr {
+                background-color: white;
+            }
+
+        td {
+            white-space: nowrap;
+            overflow: hidden;
+            width: 28px;
+        }
+    </style>
+    <script src="plugins.js"></script>
+    <script src="r2.js"></script>
+    <script src="r3.js"></script>
+    <script src="data.js"></script>
+    <script>
+        //fetch('json.json', { mode: "same-origin" })
+        //    .then(function(response) { return response.json(); })
+        //    .then(function(j) { work(j); });
+    </script>
+</head>
+<body>
+    <script>
+        (function() {
+            work(t2);
+            //document.getElementById("button").addEventListener("click", function (e) { work(document.getElementById("textarea").value); });
+        })();
+    </script>
+</body>
+</html>

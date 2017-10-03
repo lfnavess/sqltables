@@ -46,7 +46,7 @@ function work(data) {
 		"Inscripciones"."Fecha corte",
 		"Inscripciones"."Estado",
 		"Inscripciones"."Fecha inicio",
-		"Inscripciones"."Alumno ID",
+		"Colaboradores"."Colaborador ID",
 		"Colaboradores"."Colaborador",
 		"Inscripciones"."Fecha inicio",
 		"Inscripciones"."Curso",
@@ -233,21 +233,13 @@ function work(data) {
 
     var r = "";
     var ins = [];
-    var objs = {
-        f: [[Inscripciones]], refs: [], r: function(i) {
-            if (!this._r[i]) {
-
-            }
-            return this._r[i];
-        }, _r: []
-    };
     var alumnos = {
         select: '"Alumno ID",MAX("Fecha corte"),CASE WHEN AVG("Completado")=100 THEN\'Completado\'WHEN MAX("Último progreso")IS NOT NULL THEN\'Incompleto\'ELSE\'Sin iniciar\'END',
         from: [[ori, null], [Colaboradores, null, [[f => f[1][0], f => f[0][17]]], dcColaborador, osColaborador], [Inscripciones, null, [[f => f[2][0], f => f[0][67]]], dsInscripcion, osInscripcion]],
         group: '"Colaboradores"."Colaborador ID"',
         where: '"Colaboradores"."Empresa tipo"=\'INT COMEX [E]\'AND"Inscripciones"."Curso ID"IN(3853,3855,3806,3811,3896,3822,3838,3837,3830,3885,3813,3815,3829,3820,3800,3835,3865,3974)AND"Inscripciones"."Estado"IN(\'Completado\',\'Incompleto\',\'Sin iniciar\')'
     }
-    var wh = colconv(alumnos.where, alumnos.from);
+    alumnos.where = colconv(alumnos.where, alumnos.from);
     g(alumnos);
     function g(g) {
         g.fc = g.from.map(f => f[0].cols);
@@ -305,7 +297,7 @@ function work(data) {
                 if (!fr[j] && f[3]) { fr[j] = INSERT(f[0], f[3], f[4](fr)); }
                 //else if (!fr[j]) { fr[j] = INSERT(f[0], f[2].map(c => c[0](g.fc)), f[2].map(c => c[1](fr))); }
             }
-            if (!wh.call(wh, fr)) { continue; }
+            if (!g.where.call(g.where, fr)) { continue; }
 			row = s(fr);
             for (var j = 0, f; j < g.from.length; j++) {
                 f = g.from[j];
