@@ -63,15 +63,11 @@ function work(data) {
     hCols = hCols.map((c, i, n) => { n = cddf(tableCol(Interacciones, c[0])); return f => [3, i, c[0], f[n]]; });
     for (var i = 1, length = data.length - 1, row, p, ci, j; i < length; i++) {
         row = INSERT(Interacciones, data[0], data[i]);
-        rcont[cit].v = row;
-        rcat[cit].v = row;
         p = rsc(ñ(row));
-        p[cit].v = row;
+        p[cit].v = rcat[cit].v = rcont[cit].v = row;
         for (j = 0; j < hCols.length; j++) {
             ci = csc(hCols[j](row));
-            rcont[ci].v = row;
-            rcat[ci].v = row;
-            p[ci].v = row;
+            p[ci].v = rcat[ci].v = rcont[ci].v = row;
         }
     }
     Resultados.rows.remove(0, 2);
@@ -177,7 +173,7 @@ function work(data) {
     }
     function indexCol(a, e) {
         if (!e && e != 0) { e = Resultados.cols.length - 1; }
-        for (var s = 0, i, r, b; s <= e;) {
+        for (var s = 0, i, b, r = -1; s <= e;) {
             i = s + Math.round((e - s) / 2);
             b = ColPK.map(c => Resultados.rows[c][i]);
             r = cddc(a, b);
