@@ -61,17 +61,17 @@ function work(data) {
     var vcs = vCols.map(c => c[0]);
     var ñ = '5,"Categoría","Pregunta"'; ñ = function(f) { return [5, f[1], f[2]]; }
     hCols = hCols.map((c, i, n) => { n = cddf(tableCol(Interacciones, c[0])); return f => [3, i, c[0], f[n]]; });
-    for (var i = 1, length = data.length - 1, row, result, ci, j; i < length; i++) {
+    for (var i = 1, length = data.length - 1, row, p, ci, j; i < length; i++) {
         row = INSERT(Interacciones, data[0], data[i]);
         rcont[cit].v = row;
         rcat[cit].v = row;
-        result = rsc(ñ(row));
-        result[cit].v = row;
+        p = rsc(ñ(row));
+        p[cit].v = row;
         for (j = 0; j < hCols.length; j++) {
             ci = csc(hCols[j](row));
             rcont[ci].v = row;
             rcat[ci].v = row;
-            result[ci].v = row;
+            p[ci].v = row;
         }
     }
     Resultados.rows.remove(0, 2);
@@ -167,20 +167,13 @@ function work(data) {
             ci = ci[1];
             insertCol(Resultados, ["{0}|{1}".format(data[2], data[3]), "tinyint", null, null, null, "NOT NULL", [[null, "DEFAULT", null, null, "new funcs.AVG(f => f[3])"]]], ci);
             for (var i = 0; i < 4; i++) { Resultados.rows[i][ci] = data[i]; }
-            Resultados.rows[4][ci] = new funcs.COUNT(f => f[0]);
+            Resultados.rows[4][ci] = new funcs.COUNT(true, f => f[0]);
         }
         return ci;
     }
     function rsc(row) {
         var s = WHERE(Resultados, [["CR", row[0]], ["Categoría", row[1]], ["Pregunta", row[2]]])[0];
         return s || INSERT(Resultados, ["CR", "Categoría", "Pregunta"], row);
-    }
-    function countD(row, pp) {
-        var tmp = [SELECT(Interacciones, row, ["Inscripcion"])];
-        var arri = arrind(pp[3], tmp);
-        if (arri[0]) { tmp = arri[0]; }
-        else { pp[0]++; tmp[1] = []; pp[3].insertAt(tmp, arri[1]); }
-        tmp[1].push(row);
     }
     function indexCol(a, e) {
         if (!e && e != 0) { e = Resultados.cols.length - 1; }
@@ -193,20 +186,7 @@ function work(data) {
         return [!r ? b : null, s];
     }
     function cddc(a, b) {
-        for (var i = 0, r = 0; i < a.length && !r; i++) { r = compare(a[i], b[i]); }
+        for (var i = 0, r = 0; i < a.length && !r; i++) { r = compare(undefined, a[i], b[i]); }
         return r;
-    }
-    function compare(a, b) {
-        a = collate(1, a); b = collate(1, b);
-        return a === null ? (b === null ? 0 : 1) : b === null ? (a === null ? 0 : -1) : (a > b ? 1 : a < b ? -1 : 0) * 1
-    }
-    function arrind(arr, a) {
-        for (var s = 0, e = arr.length - 1, i, r, b; s <= e;) {
-            i = s + Math.round((e - s) / 2);
-            b = arr[i];
-            r = compare(a[0], b[0]);
-            if (r > 0) { s = i + 1; } else if (r) { e = i - 1; } else { s = i; break; }
-        }
-        return [!r ? b : null, s];
     }
 }

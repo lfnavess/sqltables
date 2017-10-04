@@ -89,16 +89,16 @@ var funcs = {
         get v() { return this._v; }
     },
     COUNT: class COUNT {
-        constructor(expresion) { this.e = expresion[1]; this.rs = []; this._v = null; this.u = e[0] ? [] : null; }
+        constructor(unique, expresion) { this.e = expresion; this.rs = []; this._v = null; this.u = unique ? [] : null; }
         set v(f) {
             this.rs.push(f);
             f = this.e(f);
             if (f !== null) {
                 if (!this._v) { this._v = 0; }
                 if (this.u) {
-                    for (var s = 0, e = this.u.length - 1, i, r; s <= e;) {
+                    for (var s = 0, e = this.u.length - 1, i, r = -1; s <= e;) {
                         i = s + Math.round((e - s) / 2);
-                        r = compare(undefined, f, this.u[i][0]);
+                        r = compare(undefined, f, this.u[i]);
                         if (r > 0) { s = i + 1; } else if (r) { e = i - 1; } else { s = i; break; }
                     }
                     if (r) { this.u.insertAt(f, s); this._v++; }
