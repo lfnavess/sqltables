@@ -107,11 +107,6 @@ var funcs = {
         }
         get v() { return this._v; }
     },
-    ROWS: class ROWS {
-        constructor() { this._v = []; }
-        set v(v) { this._v.push(v); }
-        get v() { return this._v; }
-    }
 }
 
 
