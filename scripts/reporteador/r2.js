@@ -51,32 +51,45 @@ if (!Array.prototype.insertAt) {
         return this;
     };
 }
-if (!Array.prototype.binaryIndexOf){
-	//https://oli.me.uk/2013/06/08/searching-javascript-arrays-with-a-binary-search/
-	Array.prototype.binaryIndexOf = function (searchElement, fromIndex = 0) {
-		'use strict';
-		for (var e = this.length - 1, i, r; fromIndex <= e;) {
-			i = ~~((fromIndex + e) / 2);
-			r = compare(undefined, searchElement, this[i]);
-			if (r > 0) { fromIndex = i + 1; } else if (r) { e = i - 1; } else { return i; }
-		}
-		return -1;
-	}
+if (!Array.prototype.binaryIndexOf) {
+    //https://oli.me.uk/2013/06/08/searching-javascript-arrays-with-a-binary-search/
+    Array.prototype.binaryIndexOf = function(searchElement, fromIndex = 0) {
+        'use strict';
+        for (var e = this.length - 1, i, r; fromIndex <= e;) {
+            i = ~~((fromIndex + e) / 2);
+            r = compare(undefined, searchElement, this[i]);
+            if (r > 0) { fromIndex = i + 1; } else if (r) { e = i - 1; } else { return i; }
+        }
+        return -1;
+    }
 }
-if (!Array.prototype.binarySort){
-	Array.prototype.binarySort = function (compareFunction) {
-		'use strict';
-		if(!compareFunction){ compareFunction = (a,b)=> compare(undefined, a, b); }
-		for(var j = 1, a, s, e, i, r; j < this.length; j++){
-			for (a = this[j], s= 0, e = j; s <= e;) {
-				i = ~~((s + e) / 2);
-				r = compareFunction(a, this[i]);
-				if (r > 0) { s = i + 1; } else if (r) { e = i - 1; } else { s = i; break; }
-			}
-			this.move(j, s);
-		}
-	}
+if (!Array.prototype.binarySort) {
+    Array.prototype.binarySort = function(compareFunction) {
+        'use strict';
+        if (!compareFunction) { compareFunction = (a, b) => compare(undefined, a, b); }
+        for (var j = 1, a, s, e, i, r; j < this.length; j++) {
+            for (a = this[j], s = 0, e = j; s <= e;) {
+                i = ~~((s + e) / 2);
+                r = compareFunction(a, this[i]);
+                if (r >= 0) { s = i + 1; } else { e = i - 1; } 
+            }
+            this.move(j, s);
+        }
+    }
 }
+if (!Array.prototype.binaryInsert) {
+    Array.prototype.binaryInsert = function(element) {
+        'use strict';
+        var compareFunction = (a, b) => compare(undefined, a, b);
+        for (var s = 0, e = this.length -1, i, r; s <= e;) {
+            i = ~~((s + e) / 2);
+            r = compareFunction(element, this[i]);
+            if (r >= 0) { s = i + 1; } else { e = i - 1; }
+        }
+        this.insertAt(element, s);
+    }
+}
+
 
 
 var dn = { null: 1, "NULL": 1, "NOT NULL": 0 };
@@ -122,14 +135,7 @@ var funcs = {
             f = this.e(f);
             if (f !== null) {
                 if (!this._v) { this._v = 0; }
-                if (this.u) {
-                    for (var s = 0, e = this.u.length - 1, i, r = -1; s <= e;) {
-                        i = ~~((s + e) / 2);
-                        r = compare(undefined, f, this.u[i]);
-                        if (r > 0) { s = i + 1; } else if (r) { e = i - 1; } else { s = i; break; }
-                    }
-                    if (r) { this.u.insertAt(f, s); this._v++; }
-                } else { this._v++; }
+                if (this.u && this.u.binaryIndexOf(f) < 0) { this.u.binaryInsert(f); this._v++; } else { this._v++; }
             }
         }
         get v() { return this._v; }
