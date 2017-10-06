@@ -46,50 +46,61 @@ if (!Array.prototype.remove) {
 if (!Array.prototype.insertAt) {
     //http://stackoverflow.com/questions/586182/javascript-insert-item-into-array-at-a-specific-index
     Array.prototype.insertAt = function(item, index) {
-        if (index === -1 || index === null || item === undefined) { return this; }
+        if (index < 0 || !index && index != 0) { return this; }
         this.splice(index, 0, item);
         return this;
     };
 }
 if (!Array.prototype.binaryIndexOf) {
     //https://oli.me.uk/2013/06/08/searching-javascript-arrays-with-a-binary-search/
-    Array.prototype.binaryIndexOf = function(searchElement, fromIndex = 0) {
-        'use strict';
-        for (var e = this.length - 1, i, r; fromIndex <= e;) {
-            i = ~~((fromIndex + e) / 2);
-            r = compare(undefined, searchElement, this[i]);
-            if (r > 0) { fromIndex = i + 1; } else if (r) { e = i - 1; } else { return i; }
+    Array.prototype.binaryIndexOf = function (searchElement, fromIndex = 0) {
+		if (!this.hasOwnProperty("compare")) { this.binarySort(); }
+        for (var e = this.length - 1, i, r, r0; fromIndex <= e;) {
+            i = fromIndex + e >> 1;
+            r = this.compare(searchElement, this[i]);
+            if (r > 0) { fromIndex = i + 1; } else if (r) { e = i - 1; } else { e = i - 1; r0 = i; }
         }
-        return -1;
+		this.s = fromIndex;
+        return r0 >= 0 ? r0 : -1;
     }
+}
+if (!Array.prototype.binaryLastIndexOf) {
+	Array.prototype.binaryLastIndexOf = function (searchElement, fromIndex = this.length -1) {
+		if (!this.hasOwnProperty("compare")) { this.binarySort(); }
+        for (var s = 0, i, r, r0; s <= fromIndex;) {
+            i = s + fromIndex >> 1;
+            r = this.compare(searchElement, this[i]);
+            if (r > 0) { s = i + 1; } else if (r) { fromIndex = i - 1; } else { s = i + 1; r0 = i; }
+        }
+		this.s = s;
+        return r0 >= 0 ? r0 : -1;
+	}
 }
 if (!Array.prototype.binarySort) {
     Array.prototype.binarySort = function(compareFunction) {
         'use strict';
-        if (!compareFunction) { compareFunction = (a, b) => compare(undefined, a, b); }
+		this.compare = compareFunction || this.compare;
         for (var j = 1, a, s, e, i, r; j < this.length; j++) {
-            for (a = this[j], s = 0, e = j; s <= e;) {
-                i = ~~((s + e) / 2);
-                r = compareFunction(a, this[i]);
-                if (r >= 0) { s = i + 1; } else { e = i - 1; } 
-            }
-            this.move(j, s);
+			this.binaryLastIndexOf(this[j]);
+			if (j != this.s) { this.splice(this.s, 0, this.splice(j, 1)[0]); }
         }
+		return this;
     }
 }
 if (!Array.prototype.binaryInsert) {
     Array.prototype.binaryInsert = function(element) {
         'use strict';
-        var compareFunction = (a, b) => compare(undefined, a, b);
-        for (var s = 0, e = this.length -1, i, r; s <= e;) {
-            i = ~~((s + e) / 2);
-            r = compareFunction(element, this[i]);
-            if (r >= 0) { s = i + 1; } else { e = i - 1; }
-        }
-        this.insertAt(element, s);
+		this.binaryLastIndexOf(this[j]);
+		this.splice(this.s, 0, element);
+		return this;
     }
 }
-
+if (!Array.prototype.compare) {
+	Array.prototype.collator = new Intl.Collator(undefined, { sensitivity: 'base', numeric: true });
+	Array.prototype.compare = function (a, b, order = 1) {
+		return !a && a != 0 ? (!b && b != 0 ? 0 : 1) : !b && b != 0 ? (!a && a != 0 ? 0 : -1) : this.collator.compare(a, b) * order;
+	}
+}
 
 
 var dn = { null: 1, "NULL": 1, "NOT NULL": 0 };
@@ -106,7 +117,7 @@ var funcs = {
         set v(f) {
             this.rs.push(f);
             f = this.e(f);
-            if (this._v === null || compare(undefined, f, this._v) > 0) { this._v = f; }
+            if (this._v === null || compare(f, this._v) > 0) { this._v = f; }
         }
         get v() { return this._v; }
     },
@@ -115,7 +126,7 @@ var funcs = {
         set v(f) {
             this.rs.push(f);
             f = this.e(f);
-            if (compare(undefined, f, this._v) < 0) { this._v = f; }
+            if (compare(f, this._v) < 0) { this._v = f; }
         }
         get v() { return this._v; }
     },
@@ -135,7 +146,9 @@ var funcs = {
             f = this.e(f);
             if (f !== null) {
                 if (!this._v) { this._v = 0; }
-                if (this.u && this.u.binaryIndexOf(f) < 0) { this.u.binaryInsert(f); this._v++; } else { this._v++; }
+				if (this.u) {
+					if(this.u.binaryIndexOf(f) < 0) { this.u.insertAt(f, this.u.s); this._v++; }
+				} else { this._v++; }
             }
         }
         get v() { return this._v; }
@@ -288,7 +301,7 @@ function ADDCONSTRAINT(table, name, type, cols, reftable, refcols, expre = null)
 function cddc(cn, a, b) {
     for (var ci = 0, r = 0; ci < cn.ccols.length && !r; ci++) {
         r = cddf(cn.ccols[ci][1]);
-        r = compare(cn.ccols[ci], a[r], b[r]);
+        r = compare(a[r], b[r], cn.ccols[ci]);
     }
     return r;
 }
@@ -312,7 +325,7 @@ function tableCol(table, col) {
     return c;
 }
 function getval(row, col) { return row[col[1].cols.indexOf(col)]; }
-function compare(cnc = [null, [], 1], a, b) {
+function compare(a, b, cnc = [null, [], 1]) {
     if (cnc[1].FK) { a = Array.isArray(a) ? a[cddf(cnc[1].FK)] : a; b = Array.isArray(b) ? b[cddf(cnc[1].FK)] : b; }
     return a === null ? (b === null ? 0 : 1) : b === null ? (a === null ? 0 : -1) : Collator.compare(a, b) * cnc[2];
     //a = collate(cnc[1][5], a); b = collate(cnc[1][5], b);
@@ -424,6 +437,13 @@ function constorow(constr, row) {
 }
 function preparecontraint(constr) {
     constr.ready = true;
+	constr[1].rows.compare = function(a, b){
+		for (var i = 0, r = 0; i < constr.ccols.length && !r; i++) {
+			r = cddf(constr.ccols[i][1]);
+			r = compare(a[r], b[r], cn.ccols[i]);
+		}
+		return r;
+	};
     for (var alln = cdde(constr), i = 0, row; i < constr[1].rows.length; i++) {
         row = constr[1].rows[i];
         if (alln && cddd(constr, row)) { continue; }

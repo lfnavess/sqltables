@@ -464,10 +464,6 @@ function work(data) {
         for (var i = 0, r = 0; i < a.length && !r; i++) { r = compare(a[i], b[i]); }
         return r;
     }
-    function compare(a, b) {
-        a = collate(1, a); b = collate(1, b);
-        return a === null ? (b === null ? 0 : 1) : b === null ? (a === null ? 0 : -1) : (a > b ? 1 : a < b ? -1 : 0) * 1
-    }
     function AVG(row, pp) {
         pp[1]++;
         pp[2] += dsVals(row)[0];
@@ -555,10 +551,6 @@ function work(data) {
         function cddc(a, b) {
             for (var i = 0, r = 0; i < a.length && !r; i++) { r = compare(a[i], b[i]); }
             return r;
-        }
-        function compare(a, b) {
-            a = collate(1, a); b = collate(1, b);
-            return a === null ? (b === null ? 0 : 1) : b === null ? (a === null ? 0 : -1) : (a > b ? 1 : a < b ? -1 : 0) * 1
         }
         function arrind(arr, a) {
             for (var s = 0, e = arr.length - 1, i, r, b; s <= e;) {

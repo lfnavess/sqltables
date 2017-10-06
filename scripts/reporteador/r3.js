@@ -182,7 +182,7 @@ function work(data) {
         return [!r ? b : null, s];
     }
     function cddc(a, b) {
-        for (var i = 0, r = 0; i < a.length && !r; i++) { r = compare(undefined, a[i], b[i]); }
+        for (var i = 0, r = 0; i < a.length && !r; i++) { r = compare(a[i], b[i]); }
         return r;
     }
 }
