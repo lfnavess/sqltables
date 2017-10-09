@@ -39,7 +39,7 @@ function work(data) {
             ["Progreso", "tinyint", null, null, null, "NOT NULL", null],
             ["Último progreso", "smalldatetime", null, null, null, "NULL", null],
             ["Completado", "tinyint", null, null, null, "NOT NULL", null],
-            ["Fecha creado", "smalldatetime", null, null, null, "NOT NULL", null],
+            ["Fecha creado", "smalldatetime", null, null, null, "NOT NULL", null]
         ]
     );
     var s = `
@@ -143,7 +143,7 @@ function work(data) {
         }
         if (u) {
             if (u.toString() === "/[\\s\"'(),.]/") { colins(s.substring(si)); }
-            else { throw ("error"); }
+            else { throw "error"; }
         } else if (p === 1) { colins(); }
         var ff;
         if (isSearch) { ff = new Function("f", `return ${ccc.map(c => c.join("")).join("")};`); }
@@ -158,11 +158,11 @@ function work(data) {
             for (var i = 0, ti, ci; i < f.length; i++) {
                 ti = f[i][0].cols.indexOf(f[i][0].cols.find(cc => cc[2] === c));
                 if (ti >= 0) {
-                    if (ci) { throw (`Nombre de columna '${c}' ambiguo`); }
+                    if (ci) { throw `Nombre de columna '${c}' ambiguo`; }
                     ci = [i, ti];
                 }
             }
-            if (!ci) { throw (`Columna '${c}' no econtrada`); }
+            if (!ci) { throw `Columna '${c}' no econtrada`; }
             return colexp(ci[0], ci[1]);
         }
         function colins(i, t) {
@@ -199,7 +199,7 @@ function work(data) {
                 else if (i === ".") { parts[parts.length - 1] = ttable(parts[parts.length - 1]); t = i; }
                 else if (funcs[i]) { t = i; }
                 else if (!isNaN(i)) { parts.push(Number(i)); }
-                else if (p === ".") { parts[parts.length - 1] = ccol(parts[parts.length - 1], t) }
+                else if (p === ".") { parts[parts.length - 1] = ccol(parts[parts.length - 1], t); }
                 else { parts.push(i); }
             }
             p = t;
@@ -222,7 +222,7 @@ function work(data) {
         }
         if (u) {
             if (u.toString() === "/[\\s\"'(]/") { parts = colde2(t.substring(s)); }
-            else { throw ("error"); }
+            else { throw "error"; }
         }
         return parts;
         function colde2(i, t) { return tableCol(ta, i); }
@@ -238,7 +238,7 @@ function work(data) {
         from: [[ori, null], [Colaboradores, null, [[f => f[1][0], f => f[0][17]]], dcColaborador, osColaborador], [Inscripciones, null, [[f => f[2][0], f => f[0][67]]], dsInscripcion, osInscripcion]],
         group: '"Colaboradores"."Colaborador ID"',
         where: '"Colaboradores"."Empresa tipo"=\'INT COMEX [E]\'AND"Inscripciones"."Curso ID"IN(3853,3855,3806,3811,3896,3822,3838,3837,3830,3885,3813,3815,3829,3820,3800,3835,3865,3974)AND"Inscripciones"."Estado"IN(\'Completado\',\'Incompleto\',\'Sin iniciar\')'
-    }
+    };
     alumnos.where = colconv(alumnos.where, alumnos.from);
     g(alumnos);
     function g(g) {
@@ -266,13 +266,13 @@ function work(data) {
                 ['Inscripciones', "tinyint", null, null, null, "NOT NULL", [[null, "DEFAULT", null, null, "new funcs.COUNT(f => f[2][10])"]]]
             ],
             [[null, "PRIMARY KEY", [['RI'], ...CursosDC.group(g.fc).map(c => [c[2]])], null, null]]
-        )
+        );
         CursosDC.f = [CursosDC.tgroup, null, [[f => f[4][1], f => f[2][4]]], null, null];
         g.from.push(CursosDC.f);
         g.fc = g.from.map(f => f[0].cols);
         CursosDC.tr = INSERT(CursosDC.f[0], ['RI', ...CursosDC.f[2].map(c => c[0](g.fc))], [1, ...CursosDC.f[2].map(c => 'Inscripciones')]);
 
-        var CursosD = { group: colconv('"Inscripciones"."Curso"', g.from) }
+        var CursosD = { group: colconv('"Inscripciones"."Curso"', g.from) };
         CursosD.tgroup = CREATE_TABLE(
             "CurosDirecciónes",
             [
@@ -281,7 +281,7 @@ function work(data) {
                 ['Completado', "tinyint", null, null, null, "NOT NULL", [[null, "DEFAULT", null, null, "new funcs.AVG(f => f[2][10])"]]]
             ],
             [[null, "PRIMARY KEY", [['RI'], ...CursosD.group(g.fc).map(c => [c[2]])], null, null]]
-        )
+        );
         CursosD.f = [CursosD.tgroup, null, [[f => f[5][1], f => f[2][4]]], null, null];
         g.from.push(CursosD.f);
         g.fc = g.from.map(f => f[0].cols);
@@ -323,14 +323,14 @@ function work(data) {
     var p;
     function table(table) {
         for (var i = 0, f; i < objs.f.length; i++) { f = objs.f[i]; if (f[1] ? collate(f[1]) : collate(f[0][1]) === collate(table)) { return i; } }
-        throw (`Tabla "${table}" no encontrada`);
+        throw `Tabla "${table}" no encontrada`;
     }
     function onlycol(col, table) {
         if (table >= 0) { return `this.r(${table})[${cddf(tableCol(objs.f[table][0], col))}]`; }
         for (var i = 0, c, c2; i < objs.f.length; i++) {
             c2 = cddf(tableCol(objs.f[i][0], col));
             if (c2) {
-                if (c) { throw (`Nombre columna "${col}" ambiguo`); }
+                if (c) { throw `Nombre columna "${col}" ambiguo`; }
                 c = `this.r(${i})[${c2}]`;
             }
         }
@@ -393,7 +393,7 @@ function work(data) {
             ["Curso", "nvarchar", 50, null, null, "NOT NULL", null]
         ],
         [[null, "PRIMARY KEY", [["CR"], ["Curso"]], null, null]]
-    )
+    );
     INSERT(Completado, Completado.cols, [0, 1]);
     INSERT(Completado, Completado.cols, [1, 0]);
     for (var i = 1, row = [2]; i < Completado.cols.length; i++) { row[i] = Completado.cols[i][2]; }
@@ -413,7 +413,7 @@ function work(data) {
         select: 'MAX("Fecha corte")AS"Fecha corte",CASE WHEN AVG("Completado")=100 THEN\'Completado\'WHEN MAX("Último progreso")IS NOT NULL THEN\'Incompleto\'ELSE\'Sin iniciar\'END AS"Estado",MIN("Fecha inicio")AS"Fecha inicio","Alumno","PPGID",COUNT("Curso")AS"Cursos",NULL AS"Estado2",AVG("Progreso")AS"Progreso",MAX("Último progreso")AS"Último progreso","Lugar","Empresa","Entidad","Centro de costos ID","Centro de costos","Puesto","Nivel","Dirección","Business Partner","Jefe","Jefe email","Director","Email",MAX("Fecha creado")AS"Fecha creado",MAX("Inscripción ID")AS"Inscripción ID","Empresa tipo",NULL AS"Curso ID",AVG("Completado")AS"Completado"',
         from: Inscripciones,
         group: '"Alumno","PPGID","Lugar","Empresa","Entidad","Centro de costos ID","Centro de costos","Puesto","Nivel","Dirección","Business Partner","Jefe","Jefe email","Director","Email","Empresa tipo"'
-    }
+    };
 
     for (var i = 0, row, drow, j, dcol; i < data.length; i++) {
         row = data[i];
@@ -481,7 +481,7 @@ function work(data) {
             row = INSERT(formats[0], selcols, row);
 
         }
-        row["Fecha corte"] = function() { return this[0]; }
+        row["Fecha corte"] = function() { return this[0]; };
 
 
 

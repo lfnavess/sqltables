@@ -84,7 +84,7 @@ class binaryArray extends Array {
         this.ready = true;
         for (var i = 0, val; i < this.length; i++) {
             val = this[i];
-            if (this.lastIndexOf(val, i - 1) >= 0 && this.unique) { throw `value '${val}' already exist`; };
+            if (this.lastIndexOf(val, i - 1) >= 0 && this.unique) { throw `value '${val}' already exist`; }
             this.move(i, this.s);
         }
         delete this.s;
@@ -94,7 +94,7 @@ class binaryArray extends Array {
     push(element) {
         for (var i = 0, val; i < arguments.length; i++) {
             val = arguments[i];
-            if (this.lastIndexOf(val) >= 0 && this.unique) { throw `value '${val}' already exist`; };
+            if (this.lastIndexOf(val) >= 0 && this.unique) { throw `value '${val}' already exist`; }
             this.insertAt(arguments[i], this.s);
         }
         delete this.s;
@@ -104,7 +104,7 @@ class binaryArray extends Array {
     unshift(element) {
         for (var i = 0, val; i < arguments.length; i++) {
             val = arguments[i];
-            if (this.indexOf(val) >= 0 && this.unique) { throw `value '${val}' already exist`; };
+            if (this.indexOf(val) >= 0 && this.unique) { throw `value '${val}' already exist`; }
             this.insertAt(arguments[i], this.s);
         }
         delete this.s;
