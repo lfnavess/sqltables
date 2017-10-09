@@ -5,13 +5,6 @@ if (!String.prototype.trimSingleLine) {
         return this.replace(/^\s+|\s+$/g, '').replace(/\s+/g, ' ');
     };
 }
-if (!String.prototype.format) {
-    //http://stackoverflow.com/questions/18405736/is-there-a-c-sharp-string-format-equivalent-in-javascript
-    String.prototype.format = function() {
-        var args = arguments;
-        return this.replace(/{(\d+)}/g, function(match, number) { return typeof args[number] !== undefined ? args[number] : match; });
-    };
-}
 if (!String.prototype.accentFold) {
     //https://stackoverflow.com/questions/5700636/using-javascript-to-perform-text-matches-with-without-accented-characters
     String.prototype.accentFold = function() {
@@ -22,7 +15,7 @@ if (!String.prototype.accentFold) {
                 return str === str.toUpperCase() ? tmp.toUpperCase() : tmp;
             }
         );
-    }
+    };
 }
 if (!Array.prototype.move) {
     //http://stackoverflow.com/questions/5306680/move-an-array-element-from-one-array-position-to-another
@@ -30,15 +23,14 @@ if (!Array.prototype.move) {
         if (old_index === new_index) { return this; }
         if (new_index >= this.length) {
             var k = new_index - this.length;
-            while (k-- + 1) { this.push(undefined); }
+            while (k-- + 1) { this.push(null); }
         }
         this.splice(new_index, 0, this.splice(old_index, 1)[0]);
-        return this; // for testing purposes
+        return this;
     };
 }
-if (!Array.prototype.remove) {
-    Array.prototype.remove = function(index, count) {
-        if (!count) { count = 1; }
+if (!Array.prototype.removeAt) {
+    Array.prototype.removeAt = function(count = 1, index) {
         this.splice(index, count);
         return this;
     };
@@ -46,70 +38,135 @@ if (!Array.prototype.remove) {
 if (!Array.prototype.insertAt) {
     //http://stackoverflow.com/questions/586182/javascript-insert-item-into-array-at-a-specific-index
     Array.prototype.insertAt = function(item, index) {
-        if (index < 0 || !index && index != 0) { return this; }
+        if (index < 0 || !index && index !== 0) { return this; }
         this.splice(index, 0, item);
         return this;
     };
 }
-if (!Array.prototype.binaryIndexOf) {
-    //https://oli.me.uk/2013/06/08/searching-javascript-arrays-with-a-binary-search/
-    Array.prototype.binaryIndexOf = function (searchElement, fromIndex = 0) {
-		if (!this.hasOwnProperty("compare")) { this.binarySort(); }
-        for (var e = this.length - 1, i, r, r0; fromIndex <= e;) {
-            i = fromIndex + e >> 1;
-            r = this.compare(searchElement, this[i]);
-            if (r > 0) { fromIndex = i + 1; } else if (r) { e = i - 1; } else { e = i - 1; r0 = i; }
-        }
-		this.s = fromIndex;
-        return r0 >= 0 ? r0 : -1;
-    }
-}
-if (!Array.prototype.binaryLastIndexOf) {
-	Array.prototype.binaryLastIndexOf = function (searchElement, fromIndex = this.length -1) {
-		if (!this.hasOwnProperty("compare")) { this.binarySort(); }
-        for (var s = 0, i, r, r0; s <= fromIndex;) {
-            i = s + fromIndex >> 1;
-            r = this.compare(searchElement, this[i]);
-            if (r > 0) { s = i + 1; } else if (r) { fromIndex = i - 1; } else { s = i + 1; r0 = i; }
-        }
-		this.s = s;
-        return r0 >= 0 ? r0 : -1;
-	}
-}
-if (!Array.prototype.binarySort) {
-    Array.prototype.binarySort = function(compareFunction) {
-        'use strict';
-		this.compare = compareFunction || this.compare;
-        for (var j = 1, a, s, e, i, r; j < this.length; j++) {
-			this.binaryLastIndexOf(this[j]);
-			if (j != this.s) { this.splice(this.s, 0, this.splice(j, 1)[0]); }
-        }
-		return this;
-    }
-}
-if (!Array.prototype.binaryInsert) {
-    Array.prototype.binaryInsert = function(element) {
-        'use strict';
-		this.binaryLastIndexOf(this[j]);
-		this.splice(this.s, 0, element);
-		return this;
-    }
-}
 if (!Array.prototype.compare) {
-	Array.prototype.collator = new Intl.Collator(undefined, { sensitivity: 'base', numeric: true });
-	Array.prototype.compare = function (a, b, order = 1) {
-		return !a && a != 0 ? (!b && b != 0 ? 0 : 1) : !b && b != 0 ? (!a && a != 0 ? 0 : -1) : this.collator.compare(a, b) * order;
-	}
+    Array.prototype._compare = (new Intl.Collator(undefined, { sensitivity: 'base', numeric: true })).compare;
+    Array.prototype.compare = function(a = null, b = null, order = 1) {
+        if (!a && a !== 0 && a !== null) { a = null; }
+        if (!b && b !== 0 && b !== null) { b = null; }
+        return a === null ? b === null ? 0 : 1 : b === null ? -1 : this._compare(a, b) * order;
+    };
 }
 
+class binaryArray extends Array {
+    indexOf(searchElement, fromIndex = 0) {
+        //https://oli.me.uk/2013/06/08/searching-javascript-arrays-with-a-binary-search/
+        if (!this.ready) { this.sort(); }
+        delete this.b;
+        for (var e = this.length - 1, i, b, r, r0; fromIndex <= e;) {
+            i = fromIndex + e >> 1;
+            b = this[i];
+            r = this.compare(searchElement, b);
+            if (r > 0) { fromIndex = i + 1; } else if (r) { e = i - 1; } else { e = i - 1; r0 = i; this.b = b; }
+        }
+        this.s = fromIndex;
+        return r0 >= 0 ? r0 : -1;
+    }
+    lastIndexOf(searchElement, fromIndex = this.length - 1) {
+        if (!this.ready) { this.sort(); }
+        delete this.b;
+        for (var s = 0, i, b, r, r0; s <= fromIndex;) {
+            i = s + fromIndex >> 1;
+            b = this[i];
+            r = this.compare(searchElement, b);
+            if (r > 0) { s = i + 1; } else if (r) { fromIndex = i - 1; } else { s = i + 1; r0 = i; this.b = b; }
+        }
+        this.s = s;
+        this.se = searchElement;
+        return r0 >= 0 ? r0 : -1;
+    }
+    sort(compareFunction) {
+        if (compareFunction) { this.compare = compareFunction; if (this.ready) { return; } }
+        this.ready = true;
+        for (var i = 0, val; i < this.length; i++) {
+            val = this[i];
+            if (this.lastIndexOf(val, i - 1) >= 0 && this.unique) { throw `value '${val}' already exist`; };
+            this.move(i, this.s);
+        }
+        delete this.s;
+        delete this.b;
+        return this;
+    }
+    push(element) {
+        for (var i = 0, val; i < arguments.length; i++) {
+            val = arguments[i];
+            if (this.lastIndexOf(val) >= 0 && this.unique) { throw `value '${val}' already exist`; };
+            this.insertAt(arguments[i], this.s);
+        }
+        delete this.s;
+        delete this.b;
+        return this.length;
+    }
+    unshift(element) {
+        for (var i = 0, val; i < arguments.length; i++) {
+            val = arguments[i];
+            if (this.indexOf(val) >= 0 && this.unique) { throw `value '${val}' already exist`; };
+            this.insertAt(arguments[i], this.s);
+        }
+        delete this.s;
+        delete this.b;
+        return this.length;
+    }
+    compare(a = null, b = null, order = 1) {
+        if (!a && a !== 0 && a !== null) { a = null; }
+        if (!b && b !== 0 && b !== null) { b = null; }
+        return a === null ? b === null ? 0 : 1 : b === null ? -1 : binaryArray.compare(a, b) * order;
+    }
+}
+binaryArray.compare = (new Intl.Collator(undefined, { sensitivity: 'base', numeric: true })).compare;
+
+class rows extends binaryArray {
+    sort() {
+        var rows = this;
+        rows.ready = true;
+        var t = rows.constr[3][0] === 1;
+        for (var alln = cdde(rows.constr), i = 0, row; i < rows.constr[1].rows.length; i++) {
+            row = rows.constr[1].rows[i];
+            if (rows.tesnull(row)) { if (!alln) { throw "Value NULL not allowed"; } continue; }
+            if (rows.lastIndexOf(row, t ? i - 1 : undefined) >= 0) { throw "Value not unique"; }
+            if (t) { rows.move(i, rows.s); } else { rows.insertAt(row, rows.s); }
+        }
+        return this;
+    }
+    compare(a, b) {
+        for (var i = 0, r = 0, ia, ib; i < this.ind.length && !r; i++) {
+            r = this.ind[i];
+            ia = a ? a[r[1]] : null;
+            ib = b ? b[r[1]] : null;
+            if (r[0].FK) {
+                ia = !ia && ia !== 0 ? null : Array.isArray(ia) ? ia[cddf(r[0].FK)] : ia;
+                ib = !ib && ib !== 0 ? null : Array.isArray(ib) ? ib[cddf(r[0].FK)] : ib;
+            }
+            r = r[0].compare(ia, ib, r[2]);
+        }
+        return r;
+    }
+    tesnull(row) {
+        for (var i = 0, r; i < this.ind.length; i++) {
+            r = row[this.ind[i][1]];
+            if (!r && r !== 0 && r !== null) { r = row[this.ind[i][1]] = null; return true; }
+        }
+    }
+    set constr(constr) {
+        if (constr[3][0] <= 2) { this.unique = true; }
+        this._c = constr;
+        this.ind = this.constr.ccols.map(c => [c[1], cddf(c[1]), [2]]);
+        if (this.ready) { this.sort(); }
+    }
+    get constr() { return this._c; }
+}
 
 var dn = { null: 1, "NULL": 1, "NOT NULL": 0 };
 var tiden = 1;
 var tciden = 1;
-var t = [];
-var aaa = function(a) { return a; }
-var bbb = function(b) { b = [tiden++, b]; t.push(b); return b; }
-var ccc = function(c) { c.unshift(tciden++); t[0].rows.push(c); return c; }
+var t = new rows;
+var aaa = function(a) { return a; };
+var bbb = function(b) { b = [tiden++, b]; t[t.length] = b; return b; };
+var ccc = function(c) { c.unshift(tciden++); t[0].rows[t[0].rows.length] = c; return c; };
 var Collator = new Intl.Collator("es-MX", { sensitivity: 'base', numeric: true });
 var funcs = {
     MAX: class MAX {
@@ -117,6 +174,7 @@ var funcs = {
         set v(f) {
             this.rs.push(f);
             f = this.e(f);
+            if (f === null) { return; }
             if (this._v === null || compare(f, this._v) > 0) { this._v = f; }
         }
         get v() { return this._v; }
@@ -126,6 +184,7 @@ var funcs = {
         set v(f) {
             this.rs.push(f);
             f = this.e(f);
+            if (f === null) { return; }
             if (compare(f, this._v) < 0) { this._v = f; }
         }
         get v() { return this._v; }
@@ -135,25 +194,25 @@ var funcs = {
         set v(f) {
             this.rs.push(f);
             f = this.e(f);
-            if (f !== null) { this.s += f; this.c++; this._v = this.s / this.c; }
+            if (f === null) { return; }
+            this.s += f; this.c++; this._v = this.s / this.c;
         }
         get v() { return this._v; }
     },
     COUNT: class COUNT {
-        constructor(unique, expresion) { this.e = expresion; this.rs = []; this._v = null; this.u = unique ? [] : null; }
+        constructor(unique, expresion) { this.e = expresion; this.rs = new binaryArray; this.rs.unique = true; this._v = null; this.u = unique ? [] : null; }
         set v(f) {
             this.rs.push(f);
             f = this.e(f);
-            if (f !== null) {
-                if (!this._v) { this._v = 0; }
-				if (this.u) {
-					if(this.u.binaryIndexOf(f) < 0) { this.u.insertAt(f, this.u.s); this._v++; }
-				} else { this._v++; }
-            }
+            if (f === null) { return; }
+            if (!this._v) { this._v = 0; }
+            if (this.u) {
+                if (this.u.indexOf(f) < 0) { this.u.insertAt(f, this.u.s); this._v++; }
+            } else { this._v++; }
         }
         get v() { return this._v; }
-    },
-}
+    }
+};
 
 
 CREATE_TABLE(
@@ -185,28 +244,29 @@ CREATE_TABLE(
         ["max", "bigint", null, null, null, null, null]
     ]
 );
-t[2].rows.push([1, "bit", 0, 1]);
-t[2].rows.push([2, "tinyint", 0, 255]);
-t[2].rows.push([3, "smallint", -32768, 32767]);
-t[2].rows.push([4, "int", -2147483648, 2147483647]);
-t[2].rows.push([5, "bigint", -9223372036854775808, 9223372036854775807]);
-t[2].rows.push([6, "nvarchar", null, null]);
-t[2].rows.push([7, "date", -62135575200000, 253402236000000]);
-t[2].rows.push([8, "smalldatetime", -2208967200000, 3453339599000]);
-t[2].rows.push([9, "datetime", -6847783200000, 253402322399997]);
-t[2].rows.push([10, "duration", -2208967200000, 3453339599000]);
-t[2].rows.push([11, "promedio", null, null]);
+t[2].rows[0] = [1, "bit", 0, 1];
+t[2].rows[1] = [2, "tinyint", 0, 255];
+t[2].rows[2] = [3, "smallint", -32768, 32767];
+t[2].rows[3] = [4, "int", -2147483648, 2147483647];
+t[2].rows[4] = [5, "bigint", -9223372036854775808, 9223372036854775807];
+t[2].rows[5] = [6, "nvarchar", null, null];
+t[2].rows[6] = [7, "date", -62135575200000, 253402236000000];
+t[2].rows[7] = [8, "smalldatetime", -2208967200000, 3453339599000];
+t[2].rows[8] = [9, "datetime", -6847783200000, 253402322399997];
+t[2].rows[9] = [10, "duration", -2208967200000, 3453339599000];
+t[2].rows[10] = [11, "promedio", null, null];
 CREATE_TABLE(
     "CONSTRAINTTYPES",
     [
         ["CONSTRAINTTYPEID", "tinyint", null, null, null, "NOT NULL", null],
-        ["CONSTRAINTTYPE", "nvarchar", 50, null, null, "NOT NULL", null]
+        ["CONSTRAINTTYPE", "nvarchar", 50, null, null, "NOT NULL", null],
+        ["CODE", "nvarchar", 2, null, null, "NOT NULL", null]
     ]
 );
-t[3].rows.push([1, "PRIMARY KEY"]);
-t[3].rows.push([2, "UNIQUE"]);
-t[3].rows.push([3, "FOREING KEY"]);
-t[3].rows.push([4, "DEFAULT"]);
+t[3].rows[0] = [1, "PRIMARY KEY", "PK"];
+t[3].rows[1] = [2, "UNIQUE", "IX"];
+t[3].rows[2] = [3, "FOREING KEY", "FK"];
+t[3].rows[3] = [4, "DEFAULT", "DF"];
 CREATE_TABLE(
     "CONSTRAINTS",
     [
@@ -229,9 +289,9 @@ CREATE_TABLE(
 
 t[1].cols[0][6] = tiden;
 t[0].cols[0][6] = tciden;
-aaa = function(a) { return WHERE(t[2], [[t[2].cols[1], a]])[0]; }
-bbb = function(b) { return INSERT(t[1], [t[1].cols[1]], [b]); }
-ccc = function(c) { return INSERT(t[0], t[0].cols.slice(1), c); }
+aaa = function(a) { return WHERE(t[2], [[t[2].cols[1], a]])[0]; };
+bbb = function(b) { return INSERT(t[1], [t[1].cols[1]], [b]); };
+ccc = function(c) { return INSERT(t[0], t[0].cols.slice(1), c); };
 t[0].rows.forEach(function(r) { r[3] = WHERE(t[2], [[t[2].cols[1], r[3]]])[0]; });
 
 ADDCONSTRAINT("Tables", null, "PRIMARY KEY", [["TableID"]], null, null);
@@ -253,47 +313,38 @@ ADDCONSTRAINT("CONSTRAINTSCOLUMNS", null, "FOREING KEY", [["column"]], "Columns"
 ADDCONSTRAINT("CONSTRAINTSCOLUMNS", null, "FOREING KEY", [["ref_column"]], "Columns", ["ColumnID"]);
 ADDCONSTRAINT("CONSTRAINTSCOLUMNS", null, "PRIMARY KEY", [["Constraint"], ["column"]], null, null);
 
-
 function ADDCONSTRAINT(table, name, type, cols, reftable, refcols, expre = null) {
-    if (typeof table === "string") { table = WHERE(t[1], [[t[1].cols[1], table]])[0]; if (!table) { throw ("table not found"); } }
-    if (typeof type === "string") { type = WHERE(t[3], [[t[3].cols[1], type]])[0]; if (!type) { throw (`type '${type}' not found`); } }
-    if (typeof reftable === "string") { reftable = WHERE(t[1], [[t[1].cols[1], reftable]])[0]; if (!reftable) { throw ("reftable not found"); } }
+    if (typeof table === "string") { table = WHERE(t[1], [[t[1].cols[1], table]])[0]; if (!table) { throw "table not found"; } }
+    if (typeof type === "string") { type = WHERE(t[3], [[t[3].cols[1], type]])[0]; if (!type) { throw `type '${type}' not found`; } }
+    if (typeof reftable === "string") { reftable = WHERE(t[1], [[t[1].cols[1], reftable]])[0]; if (!reftable) { throw "reftable not found"; } }
     cols.forEach(function(c, i) {
         if (typeof c[0] === "string") {
             c[0] = WHERE(t[0], [[t[0].cols[1], table], [t[0].cols[2], c[0]]])[0];
-            if (!c[0]) { throw ("col not found"); }
+            if (!c[0]) { throw "col not found"; }
         }
         c[1] = c[1] ? c[1] : 1;
     });
+    if (!name) { name = `${type[2]}_${table[1].toLowerCase()}${type[0] === 1 ? "" : `_${cols[0][0][2].toLowerCase()}}`}`; }
     if (reftable) {
         refcols.forEach(function(c, i) {
-            if (typeof c === "string") { c = WHERE(t[0], [[t[0].cols[1], reftable], [t[0].cols[2], refcols[0]]])[0]; if (!c) { throw ("refcol not found"); } refcols[i] = c; }
-            if (!refcols[i].constraints.find(function(cc) { return cc[3][0] < 3; })) { throw ("FK contraint is not unique"); }
+            if (typeof c === "string") { c = WHERE(t[0], [[t[0].cols[1], reftable], [t[0].cols[2], refcols[0]]])[0]; if (!c) { throw "refcol not found"; } refcols[i] = c; }
+            if (!refcols[i].constraints.find(function(cc) { return cc[3][0] < 3; })) { throw "FK contraint is not unique"; }
         });
     }
-    if (!name) {
-        name = "{0}_{1}{2}".format(
-            type[0] === 1 ? "PK" : type[0] === 2 ? "IX" : type[0] === 4 ? "DEF" : "FK",
-            table[1],
-            type[0] === 1 ? "" : "_{0}".format(cols[0][0][2])
-        );
-    }
     var constr = INSERT(t[4], t[4].cols.slice(1), [table, name, type]);
-    if (type[0] === 1) { constr.rows = table.rows; table.PK = constr; } else if (type[0] === 2) { constr.rows = []; }
+    if (type[0] === 1) {
+        constr.rows = table.rows;
+        table.PK = constr;
+    } else if (type[0] === 2) { constr.rows = new rows; }
     constr.ccols = cols.map(function(c, i) {
-        var c1 = [
-            constr,
-            c[0],
-            c[1] = type[0] > 2 ? null : c[1],
-            refcols ? refcols[i] : null,
-            expre
-        ];
+        var c1 = [constr, c[0], c[1] = type[0] > 2 ? null : c[1], refcols ? refcols[i] : null, expre];
         c = INSERT(t[5], t[5].cols, c1);
         if (type[0] === 1) { c[1].PK = c1; }
         else if (type[0] === 3) { c[1].FK = c[3]; }
         else if (type[0] === 4) { c[1].DEF = c[4]; }
         return c;
     });
+    if (type[0] <= 2) { constr.rows.constr = constr; }
     cols.forEach(function(c, i) { c[0].constraints.push(constr); });
     table.constraints.push(constr);
     return constr;
@@ -316,28 +367,26 @@ function cdde(cn) {
 function cddf(col) { return col[1].cols.indexOf(col); }
 function table(table) {
     var r = WHERE(t[1], [[t[1].cols[1], table]])[0];
-    if (!r) { throw (`Invalid object name '${table}'`); }
+    if (!r) { throw `Invalid object name '${table}'`; }
     return r;
 }
 function tableCol(table, col) {
     var c = WHERE(t[0], [[t[0].cols[1], table], [t[0].cols[2], col]])[0];
-    if (!c) { throw (`Invalid column name '${col}'.`); }
+    if (!c) { throw `Invalid column name '${col}'.`; }
     return c;
 }
 function getval(row, col) { return row[col[1].cols.indexOf(col)]; }
 function compare(a, b, cnc = [null, [], 1]) {
     if (cnc[1].FK) { a = Array.isArray(a) ? a[cddf(cnc[1].FK)] : a; b = Array.isArray(b) ? b[cddf(cnc[1].FK)] : b; }
-    return a === null ? (b === null ? 0 : 1) : b === null ? (a === null ? 0 : -1) : Collator.compare(a, b) * cnc[2];
-    //a = collate(cnc[1][5], a); b = collate(cnc[1][5], b);
-    //return a === null ? (b === null ? 0 : 1) : b === null ? (a === null ? 0 : -1) : (a > b ? 1 : a < b ? -1 : 0) * cnc[2];
+    return a === null ? b === null ? 0 : 1 : b === null ? -1 : Collator.compare(a, b) * cnc[2];
 }
 function collate(collate, v) {
     if (typeof v === "string") { return v.toLocaleUpperCase().accentFold(); }
     return v;
 }
 function WHERE(table, conditions) {
-    table = tablestr(table); if (!table) { throw ("Tabla no existe"); }
-    conditions.forEach(function(c) { c[0] = colstr(table, c[0]); if (!c[0]) { throw ("Columna no existe"); } });
+    table = tablestr(table); if (!table) { throw "Tabla no existe"; }
+    conditions.forEach(function(c) { c[0] = colstr(table, c[0]); if (!c[0]) { throw "Columna no existe"; } });
     var rs = [];
     var cc = table.constraints.find(function(c) {
         return c[3][0] < 3 && c.ccols.every(function(cc) { return conditions.some(function(con) { return con[0] === cc[1]; }); });
@@ -347,18 +396,18 @@ function WHERE(table, conditions) {
         for (var i = 0; i < cc.ccols.length; i++) {
             row[cddf(cc.ccols[i][1])] = conditions.find(function(con) { return con[0] === cc.ccols[i][1]; })[1];
         }
-        iscon(dsfdsd(cc, row)[0])
+        iscon(cc.rows.indexOf(row) >= 0 ? cc.rows.b : null);
     } else { table.rows.forEach(iscon); }
     //if (con) { return rs[0]; }
     return rs;
-    function iscon(r) { if (!r) { rs.push(r); } else if (conditions.every(function(c) { return r[cddf(c[0])] === c[1]; })) { rs.push(r); } }
+    function iscon(r) { if (!r) { rs.push(null); } else if (conditions.every(function(c) { return r[cddf(c[0])] === c[1]; })) { rs.push(r); } }
 }
 function INSERT(table, cols, vals) {
-    table = tablestr(table); if (!table) { throw ("Tabla no existe"); }
+    table = tablestr(table); if (!table) { throw "Tabla no existe"; }
     if (!cols) { cols = table.cols; }
     else {
         cols = cols.map(function(c) {
-            var c2 = colstr(table, c); if (!c2) { throw ("Columna {0} no existe".format(c)); }
+            var c2 = colstr(table, c); if (!c2) { throw "Columna {0} no existe".format(c); }
             return c2;
         });
     }
@@ -374,48 +423,48 @@ function INSERT(table, cols, vals) {
         if (c.DEF && !val && val !== 0) { val = eval(c.DEF); }
         if (typeof val === "string") { val = val.trimSingleLine(); }
         if (!val && val !== 0) {
-            if (!c[7]) { throw (`Cannot insert the value NULL into column '${c[2]}', table '${table[1]}'; column does not allow nulls. INSERT fails.`); }
+            if (!c[7]) { throw `Cannot insert the value NULL into column '${c[2]}', table '${table[1]}'; column does not allow nulls. INSERT fails.`; }
             val = null;
-        } else if (!Array.isArray(val) && typeof (val) !== "object") {
+        } else if (!Array.isArray(val) && typeof val !== "object") {
             if (c[3][1] === "nvarchar") {
                 if (typeof val !== "string") { val = val + ""; }
-                if (val.length > c[4]) { throw (`${c[2]} Maxlength reached`); }
+                if (val.length > c[4]) { throw `String or binary data would be truncated.`; }
             } else if (c[3][0] === 8) { //smalldatetime
                 if (typeof val === "string") { val = moment.tz(val, "DD/MM/YYYY HH:mm", true, "America/Mexico_City"); }
-                if (val < c[3][2]) { throw (`${c[2]} Min date value reached`); }
-                else if (val > c[3][3]) { throw (`${c[2]} Max date value reached`); }
+                if (val < c[3][2]) { throw `${c[2]} Min date value reached`; }
+                else if (val > c[3][3]) { throw `${c[2]} Max date value reached`; }
             } else if (c[3][0] === 7) { //date
                 if (typeof val === "string") { val = moment.tz(val, "DD/MM/YYYY", true, "America/Mexico_City"); }
-                if (val < c[3][2]) { throw (`${c[2]} Min date value reached`); }
-                else if (val > c[3][3]) { throw (`${c[2]} "Max date value reached`); }
+                if (val < c[3][2]) { throw `${c[2]} Min date value reached`; }
+                else if (val > c[3][3]) { throw `${c[2]} "Max date value reached`; }
             } else {
-                if (isNaN(val)) { throw (`Conversion failed when converting the varchar value '${val}' to data type ${c[3][1]}.`); } else { val = parseInt(val); }
-                if (val < c[3][2]) { throw ("Min value reached"); }
-                else if (val > c[3][3]) { throw ("Max value reached"); }
+                if (isNaN(val)) { throw `Conversion failed when converting the varchar value '${val}' to data type ${c[3][1]}.`; } else { val = parseInt(val); }
+                if (val < c[3][2]) { throw "Min value reached"; }
+                else if (val > c[3][3]) { throw `Arithmetic overflow error for data type ${c[3][1]}, value = ${val}.`; }
             }
             for (var i = 0, cc; i < c.constraints.length; i++) {
                 cc = c.constraints[i];
                 tttt = constorow(cc, row);
-                if (cc[3][0] < 3) {
+                if (cc[3][0] <= 2) {
                     tttt[ci] = val;
-                    if (cddd(cc, tttt)) { continue; }
-                    if (dsfdsd(cc, tttt)[0]) { throw (`Valor ${val} repetido en columna ${c[2]}`); }
+                    if (cc.rows.tesnull(tttt)) { continue; }
+                    if (cc.rows.lastIndexOf(tttt) >= 0) { throw `Violation of ${cc[3][1]} constraint '${cc[2]}'.Cannot insert duplicate key in object '${table[1]}'.The duplicate key value is (${tttt.join()}).`; }
                 } else {
                     cc = c.FK.constraints[0];
                     tttt[cddf(c.FK)] = val;
                     if (cddd(cc, tttt)) { continue; }
-                    if (!dsfdsd(cc, tttt)[0]) { throw ("Valor no existe en la tabla relacionada"); }
+                    if (!dsfdsd(cc, tttt)[0]) { throw "Valor no existe en la tabla relacionada"; }
                 }
             }
         }
         row[ci] = val;
-    };
+    }
     for (var i = 0, cc, tttt, cc2; i < table.constraints.length; i++) {
         cc = table.constraints[i];
         if (cc[3][0] === 4) { continue; }
-        if (cc[3][0] < 3) {
-            if (cddd(cc, row)) { continue; }
-            cc.rows.insertAt(row, dsfdsd(cc, row)[1]);
+        if (cc[3][0] <= 2) {
+            if (cc.rows.tesnull(row)) { continue; }
+            cc.rows.insertAt(row, cc.rows.s);
         } else {
             cc2 = cc.ccols[0][3].constraints[0];
             tttt = constorow(cc, row);
@@ -423,7 +472,7 @@ function INSERT(table, cols, vals) {
             row[cddf(cc.ccols[0][1])] = dsfdsd(cc2, tttt)[0];
         }
     }
-    if (!table.PK) { table.rows.push(row); }
+    if (!table.PK) { table.rows[table.rows.length] = row; }
     return row;
 }
 function constorow(constr, row) {
@@ -437,18 +486,11 @@ function constorow(constr, row) {
 }
 function preparecontraint(constr) {
     constr.ready = true;
-	constr[1].rows.compare = function(a, b){
-		for (var i = 0, r = 0; i < constr.ccols.length && !r; i++) {
-			r = cddf(constr.ccols[i][1]);
-			r = compare(a[r], b[r], cn.ccols[i]);
-		}
-		return r;
-	};
     for (var alln = cdde(constr), i = 0, row; i < constr[1].rows.length; i++) {
         row = constr[1].rows[i];
         if (alln && cddd(constr, row)) { continue; }
         var r = dsfdsd(constr, row, constr[3][0] === 1 ? i - 1 : null);
-        if (r[0]) { throw ("Valor duplicado"); }
+        if (r[0]) { throw "Valor duplicado"; }
         if (constr[3][0] === 1) { constr.rows.move(i, r[1]); }
         else { constr.rows.insertAt(row, r[1]); }
     }
@@ -456,7 +498,7 @@ function preparecontraint(constr) {
 }
 function dsfdsd(constr, row, e) {
     if (!constr.ready) { preparecontraint(constr); }
-    if (!e && e != 0) { e = constr.rows.length - 1; }
+    if (!e && e !== 0) { e = constr.rows.length - 1; }
     for (var s = 0, i, r = -1, t; s <= e;) {
         i = ~~((s + e) / 2);
         t = constr.rows[i];
@@ -468,10 +510,10 @@ function dsfdsd(constr, row, e) {
 
 function SELECT(table, row, cols) {
     table = tablestr(table);
-    if (!table) { throw ("Tabla no existe"); }
+    if (!table) { throw "Tabla no existe"; }
     cols = cols.map(function(c) {
         c = colstr(table, c);
-        if (!c) { throw ("Columna no existe"); }
+        if (!c) { throw "Columna no existe"; }
         return c;
     });
     row = cols.map(function(c) { return row[cddf(c)]; });
@@ -492,7 +534,7 @@ function colstr(table, c) {
 
 function CREATE_TABLE(table, column_definition, table_constraint) {
     if (t.length > 0 && tablestr(table)) { showAlert("Tablename exist allready"); }
-    table = bbb(table); table.cols = []; table.rows = []; table.constraints = [];
+    table = bbb(table); table.cols = []; table.rows = new rows; table.constraints = [];
     column_definition.forEach(function(c) { return insertCol(table, c); });
     table_constraint && table_constraint.forEach(function(cc) { ADDCONSTRAINT(table, cc[0], cc[1], cc[2], cc[3], cc[4]); });
     return table;
