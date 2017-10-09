@@ -47,16 +47,43 @@ function work(data) {
         ],
         [[null, "PRIMARY KEY", [["CR"], ["Categoría"], ["Pregunta"]], null, null]]
     );
+	
     INSERT(Resultados, Resultados.cols, [0, 1, 1]);
     INSERT(Resultados, Resultados.cols, [1, 1, 2]);
     for (var i = 1, row = [2]; i < Resultados.cols.length; i++) { row[i] = Resultados.cols[i][2]; }
     INSERT(Resultados, Resultados.cols, row);
     for (var i = 1, row = [3]; i < Resultados.cols.length; i++) { row[i] = Resultados.cols[i][2]; }
     INSERT(Resultados, Resultados.cols, row);
+    var ColPK = [0, 1, 3];
+	var cols = new binaryArray();
+	cols.compare = function(a, b, o){
+		for (var i = 0, r = 0, ia, ib; i < ColPK.length && !r; i++) {
+			r = ColPK[i];
+			ia = a ? a[r] : null;
+			ib = b ? b[r] : null;
+			r = this.__proto__.compare(ia, ib, o);
+		}
+		return r;
+	}
+	cols.unique = true;
+	cols.push([0,1,2,3]);
+	cols.push([1,1,"Categoría","Categoría"]);
+	cols.push([1,2,"Pregunta","Pregunta"]);
+	
+	function csc2(data){
+		if (cols.lastIndexOf(data) >= 0) { return cols.b; }
+		else{
+			cols.insertAt(data, cols.s);
+            insertCol(Resultados, [`${data[2]}|${data[3]}`, "tinyint", null, null, null, "NOT NULL", [[null, "DEFAULT", null, null, "new funcs.AVG(f => f[3])"]]], cols.s);
+            //for (var i = 0; i < 4; i++) { Resultados.rows[i][ci] = data[i]; }
+            //Resultados.rows[4][ci] = new funcs.COUNT(true, f => f[0]);
+		}
+	}
+	csc2([2, 0, "Totales", "Totales"]);
     var rcont = rsc([4, "Totales", "1.Encuestas"]);
     var rcat = rsc([4, "Totales", "2.Promedio"]);
 
-    var ColPK = [0, 1, 3];
+	Resultados.cols.indexOf([2, 0, "Totales", "Totales"]);
     var cit = csc([2, 0, "Totales", "Totales"]);
     var vcs = vCols.map(c => c[0]);
     var ñ = '5,"Categoría","Pregunta"'; ñ = function(f) { return [5, f[1], f[2]]; };
