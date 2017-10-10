@@ -64,7 +64,7 @@ class binaryArray extends Array {
             if (r > 0) { fromIndex = i + 1; } else if (r) { e = i - 1; } else { e = i - 1; r0 = true; this.b = b; if (this.unique) { fromIndex = i; } }
         }
         this.s = fromIndex;
-		return r0 ? fromIndex : -1;
+        return r0 ? fromIndex : -1;
     }
     lastIndexOf(searchElement, fromIndex = this.length - 1) {
         if (!this.ready) { this.sort(); }
@@ -75,8 +75,8 @@ class binaryArray extends Array {
             r = this.compare(searchElement, b, this.order, i);
             if (r > 0) { s = i + 1; } else if (r) { fromIndex = i - 1; } else { s = i + 1; r0 = true; this.b = b; if (this.unique) { fromIndex = i; } }
         }
-		this.s = s;
-		return r0 ? fromIndex : -1;
+        this.s = s;
+        return r0 ? fromIndex : -1;
     }
     sort(compareFunction) {
         if (compareFunction) { this.compare = compareFunction; if (this.ready) { return; } }
@@ -111,7 +111,18 @@ class binaryArray extends Array {
         return this.length;
     }
     compare(a = null, b = null, order = 1) {
-		var na = !a && a !== 0, nb = !b && b !== 0;
+        var na = !a && a !== 0, nb = !b && b !== 0;
+        if (Array.isArray(a) || Array.isArray(b)) {
+            var l = Array.isArray(a) ? Array.isArray(b) ? a.length > b.length ? a.length : b.length : a.length : b.length;
+            for (var i = 0, r = 0; i < l && !r; i++) {
+                r = this.compare(
+                    Array.isArray(a) ? a[i] : i === 0 ? a : null,
+                    Array.isArray(b) ? b[i] : i === 0 ? b : null,
+                    order
+                );
+            }
+            return r;
+        }
         return na ? nb ? 0 : 1 : nb ? -1 : binaryArray.compare(a, b) * order;
     }
 }
@@ -136,8 +147,8 @@ class rows extends binaryArray {
             ia = a ? a[r[1]] : null;
             ib = b ? b[r[1]] : null;
             if (r[2] >= 0) {
-                ia =  Array.isArray(ia) ? ia[r[2]] : ia;
-                ib =  Array.isArray(ib) ? ib[r[2]] : ib;
+                ia = Array.isArray(ia) ? ia[r[2]] : ia;
+                ib = Array.isArray(ib) ? ib[r[2]] : ib;
             }
             r = r[0].compare(ia, ib, r[3]);
         }
@@ -334,8 +345,8 @@ function ADDCONSTRAINT(table, name, type, cols, reftable, refcols, expre = null)
         constr.rows = table.rows;
         table.PK = constr;
     }
-	else if (type[0] === 2) { constr.rows = new rows; }
-	else if(type[0] === 3) { constr.rows = refcols[0].constraints[0].rows; }
+    else if (type[0] === 2) { constr.rows = new rows; }
+    else if (type[0] === 3) { constr.rows = refcols[0].constraints[0].rows; }
     constr.ccols = cols.map(function(c, i) {
         var c1 = [constr, c[0], c[1] = type[0] > 2 ? null : c[1], refcols ? refcols[i] : null, expre];
         c = INSERT(t[5], t[5].cols, c1);
@@ -354,8 +365,8 @@ function cdde(cn) {
     return r;
 }
 function cddf(col) {
-	if (!col) { return null; }
-	return col[1].cols.indexOf(col);
+    if (!col) { return null; }
+    return col[1].cols.indexOf(col);
 }
 function table(table) {
     var r = WHERE(t[1], [[t[1].cols[1], table]])[0];
@@ -433,15 +444,15 @@ function INSERT(table, cols, vals) {
             for (var i = 0, cc; i < c.constraints.length; i++) {
                 cc = c.constraints[i];
                 tttt = constorow(cc, row);
-				tttt[ci] = val;
+                tttt[ci] = val;
                 if (cc[3][0] <= 2) {
                     if (cc.rows.tesnull(tttt)) { continue; }
                     if (cc.rows.lastIndexOf(tttt) >= 0) { throw `Violation of ${cc[3][1]} constraint '${cc[2]}'.Cannot insert duplicate key in object '${table[1]}'.The duplicate key value is (${tttt.join()}).`; }
                 } else {
-					tttt = FKtrans(cc, tttt);
+                    tttt = FKtrans(cc, tttt);
                     if (cc.rows.tesnull(tttt)) { continue; }
                     if (cc.rows.lastIndexOf(tttt) < 0) { throw "Valor no existe en la tabla relacionada"; }
-					cc.b = cc.rows.b;
+                    cc.b = cc.rows.b;
                 }
             }
         }
@@ -455,27 +466,27 @@ function INSERT(table, cols, vals) {
             cc.rows.insertAt(row, cc.rows.s);
         } else {
             tttt = FKtrans(cc, row);
-			if (cc.rows.tesnull(tttt)) { continue; }
-			FKset(cc, row, cc.b);
-			delete cc.b;
+            if (cc.rows.tesnull(tttt)) { continue; }
+            FKset(cc, row, cc.b);
+            delete cc.b;
         }
     }
     if (!table.PK) { table.rows[table.rows.length] = row; }
     return row;
 }
-function FKset(constraint, left, val){
-	for (var i = 0, c; i < constraint.ccols.length; i++){
-		c = constraint.ccols[i];
-		left[cddf(c[1])] = val;
-	}
+function FKset(constraint, left, val) {
+    for (var i = 0, c; i < constraint.ccols.length; i++) {
+        c = constraint.ccols[i];
+        left[cddf(c[1])] = val;
+    }
 }
-function FKtrans(constraint, left){
-	var right = [];
-	for (var i = 0, c; i < constraint.ccols.length; i++){
-		c = constraint.ccols[i];
-		right[cddf(c[3])] = left[cddf(c[1])];
-	}
-	return right;
+function FKtrans(constraint, left) {
+    var right = [];
+    for (var i = 0, c; i < constraint.ccols.length; i++) {
+        c = constraint.ccols[i];
+        right[cddf(c[3])] = left[cddf(c[1])];
+    }
+    return right;
 }
 function constorow(constr, row) {
     var ret = [];
