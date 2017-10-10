@@ -46,29 +46,41 @@ if (!Array.prototype.insertAt) {
 if (!Array.prototype.compare) {
     Array.prototype._compare = (new Intl.Collator(undefined, { sensitivity: 'base', numeric: true })).compare;
     Array.prototype.compare = function(a = null, b = null, order = 1) {
-        if (!a && a !== 0 && a !== null) { a = null; }
-        if (!b && b !== 0 && b !== null) { b = null; }
-        return a === null ? b === null ? 0 : 1 : b === null ? -1 : this._compare(a, b) * order;
+        var na = !a && a !== 0, nb = !b && b !== 0;
+        if (Array.isArray(a) || Array.isArray(b)) {
+            var l = Array.isArray(a) ? Array.isArray(b) ? a.length > b.length ? a.length : b.length : a.length : b.length;
+            for (var i = 0, r = 0; i < l && !r; i++) {
+                r = this.compare(
+                    Array.isArray(a) ? a[i] : i === 0 ? a : null,
+                    Array.isArray(b) ? b[i] : i === 0 ? b : null,
+                    order
+                );
+            }
+            return r;
+        }
+        return na ? nb ? 0 : 1 : nb ? -1 : this._compare(a, b) * order;
     };
 }
 
 class binaryArray extends Array {
     indexOf(searchElement, fromIndex = 0) {
         //https://oli.me.uk/2013/06/08/searching-javascript-arrays-with-a-binary-search/
+		if(this.unique && this.testnull(searchElement)){ delete this.b; delete this.s; return -1; }
         if (!this.ready) { this.sort(); }
-        delete this.b;
+        delete this.b; delete this.s;
         for (var e = this.length - 1, i, b, r, r0; fromIndex <= e;) {
             i = fromIndex + e >> 1;
             b = this[i];
-            r = this.compare(searchElement, b);
+            r = this.compare(searchElement, b, this.order);
             if (r > 0) { fromIndex = i + 1; } else if (r) { e = i - 1; } else { e = i - 1; r0 = true; this.b = b; if (this.unique) { fromIndex = i; } }
         }
         this.s = fromIndex;
         return r0 ? fromIndex : -1;
     }
     lastIndexOf(searchElement, fromIndex = this.length - 1) {
+		if(this.unique && this.testnull(searchElement)){ delete this.b; delete this.s; return -1; }
         if (!this.ready) { this.sort(); }
-        delete this.b;
+        delete this.b; delete this.s;
         for (var s = 0, i, b, r, r0; s <= fromIndex;) {
             i = s + fromIndex >> 1;
             b = this[i];
@@ -83,6 +95,7 @@ class binaryArray extends Array {
         this.ready = true;
         for (var i = 0, val; i < this.length; i++) {
             val = this[i];
+			if (this.unique && this.testnull(val)) { this.removeAt(1, i); i--; continue; }
             if (this.lastIndexOf(val, i - 1) >= 0 && this.unique) { throw `value '${val}' already exist`; }
             this.move(i, this.s);
         }
@@ -93,6 +106,7 @@ class binaryArray extends Array {
     push(element) {
         for (var i = 0, val; i < arguments.length; i++) {
             val = arguments[i];
+			if (this.unique && this.testnull(val)) { continue; }
             if (this.lastIndexOf(val) >= 0 && this.unique) { throw `value '${val}' already exist`; }
             this.insertAt(arguments[i], this.s);
         }
@@ -103,6 +117,7 @@ class binaryArray extends Array {
     unshift(element) {
         for (var i = 0, val; i < arguments.length; i++) {
             val = arguments[i];
+			if (this.unique && this.testnull(val)) { continue; }
             if (this.indexOf(val) >= 0 && this.unique) { throw `value '${val}' already exist`; }
             this.insertAt(arguments[i], this.s);
         }
@@ -114,7 +129,7 @@ class binaryArray extends Array {
         var na = !a && a !== 0, nb = !b && b !== 0;
         if (Array.isArray(a) || Array.isArray(b)) {
             var l = Array.isArray(a) ? Array.isArray(b) ? a.length > b.length ? a.length : b.length : a.length : b.length;
-            for (var i = 0, r = 0; i < l && !r; i++) {
+            for (var i = 0, r; i < l && !r; i++) {
                 r = this.compare(
                     Array.isArray(a) ? a[i] : i === 0 ? a : null,
                     Array.isArray(b) ? b[i] : i === 0 ? b : null,
@@ -125,6 +140,10 @@ class binaryArray extends Array {
         }
         return na ? nb ? 0 : 1 : nb ? -1 : binaryArray.compare(a, b) * order;
     }
+	testnull(a = null){
+		if(Array.isArray(a)){ for (var i = 0, r = 1; i < a.length && r; i++) { r = this.testnull(a[i]); } }
+		return this.compare(a, null) === 0;
+	}
 }
 binaryArray.compare = (new Intl.Collator(undefined, { sensitivity: 'base', numeric: true })).compare;
 
@@ -135,30 +154,33 @@ class rows extends binaryArray {
         var t = rows.constr[3][0] === 1;
         for (var alln = cdde(rows.constr), i = 0, row; i < rows.constr[1].rows.length; i++) {
             row = rows.constr[1].rows[i];
-            if (rows.tesnull(row)) { if (!alln) { throw "Value NULL not allowed"; } continue; }
+            if (rows.testnull(row)) { if (!alln) { throw "Value NULL not allowed"; } continue; }
             if (rows.lastIndexOf(row, t ? i - 1 : undefined) >= 0) { throw "Value not unique"; }
             if (t) { rows.move(i, rows.s); } else { rows.insertAt(row, rows.s); }
         }
         return this;
     }
     compare(a, b) {
-        for (var i = 0, r = 0, ia, ib; i < this.ind.length && !r; i++) {
+        for (var i = 0, r, ia, ib; i < this.ind.length && !r; i++) {
             r = this.ind[i];
-            ia = a ? a[r[1]] : null;
-            ib = b ? b[r[1]] : null;
-            if (r[2] >= 0) {
-                ia = Array.isArray(ia) ? ia[r[2]] : ia;
-                ib = Array.isArray(ib) ? ib[r[2]] : ib;
+            ia = Array.isArray(a) ? a[r[1]] : i === 0 ? a : null;
+            ib = Array.isArray(b) ? b[r[1]] : i === 0 ? b : null;
+            if (r[2] !== null) {
+                if (Array.isArray(ia)) { ia = ia[r[2]]; }
+                if (Array.isArray(ib)) { ib = ib[r[2]]; }
             }
             r = r[0].compare(ia, ib, r[3]);
         }
         return r;
     }
-    tesnull(row) {
-        for (var i = 0, r; i < this.ind.length; i++) {
-            r = row[this.ind[i][1]];
-            if (!r && r !== 0) { return true; }
+    testnull(a) {
+        for (var i = 0, r = 1, ia; i < this.ind.length && r; i++) {
+			r = this.ind[i];
+            ia = Array.isArray(a) ? a[r[1]] : i === 0 ? a : null;
+			if (r[2] !== null && Array.isArray(ia)) { ia = ia[r[2]]; }
+			r = r[0].compare(ia, null, r[3]);
         }
+		return r === 0;
     }
     set constr(constr) {
         if (constr[3][0] <= 2) { this.unique = true; }
@@ -423,7 +445,7 @@ function INSERT(table, cols, vals) {
         if (typeof val === "string") { val = val.trimSingleLine(); }
         if (!val && val !== 0) {
             if (!c[7]) { throw `Cannot insert the value NULL into column '${c[2]}', table '${table[1]}'; column does not allow nulls. INSERT fails.`; }
-            val = null;
+            row[ci] = null;
         } else if (!Array.isArray(val) && typeof val !== "object") {
             if (c[3][1] === "nvarchar") {
                 if (typeof val !== "string") { val = val + ""; }
@@ -441,34 +463,26 @@ function INSERT(table, cols, vals) {
                 if (val < c[3][2]) { throw "Min value reached"; }
                 else if (val > c[3][3]) { throw `Arithmetic overflow error for data type ${c[3][1]}, value = ${val}.`; }
             }
+			row[ci] = val;
             for (var i = 0, cc; i < c.constraints.length; i++) {
                 cc = c.constraints[i];
-                tttt = constorow(cc, row);
-                tttt[ci] = val;
-                if (cc[3][0] <= 2) {
-                    if (cc.rows.tesnull(tttt)) { continue; }
-                    if (cc.rows.lastIndexOf(tttt) >= 0) { throw `Violation of ${cc[3][1]} constraint '${cc[2]}'.Cannot insert duplicate key in object '${table[1]}'.The duplicate key value is (${tttt.join()}).`; }
-                } else {
-                    tttt = FKtrans(cc, tttt);
-                    if (cc.rows.tesnull(tttt)) { continue; }
+                if (cc[3][0] <= 2) { if (cc.rows.lastIndexOf(row) >= 0) { throw `Violation of ${cc[3][1]} constraint '${cc[2]}'.Cannot insert duplicate key in object '${table[1]}'.The duplicate key value is (${tttt.join()}).`; }}
+				else {
+                    tttt = FKtrans(cc, row);
+                    if (cc.rows.testnull(tttt)) { continue; }
                     if (cc.rows.lastIndexOf(tttt) < 0) { throw "Valor no existe en la tabla relacionada"; }
-                    cc.b = cc.rows.b;
+					row[ci] = cc.rows.b;
+					delete cc.rows.b; delete cc.rows.s;
                 }
             }
-        }
-        row[ci] = val;
+        } else { row[ci] = val; }
     }
     for (var i = 0, cc, tttt, cc2; i < table.constraints.length; i++) {
         cc = table.constraints[i];
-        if (cc[3][0] === 4) { continue; }
         if (cc[3][0] <= 2) {
-            if (cc.rows.tesnull(row)) { continue; }
+            if (cc.rows.testnull(row)) { continue; }
             cc.rows.insertAt(row, cc.rows.s);
-        } else {
-            tttt = FKtrans(cc, row);
-            if (cc.rows.tesnull(tttt)) { continue; }
-            FKset(cc, row, cc.b);
-            delete cc.b;
+			delete cc.rows.s;
         }
     }
     if (!table.PK) { table.rows[table.rows.length] = row; }

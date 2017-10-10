@@ -71,7 +71,7 @@ function work(data) {
     cols.push([1, 2, "Pregunta", "Pregunta"]);
 
     function csc2(data) {
-        if (cols.lastIndexOf(data) >= 0) { return cols.b; }
+        if (cols.lastIndexOf(data) >= 0) { return cols.s; }
         else {
             cols.insertAt(data, cols.s);
             insertCol(Resultados, [`${data[2]}|${data[3]}`, "tinyint", null, null, null, "NOT NULL", [[null, "DEFAULT", null, null, "new funcs.AVG(f => f[3])"]]], cols.s);
