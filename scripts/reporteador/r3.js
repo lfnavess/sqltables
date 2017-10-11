@@ -50,28 +50,28 @@ function work(data) {
 
     INSERT(Resultados, Resultados.cols, [0, 1, 1]);
     INSERT(Resultados, Resultados.cols, [1, 1, 2]);
-    for (var i = 1, row = [2]; i < Resultados.cols.length; i++) { row[i] = Resultados.cols[i][2]; }
+    for(var i = 1, row = [2]; i < Resultados.cols.length; i++) { row[i] = Resultados.cols[i][2]; }
     INSERT(Resultados, Resultados.cols, row);
-    for (var i = 1, row = [3]; i < Resultados.cols.length; i++) { row[i] = Resultados.cols[i][2]; }
+    for(var i = 1, row = [3]; i < Resultados.cols.length; i++) { row[i] = Resultados.cols[i][2]; }
     INSERT(Resultados, Resultados.cols, row);
     var ColPK = [0, 1, 3];
     var cols = new binaryArray();
     cols.compare = function(a, b, o) {
-        for (var i = 0, r = 0, ia, ib; i < ColPK.length && !r; i++) {
+        for(var i = 0, r = 0, ia, ib; i < ColPK.length && !r; i++) {
             r = ColPK[i];
             ia = a ? a[r] : null;
             ib = b ? b[r] : null;
             r = this.__proto__.compare(ia, ib, o);
         }
         return r;
-    }
+    };
     cols.unique = true;
     cols.push([0, 1, 2, 3]);
     cols.push([1, 1, "Categoría", "Categoría"]);
     cols.push([1, 2, "Pregunta", "Pregunta"]);
 
     function csc2(data) {
-        if (cols.lastIndexOf(data) >= 0) { return cols.s; }
+        if(cols.lastIndexOf(data) >= 0) { return cols.s; }
         else {
             cols.insertAt(data, cols.s);
             insertCol(Resultados, [`${data[2]}|${data[3]}`, "tinyint", null, null, null, "NOT NULL", [[null, "DEFAULT", null, null, "new funcs.AVG(f => f[3])"]]], cols.s);
@@ -88,11 +88,11 @@ function work(data) {
     var vcs = vCols.map(c => c[0]);
     var ñ = '5,"Categoría","Pregunta"'; ñ = function(f) { return [5, f[1], f[2]]; };
     hCols = hCols.map((c, i, n) => { n = cddf(tableCol(Interacciones, c[0])); return f => [3, i, c[0], f[n]]; });
-    for (var i = 1, length = data.length - 1, row, p, ci, j; i < length; i++) {
+    for(var i = 1, length = data.length - 1, row, p, ci, j; i < length; i++) {
         row = INSERT(Interacciones, data[0], data[i]);
         p = rsc(ñ(row));
         p[cit].v = rcat[cit].v = rcont[cit].v = row;
-        for (j = 0; j < hCols.length; j++) {
+        for(j = 0; j < hCols.length; j++) {
             ci = csc(hCols[j](row));
             p[ci].v = rcat[ci].v = rcont[ci].v = row;
         }
@@ -104,17 +104,17 @@ function work(data) {
     Resultados.rows.forEach(function(r, ri) {
         var tr = document.createElement("tr"); tbody.appendChild(tr);
         r.removeAt(1, 0);
-        if (ri === 1) {
+        if(ri === 1) {
             tr.style.verticalAlign = "bottom";
             tr.style.height = "95px";
         }
-        if (ri < 4) { tr.style.fontWeight = "bold"; }
+        if(ri < 4) { tr.style.fontWeight = "bold"; }
         r.forEach(function(c, ci) {
             var c2 = c;
             c = c !== null && typeof c === "object" ? ci < 2 ? c[0] : c.v.toFixed(0) : c;
-            if (ri === 0) {
+            if(ri === 0) {
                 var wi = ci === 1 ? 200 : 28;
-                if (prevri[ri] && prevri[ri].innerText.trimSingleLine() === c) {
+                if(prevri[ri] && prevri[ri].innerText.trimSingleLine() === c) {
                     prevci[ci] = prevri[ri];
                     prevri[ri].setAttribute("colspan", (prevri[ri].getAttribute("colspan") || 1) * 1 + 1);
                     prevri[ri].style.width = prevri[ri].getAttribute("colspan") * wi + "px";
@@ -123,34 +123,34 @@ function work(data) {
                 twi += wi;
                 table.style.width = twi + "px";
             }
-            if ((ci === 0 || ci < 3 && ri < 2) && prevci[ci] && prevci[ci].innerText.trimSingleLine() === c) {
+            if((ci === 0 || ci < 3 && ri < 2) && prevci[ci] && prevci[ci].innerText.trimSingleLine() === c) {
                 prevri[ri] = prevci[ci];
                 prevci[ci].setAttribute("rowspan", (prevci[ci].getAttribute("rowspan") || 1) * 1 + 1);
                 return;
             }
             var td = document.createElement("td"); tr.appendChild(td);
-            if (ri === 0) { td.style.verticalAlign = "bottom"; td.style.textAlign = "center"; }
-            if (ri === 0 && ci === 2 || ri === 2 && ci === 0) { td.style.backgroundColor = "#BFBFBF"; }
-            if (ri === 1 && ci > 2) { td.style.backgroundColor = prevci[ci].style.backgroundColor; }
-            if (ri === 1 && ci > 13 || ci === 0 || ri === 0 && ci === 2) {
+            if(ri === 0) { td.style.verticalAlign = "bottom"; td.style.textAlign = "center"; }
+            if(ri === 0 && ci === 2 || ri === 2 && ci === 0) { td.style.backgroundColor = "#BFBFBF"; }
+            if(ri === 1 && ci > 2) { td.style.backgroundColor = prevci[ci].style.backgroundColor; }
+            if(ri === 1 && ci > 13 || ci === 0 || ri === 0 && ci === 2) {
                 var div = document.createElement("div"); td.appendChild(div);
                 div.style.transform = "rotate(-90.0deg)";
                 div.style.marginBottom = "8px";
                 div.textContent = c;
             } else { td.textContent = c; }
-            if (ri < 4 || ci < 3) { td.style.border = "1px solid black"; }
-            if (ri >= 2 && ci === 1) {
+            if(ri < 4 || ci < 3) { td.style.border = "1px solid black"; }
+            if(ri >= 2 && ci === 1) {
                 td.style.backgroundColor = prevri[ri].style.backgroundColor;
             }
-            if (ri > 2 && ci > 1) { td.style.textAlign = "center"; td.style.backgroundColor = getColorForPercentage(c / 100); }
-            if (ri >= 4 && ci === 0) {
-                for (var i = 0, ss = c2[1].split(";").map(s => s.split(":")); i < ss.length && ss[i][0]; i++) { td.style[ss[i][0]] = ss[i][1]; }
+            if(ri > 2 && ci > 1) { td.style.textAlign = "center"; td.style.backgroundColor = getColorForPercentage(c / 100); }
+            if(ri >= 4 && ci === 0) {
+                for(var i = 0, ss = c2[1].split(";").map(s => s.split(":")); i < ss.length && ss[i][0]; i++) { td.style[ss[i][0]] = ss[i][1]; }
             }
-            if (ci < 3) { td.style.fontWeight = "bold"; }
-            if (ri === 0) {
-                if (ci === 3) { td.style.backgroundColor = "#DDEBF7"; }
-                else if (ci === 5) { td.style.backgroundColor = "#FCE4D6"; }
-                if (wi !== 28) { td.style.width = wi + "px"; }
+            if(ci < 3) { td.style.fontWeight = "bold"; }
+            if(ri === 0) {
+                if(ci === 3) { td.style.backgroundColor = "#DDEBF7"; }
+                else if(ci === 5) { td.style.backgroundColor = "#FCE4D6"; }
+                if(wi !== 28) { td.style.width = wi + "px"; }
             }
             prevri[ri] = td;
             prevci[ci] = td;
@@ -164,7 +164,7 @@ function work(data) {
             { pct: 0.5, c: { r: 0xff, g: 0xeb, b: 0x84 } },
             { pct: 1.0, c: { r: 0x63, g: 0xbe, b: 0x7b } }
         ];
-        for (var i = 1; i < percentColors.length - 1; i++) { if (pct < percentColors[i].pct) { break; } }
+        for(var i = 1; i < percentColors.length - 1; i++) { if(pct < percentColors[i].pct) { break; } }
         var l = percentColors[i - 1];
         var u = percentColors[i];
         var pu = (pct - l.pct) / (u.pct - l.pct);
@@ -175,11 +175,11 @@ function work(data) {
     }
     function csc(data) {
         var ci = indexCol(ColPK.map(c => data[c]));
-        if (ci[0]) { ci = ci[1]; }
+        if(ci[0]) { ci = ci[1]; }
         else {
             ci = ci[1];
             insertCol(Resultados, [`${data[2]}|${data[3]}`, "tinyint", null, null, null, "NOT NULL", [[null, "DEFAULT", null, null, "new funcs.AVG(f => f[3])"]]], ci);
-            for (var i = 0; i < 4; i++) { Resultados.rows[i][ci] = data[i]; }
+            for(var i = 0; i < 4; i++) { Resultados.rows[i][ci] = data[i]; }
             Resultados.rows[4][ci] = new funcs.COUNT(true, f => f[0]);
         }
         return ci;
@@ -189,17 +189,17 @@ function work(data) {
         return s || INSERT(Resultados, ["CR", "Categoría", "Pregunta"], row);
     }
     function indexCol(a, e) {
-        if (!e && e !== 0) { e = Resultados.cols.length - 1; }
-        for (var s = 0, i, b, r = -1; s <= e;) {
+        if(!e && e !== 0) { e = Resultados.cols.length - 1; }
+        for(var s = 0, i, b, r = -1; s <= e;) {
             i = s + Math.round((e - s) / 2);
             b = ColPK.map(c => Resultados.rows[c][i]);
             r = cddc(a, b);
-            if (r > 0) { s = i + 1; } else if (r) { e = i - 1; } else { s = i; break; }
+            if(r > 0) { s = i + 1; } else if(r) { e = i - 1; } else { s = i; break; }
         }
         return [!r ? b : null, s];
     }
     function cddc(a, b) {
-        for (var i = 0, r = 0; i < a.length && !r; i++) { r = compare(a[i], b[i]); }
+        for(var i = 0, r = 0; i < a.length && !r; i++) { r = compare(a[i], b[i]); }
         return r;
     }
 }

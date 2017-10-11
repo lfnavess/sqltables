@@ -109,7 +109,7 @@ function work(data) {
 
     var ori = CREATE_TABLE("ori", data.splice(0, 1)[0].map(c => [c, "nvarchar", 200, null, null, "NULL", null]));
     function sel(row, select_list) {
-        for (var i = 0, si; i < select_list.length; i++) {
+        for(var i = 0, si; i < select_list.length; i++) {
             si = colconv(select_list[i]);
         }
     }
@@ -123,83 +123,83 @@ function work(data) {
     function colconv(s, f) {
         var parts = [], ccc = [], o = [], isSearch;
         ccc.push(parts);
-        for (var i = 0, c, si, u, p; i < s.length; i++) {
+        for(var i = 0, c, si, u, p; i < s.length; i++) {
             c = s[i];
-            if (!u && /\S/.test(c)) {
+            if(!u && /\S/.test(c)) {
                 si = i;
-                if (c === '"') { si++; u = /"/; }
-                else if (c === "'") { u = /'/; }
-                else if (c === "(") { colins(c); }
-                else if (c === ")") { colins(c); }
-                else if (c === ",") { colins(c); }
-                else if (c === ".") { colins(c); }
+                if(c === '"') { si++; u = /"/; }
+                else if(c === "'") { u = /'/; }
+                else if(c === "(") { colins(c); }
+                else if(c === ")") { colins(c); }
+                else if(c === ",") { colins(c); }
+                else if(c === ".") { colins(c); }
                 else { u = /[\s"'(),.]/; }
-            } else if (u && u.test(c)) {
-                if (u.toString() === '/"/') { colins(s.substring(si, i), 1); }
-                else if (u.toString() === "/'/") { colins(s.substring(si, i + 1), 2); }
+            } else if(u && u.test(c)) {
+                if(u.toString() === '/"/') { colins(s.substring(si, i), 1); }
+                else if(u.toString() === "/'/") { colins(s.substring(si, i + 1), 2); }
                 else { colins(s.substring(si, i--)); }
                 u = undefined;
             }
         }
-        if (u) {
-            if (u.toString() === "/[\\s\"'(),.]/") { colins(s.substring(si)); }
+        if(u) {
+            if(u.toString() === "/[\\s\"'(),.]/") { colins(s.substring(si)); }
             else { throw "error"; }
-        } else if (p === 1) { colins(); }
+        } else if(p === 1) { colins(); }
         var ff;
-        if (isSearch) { ff = new Function("f", `return ${ccc.map(c => c.join("")).join("")};`); }
+        if(isSearch) { ff = new Function("f", `return ${ccc.map(c => c.join("")).join("")};`); }
         else { ff = new Function("f", `return[${ccc.map(c => c.join("")).join()}];`); }
-        if (o.length) { ff.o = o; }
+        if(o.length) { ff.o = o; }
         return ff;
 
         function colexp(ti, ci) { return `f[${ti}][${ci}]`; }
         function ttable(tt) { return f.indexOf(f.find(f => (f[1] || f[0][1]) === tt)); }
         function ccol(ti, c) { return colexp(ti, cddf(tableCol(f[ti][0], c))); }
         function onlyCol(c) {
-            for (var i = 0, ti, ci; i < f.length; i++) {
+            for(var i = 0, ti, ci; i < f.length; i++) {
                 ti = f[i][0].cols.indexOf(f[i][0].cols.find(cc => cc[2] === c));
-                if (ti >= 0) {
-                    if (ci) { throw `Nombre de columna '${c}' ambiguo`; }
+                if(ti >= 0) {
+                    if(ci) { throw `Nombre de columna '${c}' ambiguo`; }
                     ci = [i, ti];
                 }
             }
-            if (!ci) { throw `Columna '${c}' no econtrada`; }
+            if(!ci) { throw `Columna '${c}' no econtrada`; }
             return colexp(ci[0], ci[1]);
         }
         function colins(i, t) {
-            if (p === 1 && t !== 1 && i !== ".") { parts[parts.length - 1] = onlyCol(parts[parts.length - 1]); p = undefined; }
+            if(p === 1 && t !== 1 && i !== ".") { parts[parts.length - 1] = onlyCol(parts[parts.length - 1]); p = undefined; }
 
-            if (p === 1) {
-                if (i === ".") { parts[parts.length - 1] = ttable(parts[parts.length - 1]); t = 1; }
+            if(p === 1) {
+                if(i === ".") { parts[parts.length - 1] = ttable(parts[parts.length - 1]); t = 1; }
                 else { parts[parts.length - 1] = ccol(parts[parts.length - 1], i); t = undefined; }
             }
-            else if (p === "(") {
-                if (i === ",") { t = p; }
-                else if (i === ")") { parts[parts.length - 1] = `this.o[${o.length - 1}].indexOf(${parts[parts.length - 1]})>=0`; }
+            else if(p === "(") {
+                if(i === ",") { t = p; }
+                else if(i === ")") { parts[parts.length - 1] = `this.o[${o.length - 1}].indexOf(${parts[parts.length - 1]})>=0`; }
                 else { o[o.length - 1].push(isNaN(i) ? i.replace(/'/g, "") : Number(i)); t = p; }
-            } else if (t) { parts.push(i); }
+            } else if(t) { parts.push(i); }
             else {
-                if (i === "AND") { parts = ["&&"]; ccc.push(parts); isSearch = true; }
-                else if (i === "OR") { parts = ["||"]; ccc.push(parts); isSearch = true; }
-                else if (i === ",") { parts = []; ccc.push(parts); }
-                else if (i === "NOT") { parts.push("!"); }
-                else if (i === "CASE") { p = i; }
-                else if (i === "WHEN") { if (p === "CASE") { p = i; } }
-                else if (i === "THEN") { parts.push("?"); p = i; }
-                else if (i === "ELSE") { parts.push(":"); p = i; }
-                else if (i === "END") { p = i; }
-                else if (i === "AND") { p = i; }
-                else if (i === "IN") { o.push([]); t = i; }
-                else if (i === "=") { parts.push("==="); t = "lo"; }
-                else if (i === ">=") { parts.push(i); t = "lo"; }
-                else if (i === "<=") { parts.push(i); t = "lo"; }
-                else if (i === "!=" || i === "<>") { parts.push("!=="); t = "lo"; }
-                else if (i === "<") { parts.push(i); t = "lo"; }
-                else if (i === ">") { parts.push(i); t = "lo"; }
-                else if (i === "(") { t = i; }
-                else if (i === ".") { parts[parts.length - 1] = ttable(parts[parts.length - 1]); t = i; }
-                else if (funcs[i]) { t = i; }
-                else if (!isNaN(i)) { parts.push(Number(i)); }
-                else if (p === ".") { parts[parts.length - 1] = ccol(parts[parts.length - 1], t); }
+                if(i === "AND") { parts = ["&&"]; ccc.push(parts); isSearch = true; }
+                else if(i === "OR") { parts = ["||"]; ccc.push(parts); isSearch = true; }
+                else if(i === ",") { parts = []; ccc.push(parts); }
+                else if(i === "NOT") { parts.push("!"); }
+                else if(i === "CASE") { p = i; }
+                else if(i === "WHEN") { if(p === "CASE") { p = i; } }
+                else if(i === "THEN") { parts.push("?"); p = i; }
+                else if(i === "ELSE") { parts.push(":"); p = i; }
+                else if(i === "END") { p = i; }
+                else if(i === "AND") { p = i; }
+                else if(i === "IN") { o.push([]); t = i; }
+                else if(i === "=") { parts.push("==="); t = "lo"; }
+                else if(i === ">=") { parts.push(i); t = "lo"; }
+                else if(i === "<=") { parts.push(i); t = "lo"; }
+                else if(i === "!=" || i === "<>") { parts.push("!=="); t = "lo"; }
+                else if(i === "<") { parts.push(i); t = "lo"; }
+                else if(i === ">") { parts.push(i); t = "lo"; }
+                else if(i === "(") { t = i; }
+                else if(i === ".") { parts[parts.length - 1] = ttable(parts[parts.length - 1]); t = i; }
+                else if(funcs[i]) { t = i; }
+                else if(!isNaN(i)) { parts.push(Number(i)); }
+                else if(p === ".") { parts[parts.length - 1] = ccol(parts[parts.length - 1], t); }
                 else { parts.push(i); }
             }
             p = t;
@@ -208,20 +208,20 @@ function work(data) {
 
 
     function colde(t, ta) {
-        for (var i = 0, c, s, u; i < t.length; i++) {
+        for(var i = 0, c, s, u; i < t.length; i++) {
             c = t[i];
-            if (!u && /\S/.test(c)) {
+            if(!u && /\S/.test(c)) {
                 s = i;
-                if (c === '"') { s++; u = /"/; }
+                if(c === '"') { s++; u = /"/; }
                 else { u = /[\s"'(]/; }
-            } else if (u && u.test(c)) {
-                if (u.toString() === '/"/') { parts = colde2(t.substring(s, i), 1); }
+            } else if(u && u.test(c)) {
+                if(u.toString() === '/"/') { parts = colde2(t.substring(s, i), 1); }
                 else { parts = colde2(t.substring(s, i--)); }
                 u = undefined;
             }
         }
-        if (u) {
-            if (u.toString() === "/[\\s\"'(]/") { parts = colde2(t.substring(s)); }
+        if(u) {
+            if(u.toString() === "/[\\s\"'(]/") { parts = colde2(t.substring(s)); }
             else { throw "error"; }
         }
         return parts;
@@ -244,7 +244,7 @@ function work(data) {
     function g(g) {
         g.fc = g.from.map(f => f[0].cols);
         g.group = colconv(g.group, g.from);
-		s = colconv(s, g.from);
+        s = colconv(s, g.from);
         g.tgroup = CREATE_TABLE(
             "table1",
             g.group(g.fc).map(c => [c[2], c[3][1], c[4], c[5], c[6], c[7] ? "NULL" : "NOT NULL", null]),
@@ -287,21 +287,21 @@ function work(data) {
         g.fc = g.from.map(f => f[0].cols);
         CursosD.tr = INSERT(CursosD.f[0], ['RI', ...CursosD.f[2].map(c => c[0](g.fc))], [1, ...CursosD.f[2].map(c => 'Inscripciones')]);
 
-        for (var i = 0, colaborador, row, j, fr; i < data.length; i++) {
+        for(var i = 0, colaborador, row, j, fr; i < data.length; i++) {
             fr = [data[i]];
-            if (!fr[0][0]) { break; }
+            if(!fr[0][0]) { break; }
             //preparar todas las filas relacionadas
-            for (j = 1, f; j < g.from.length; j++) {
+            for(j = 1, f; j < g.from.length; j++) {
                 f = g.from[j];
                 fr[j] = WHERE(f[0], f[2].map(c => [c[0](g.fc), parseInt(c[1](fr))]))[0];
-                if (!fr[j] && f[3]) { fr[j] = INSERT(f[0], f[3], f[4](fr)); }
+                if(!fr[j] && f[3]) { fr[j] = INSERT(f[0], f[3], f[4](fr)); }
                 //else if (!fr[j]) { fr[j] = INSERT(f[0], f[2].map(c => c[0](g.fc)), f[2].map(c => c[1](fr))); }
             }
-            if (!g.where.call(g.where, fr)) { continue; }
-			row = s(fr);
-            for (var j = 0, f; j < g.from.length; j++) {
+            if(!g.where.call(g.where, fr)) { continue; }
+            row = s(fr);
+            for(var j = 0, f; j < g.from.length; j++) {
                 f = g.from[j];
-                if (!fr[j]) { fr[j] = INSERT(f[0], f[2].map(c => c[0](g.fc)), f[2].map(c => c[1](fr))); }
+                if(!fr[j]) { fr[j] = INSERT(f[0], f[2].map(c => c[0](g.fc)), f[2].map(c => c[1](fr))); }
             }
             CursosDC.tr[CursosD.tc].v = fr;
             CursosD.tr[CursosD.tc].v = fr;
@@ -311,7 +311,7 @@ function work(data) {
             fr[3][3].v = fr;
             fr[3][4].v = fr;
         }
-        for (var i = 0, r, r2, rows = []; i < g.tgroup.rows.length; i++) {
+        for(var i = 0, r, r2, rows = []; i < g.tgroup.rows.length; i++) {
             r = g.tgroup.rows[i];
             r2 = [r[0], r[2].v, r[3].v === 100 ? 'Completado' : r[4].v !== null ? 'Incompleto' : 'Sin iniciar', r[5].v, 'Capacitación 2017', r[3].v, r[4].v];
             r2.rs = r[1].v;
@@ -322,39 +322,39 @@ function work(data) {
     var search_condition = [parts];
     var p;
     function table(table) {
-        for (var i = 0, f; i < objs.f.length; i++) { f = objs.f[i]; if (f[1] ? collate(f[1]) : collate(f[0][1]) === collate(table)) { return i; } }
+        for(var i = 0, f; i < objs.f.length; i++) { f = objs.f[i]; if(f[1] ? collate(f[1]) : collate(f[0][1]) === collate(table)) { return i; } }
         throw `Tabla "${table}" no encontrada`;
     }
     function onlycol(col, table) {
-        if (table >= 0) { return `this.r(${table})[${cddf(tableCol(objs.f[table][0], col))}]`; }
-        for (var i = 0, c, c2; i < objs.f.length; i++) {
+        if(table >= 0) { return `this.r(${table})[${cddf(tableCol(objs.f[table][0], col))}]`; }
+        for(var i = 0, c, c2; i < objs.f.length; i++) {
             c2 = cddf(tableCol(objs.f[i][0], col));
-            if (c2) {
-                if (c) { throw `Nombre columna "${col}" ambiguo`; }
+            if(c2) {
+                if(c) { throw `Nombre columna "${col}" ambiguo`; }
                 c = `this.r(${i})[${c2}]`;
             }
         }
         return c;
     }
     function ins2(i, t) {
-        if (p === 1 && i !== ".") { parts[parts.length - 1] = onlycol(parts[parts.length - 1]); }
-        if (!t) {
-            if (i === "AND" || i === "OR") { parts = [i === "AND" ? "&&" : "||"]; search_condition.push(parts); }
-            else if (i === "NOT") { parts.push("!"); }
-            else if (i === "IN") { t = i; }
-            else if (i === "=") { parts.push("==="); t = "lo"; }
-            else if (i === ">=") { parts.push(i); t = "lo"; }
-            else if (i === "<=") { parts.push(i); t = "lo"; }
-            else if (i === "!=" || i === "<>") { parts.push("!=="); t = "lo"; }
-            else if (i === "<") { parts.push(i); t = "lo"; }
-            else if (i === ">") { parts.push(i); t = "lo"; }
-            else if (i === ".") { parts[parts.length - 1] = table(parts[parts.length - 1]); t = i; }
+        if(p === 1 && i !== ".") { parts[parts.length - 1] = onlycol(parts[parts.length - 1]); }
+        if(!t) {
+            if(i === "AND" || i === "OR") { parts = [i === "AND" ? "&&" : "||"]; search_condition.push(parts); }
+            else if(i === "NOT") { parts.push("!"); }
+            else if(i === "IN") { t = i; }
+            else if(i === "=") { parts.push("==="); t = "lo"; }
+            else if(i === ">=") { parts.push(i); t = "lo"; }
+            else if(i === "<=") { parts.push(i); t = "lo"; }
+            else if(i === "!=" || i === "<>") { parts.push("!=="); t = "lo"; }
+            else if(i === "<") { parts.push(i); t = "lo"; }
+            else if(i === ">") { parts.push(i); t = "lo"; }
+            else if(i === ".") { parts[parts.length - 1] = table(parts[parts.length - 1]); t = i; }
             else { t = 1; }
         }
-        if (t === 1) { if (p === ".") { parts[parts.length - 1] = onlycol(i, parts[parts.length - 1]); t = null; } else { parts.push(i); } }
-        else if (t === 2) { parts.push(i); }
-        else if (t === 3) {
-            if (p === "IN") {
+        if(t === 1) { if(p === ".") { parts[parts.length - 1] = onlycol(i, parts[parts.length - 1]); t = null; } else { parts.push(i); } }
+        else if(t === 2) { parts.push(i); }
+        else if(t === 3) {
+            if(p === "IN") {
                 objs.refs.push(i.split(",").map(m => isNaN(m) ? m.replace(/'/g, "") : Number(m)));
                 parts[parts.length - 1] = `this.refs[${objs.refs.length - 1}].indexOf(${parts[parts.length - 1]})>=0`;
             }
@@ -396,9 +396,9 @@ function work(data) {
     );
     INSERT(Completado, Completado.cols, [0, 1]);
     INSERT(Completado, Completado.cols, [1, 0]);
-    for (var i = 1, row = [2]; i < Completado.cols.length; i++) { row[i] = Completado.cols[i][2]; }
+    for(var i = 1, row = [2]; i < Completado.cols.length; i++) { row[i] = Completado.cols[i][2]; }
     INSERT(Completado, Completado.cols, row);
-    for (var i = 1, row = [3]; i < Completado.cols.length; i++) { row[i] = Completado.cols[i][2]; }
+    for(var i = 1, row = [3]; i < Completado.cols.length; i++) { row[i] = Completado.cols[i][2]; }
     INSERT(Completado, Completado.cols, row);
     var avgRow = rsc([4, "Completado"]);
     var ColPK = [0, 1, 3];
@@ -415,16 +415,16 @@ function work(data) {
         group: '"Alumno","PPGID","Lugar","Empresa","Entidad","Centro de costos ID","Centro de costos","Puesto","Nivel","Dirección","Business Partner","Jefe","Jefe email","Director","Email","Empresa tipo"'
     };
 
-    for (var i = 0, row, drow, j, dcol; i < data.length; i++) {
+    for(var i = 0, row, drow, j, dcol; i < data.length; i++) {
         row = data[i];
-        if (!row[0]) { break; }
+        if(!row[0]) { break; }
         row = objs._r[0] = INSERT(Inscripciones, descol, orisel(row));
-        if (!tmp1.call(objs)) { continue; }
+        if(!tmp1.call(objs)) { continue; }
 
 
         var alumno = alumnos.sgroup(row);
         alumno = WHERE(alumnos.tgroup, alumnos.tgroup.cols.map((c, i) => [c, alumno[i]]))[0];
-        if (!alumno) { alumno = INSERT(alumnos.tgroup, null, alumnos.sgroup(row)); alumno.rows = []; }
+        if(!alumno) { alumno = INSERT(alumnos.tgroup, null, alumnos.sgroup(row)); alumno.rows = []; }
         alumno.rows.push(row);
         //AVG(row, avgRow[cit]);
         //drow = rsc(dsRows(row));
@@ -442,26 +442,26 @@ function work(data) {
     }
     function csc(data) {
         var ci = indexCol(ColPK.map(c => data[c]));
-        if (ci[0]) { ci = ci[1]; }
+        if(ci[0]) { ci = ci[1]; }
         else {
             ci = ci[1];
             insertCol(Completado, ["{0}|{1}".format(data[2], data[3]), "tinyint", null, null, null, "NOT NULL", [[null, "DEFAULT", null, null, "[0,0,0,[]]"]]], ci);
-            for (var i = 0; i < 4; i++) { Completado.rows[i][ci] = data[i]; }
+            for(var i = 0; i < 4; i++) { Completado.rows[i][ci] = data[i]; }
         }
         return ci;
     }
     function indexCol(a, e) {
-        if (!e && e != 0) { e = Completado.cols.length - 1; }
-        for (var s = 0, i, r, b; s <= e;) {
+        if(!e && e != 0) { e = Completado.cols.length - 1; }
+        for(var s = 0, i, r, b; s <= e;) {
             i = s + Math.round((e - s) / 2);
             b = ColPK.map(c => Completado.rows[c][i]);
             r = cddc(a, b);
-            if (r > 0) { s = i + 1; } else if (r) { e = i - 1; } else { s = i; break; }
+            if(r > 0) { s = i + 1; } else if(r) { e = i - 1; } else { s = i; break; }
         }
         return [!r ? b : null, s];
     }
     function cddc(a, b) {
-        for (var i = 0, r = 0; i < a.length && !r; i++) { r = compare(a[i], b[i]); }
+        for(var i = 0, r = 0; i < a.length && !r; i++) { r = compare(a[i], b[i]); }
         return r;
     }
     function AVG(row, pp) {
@@ -473,7 +473,7 @@ function work(data) {
 
     function dsdfsd() {
         var selcols = formats[1].map(c => c[0]);
-        for (var i = 0, row; i < ori.rows.length; i++) {
+        for(var i = 0, row; i < ori.rows.length; i++) {
             row = SELECT(ori, ori.rows[i], selcols);
             //for (var j = 0; j < formats[1].length; j++) {
             //    if (formats[1][j][1]) { row[j] = moment(row[j].replace(". m.", ".m."), formats[1][j][1], true).format(formats[1][j][2]); }
@@ -494,7 +494,7 @@ function work(data) {
                 { pct: 0.5, color: { r: 0xff, g: 0xeb, b: 0x84 } },
                 { pct: 1.0, color: { r: 0x63, g: 0xbe, b: 0x7b } }
             ];
-            for (var i = 1; i < percentColors.length - 1; i++) { if (pct < percentColors[i].pct) { break; } }
+            for(var i = 1; i < percentColors.length - 1; i++) { if(pct < percentColors[i].pct) { break; } }
             var lower = percentColors[i - 1];
             var upper = percentColors[i];
             var pctUpper = (pct - lower.pct) / (upper.pct - lower.pct);
@@ -513,11 +513,11 @@ function work(data) {
         }
         function csc(data) {
             var ci = indexCol(ColPK.map(function(c) { return data[c]; }));
-            if (ci[0]) { ci = ci[1]; }
+            if(ci[0]) { ci = ci[1]; }
             else {
                 ci = ci[1];
                 insertCol(Resultados, ["{0}|{1}".format(data[2], data[3]), "tinyint", null, null, null, "NOT NULL", [[null, "DEFAULT", null, null, "[0,0,0,[]]"]]], ci);
-                for (var i = 0; i < 4; i++) { Resultados.rows[i][ci] = data[i]; }
+                for(var i = 0; i < 4; i++) { Resultados.rows[i][ci] = data[i]; }
             }
             return ci;
         }
@@ -534,30 +534,30 @@ function work(data) {
         function countD(row, pp) {
             var tmp = [SELECT(Interacciones, row, ["Inscripcion"])];
             var arri = arrind(pp[3], tmp);
-            if (arri[0]) { tmp = arri[0]; }
+            if(arri[0]) { tmp = arri[0]; }
             else { pp[0]++; tmp[1] = []; pp[3].insertAt(tmp, arri[1]); }
             tmp[1].push(row);
         }
         function indexCol(a, e) {
-            if (!e && e != 0) { e = Resultados.cols.length - 1; }
-            for (var s = 0, i, r, b; s <= e;) {
+            if(!e && e != 0) { e = Resultados.cols.length - 1; }
+            for(var s = 0, i, r, b; s <= e;) {
                 i = s + Math.round((e - s) / 2);
                 b = ColPK.map(c => Resultados.rows[c][i]);
                 r = cddc(a, b);
-                if (r > 0) { s = i + 1; } else if (r) { e = i - 1; } else { s = i; break; }
+                if(r > 0) { s = i + 1; } else if(r) { e = i - 1; } else { s = i; break; }
             }
             return [!r ? b : null, s];
         }
         function cddc(a, b) {
-            for (var i = 0, r = 0; i < a.length && !r; i++) { r = compare(a[i], b[i]); }
+            for(var i = 0, r = 0; i < a.length && !r; i++) { r = compare(a[i], b[i]); }
             return r;
         }
         function arrind(arr, a) {
-            for (var s = 0, e = arr.length - 1, i, r, b; s <= e;) {
+            for(var s = 0, e = arr.length - 1, i, r, b; s <= e;) {
                 i = s + Math.round((e - s) / 2);
                 b = arr[i];
                 r = compare(a[0], b[0]);
-                if (r > 0) { s = i + 1; } else if (r) { e = i - 1; } else { s = i; break; }
+                if(r > 0) { s = i + 1; } else if(r) { e = i - 1; } else { s = i; break; }
             }
             return [!r ? b : null, s];
         }
