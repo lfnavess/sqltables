@@ -451,7 +451,7 @@ function work(data) {
         return ci;
     }
     function indexCol(a, e) {
-        if(!e && e != 0) { e = Completado.cols.length - 1; }
+        if(!e && e !== 0) { e = Completado.cols.length - 1; }
         for(var s = 0, i, r, b; s <= e;) {
             i = s + Math.round((e - s) / 2);
             b = ColPK.map(c => Completado.rows[c][i]);
@@ -539,7 +539,7 @@ function work(data) {
             tmp[1].push(row);
         }
         function indexCol(a, e) {
-            if(!e && e != 0) { e = Resultados.cols.length - 1; }
+            if(!e && e !== 0) { e = Resultados.cols.length - 1; }
             for(var s = 0, i, r, b; s <= e;) {
                 i = s + Math.round((e - s) / 2);
                 b = ColPK.map(c => Resultados.rows[c][i]);
