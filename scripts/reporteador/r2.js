@@ -103,6 +103,28 @@ class binaryArray extends Array {
         delete this.b;
         return this;
     }
+    sort2(compareFunction) {
+        if(compareFunction) { this.compare = compareFunction; if(this.ready) { return; } }
+        this.ready = true;
+        for(var i = 1, p = 0, s, val= { p : this[p]}, si; i < this.length; i++) {
+            val.i = this[i];
+            if(!si && this.compare(val.p, val.i) <= 0){ val.p = val.i; p = i;}
+            else if(!si){ 
+                this.lastIndexOf(val.i, p);
+                val.s = this[this.s]; s = this.s;
+                
+                si = i; val[1] = val[2]; val[2] = val[3];
+            }
+            else if(si && this.compare(val[1], val[2]) < 0){
+                this.lastIndexOf(this[si], si - 1);
+                var tn = this.splice(si, i - si);
+                this.splice(this.s, 0, ...tn);
+            }
+        }
+        delete this.s;
+        delete this.b;
+        return this;
+    }
     push(element) {
         for(var i = 0, val; i < arguments.length; i++) {
             val = arguments[i];
@@ -126,7 +148,6 @@ class binaryArray extends Array {
         return this.length;
     }
     compare(a = null, b = null, order = 1) {
-        var na = !a && a !== 0, nb = !b && b !== 0;
         if(Array.isArray(a) || Array.isArray(b)) {
             var l = Array.isArray(a) ? Array.isArray(b) ? a.length > b.length ? a.length : b.length : a.length : b.length;
             for(var i = 0, r; i < l && !r; i++) {
@@ -138,14 +159,18 @@ class binaryArray extends Array {
             }
             return r;
         }
-        return na ? nb ? 0 : 1 : nb ? -1 : binaryArray.compare(a, b) * order;
+        if(!a && a !== 0) { return !b && b !== 0 ? 0 : 1; } 
+        if(!b && b !== 0) { return -1; }
+        if(!isNaN(a)) { return (!isNaN(b) ? a < b ? -1 : a > b ? 1 : 0 : -1) * order; }
+        if(!isNaN(b)) { return order; }
+        return binaryArray.compare(a, b) * order;
     }
     testnull(a = null) {
         if(Array.isArray(a)) { for(var i = 0, r = 1; i < a.length && r; i++) { r = this.testnull(a[i]); } }
         return this.compare(a, null) === 0;
     }
 }
-binaryArray.compare = (new Intl.Collator(undefined, { sensitivity: 'base', numeric: true })).compare;
+binaryArray.compare = (new Intl.Collator(undefined, { sensitivity: 'base' })).compare;
 
 class rows extends binaryArray {
     sort() {
