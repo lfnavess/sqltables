@@ -25,7 +25,7 @@ if(!Array.prototype.move) {
             var k = new_index - this.length;
             while(k-- + 1) { this.push(null); }
         }
-        this.splice(new_index, 0, this.splice(old_index, 1)[0]);
+        this.splice(new_index, 0, ...this.splice(old_index, 1));
         return this;
     };
 }
@@ -61,7 +61,6 @@ if(!Array.prototype.compare) {
         return na ? nb ? 0 : 1 : nb ? -1 : this._compare(a, b) * order;
     };
 }
-
 class binaryArray extends Array {
     indexOf(searchElement, fromIndex = 0) {
         //https://oli.me.uk/2013/06/08/searching-javascript-arrays-with-a-binary-search/
@@ -104,25 +103,18 @@ class binaryArray extends Array {
         return this;
     }
     sort2(compareFunction) {
-        if(compareFunction) { this.compare = compareFunction; if(this.ready) { return; } }
-        this.ready = true;
-        for(var i = 1, p = 0, s, val= { p : this[p]}, si; i < this.length; i++) {
+        for(var i = 1, s = 0, e = 0, val = { e: this[e], s: this[s] }, si; i < this.length; i++) {
             val.i = this[i];
-            if(!si && this.compare(val.p, val.i) <= 0){ val.p = val.i; p = i;}
-            else if(!si){ 
-                this.lastIndexOf(val.i, p);
-                val.s = this[this.s]; s = this.s;
-                
-                si = i; val[1] = val[2]; val[2] = val[3];
-            }
-            else if(si && this.compare(val[1], val[2]) < 0){
-                this.lastIndexOf(this[si], si - 1);
-                var tn = this.splice(si, i - si);
-                this.splice(this.s, 0, ...tn);
-            }
+            if(this.compare(val.i, val.e) < 0) {
+                if(this.compare(val.i, val.s) > 0) {
+                    val.e--; val.s++;
+
+                } else {
+                    val.e = val.i;
+                    //this.splice(s, 0, ...this.splice(i, 1)); val.s = val.i; val.e = i;
+                }
+            } else { val.e = val.i; e = i; }
         }
-        delete this.s;
-        delete this.b;
         return this;
     }
     push(element) {
@@ -159,7 +151,7 @@ class binaryArray extends Array {
             }
             return r;
         }
-        if(!a && a !== 0) { return !b && b !== 0 ? 0 : 1; } 
+        if(!a && a !== 0) { return !b && b !== 0 ? 0 : 1; }
         if(!b && b !== 0) { return -1; }
         if(!isNaN(a)) { return (!isNaN(b) ? a < b ? -1 : a > b ? 1 : 0 : -1) * order; }
         if(!isNaN(b)) { return order; }
@@ -169,8 +161,14 @@ class binaryArray extends Array {
         if(Array.isArray(a)) { for(var i = 0, r = 1; i < a.length && r; i++) { r = this.testnull(a[i]); } }
         return this.compare(a, null) === 0;
     }
+    flip(s, e) {
+        var t = this[s];
+        this[s] = this[e];
+        this[e] = t;
+    }
 }
 binaryArray.compare = (new Intl.Collator(undefined, { sensitivity: 'base' })).compare;
+
 
 class rows extends binaryArray {
     sort() {

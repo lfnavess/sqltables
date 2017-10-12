@@ -1,10 +1,6 @@
 function work(data) {
     "use strict";
     //data = data.split("\n").map(function(a) { return a.split("\t"); });
-    var ab = new binaryArray;
-    for(var i = 0; i < 1000; i++){ ab[i] = Math.random(); }
-    ab.sort2();
-    
     var Categorias = CREATE_TABLE(
         "Categorias",
         [
