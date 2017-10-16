@@ -92,11 +92,24 @@ class binaryArray extends Array {
     sort(compareFunction) {
         if(compareFunction) { this.compare = compareFunction; if(this.ready) { return; } }
         this.ready = true;
-        for(var i = 0, val; i < this.length; i++) {
-            val = this[i];
-            if(this.unique && this.testnull(val)) { this.removeAt(1, i); i--; continue; }
-            if(this.lastIndexOf(val, i - 1) >= 0 && this.unique) { throw `value '${val}' already exist`; }
-            this.move(i, this.s);
+        var i = 0, val, pre;
+        if(this.unique) {
+            for(var t; i < this.length; i++) {
+                val = this[i];
+                if(this.testnull(val)) { this.removeAt(1, i); i--; continue; }
+                t = this.compare(val, pre); pre = val;
+                if(!t) { throw `value '${val}' already exist`; }
+                else if(t < 0) {
+                    if(this.lastIndexOf(val, i - 2) >= 0) { throw `value '${val}' already exist`; }
+                    this.move(i, this.s);
+                }
+            }
+        } else {
+            for(; i < this.length; i++) {
+                val = this[i];
+                if(this.compare(val, pre) < 0) { this.lastIndexOf(val, i - 2); this.move(i, this.s); }
+                pre = val;
+            }
         }
         delete this.s;
         delete this.b;
@@ -381,7 +394,7 @@ function ADDCONSTRAINT(table, name, type, cols, reftable, refcols, expre = null)
     if(!name) { name = `${type[2]}_${table[1].toLowerCase()}${type[0] === 1 ? "" : `_${cols[0][0][2].toLowerCase()}`}`; }
     if(reftable) {
         refcols.forEach(function(c, i) {
-            if(typeof c === "string") { c = WHERE(t[0], [[t[0].cols[1], reftable], [t[0].cols[2], refcols[0]]])[0]; if(!c) { throw "refcol not found"; } refcols[i] = c; }
+            if(typeof c === "string") { c = WHERE(t[0], [[t[0].cols[1], reftable], [t[0].cols[2], refcols[i]]])[0]; if(!c) { throw "refcol not found"; } refcols[i] = c; }
             if(!refcols[i].constraints.find(function(cc) { return cc[3][0] < 3; })) { throw "FK contraint is not unique"; }
         });
     }
@@ -391,7 +404,10 @@ function ADDCONSTRAINT(table, name, type, cols, reftable, refcols, expre = null)
         table.PK = constr;
     }
     else if(type[0] === 2) { constr.rows = new rows; }
-    else if(type[0] === 3) { constr.rows = refcols[0].constraints[0].rows; }
+    else if(type[0] === 3) {
+        constr.rows = reftable.constraints
+            .find(function(c) { return c[3][0] <= 2 && c.ccols.every(function(cc) { return refcols.some(function(rc) { return rc === cc[1]; }); }); }).rows;
+    }
     constr.ccols = cols.map(function(c, i) {
         var c1 = [constr, c[0], c[1] = type[0] > 2 ? null : c[1], refcols ? refcols[i] : null, expre];
         c = INSERT(t[5], t[5].cols, c1);
@@ -449,7 +465,12 @@ function WHERE(table, conditions) {
 function INSERT(table, cols, vals) {
     table = tablestr(table); if(!table) { throw "Tabla no existe"; }
     if(!cols) { cols = table.cols; }
-    else {
+    else if(typeof cols === "string") {
+        cols = cols.split(",").map(function(c) {
+            var c2 = colstr(table, c[0] === "\"" ? c.split("\"")[1] : c); if(!c2) { throw "Columna {0} no existe".format(c); }
+            return c2;
+        })
+    } else {
         cols = cols.map(function(c) {
             var c2 = colstr(table, c); if(!c2) { throw "Columna {0} no existe".format(c); }
             return c2;
@@ -494,7 +515,7 @@ function INSERT(table, cols, vals) {
                     tttt = FKtrans(cc, row);
                     if(cc.rows.testnull(tttt)) { continue; }
                     if(cc.rows.lastIndexOf(tttt) < 0) { throw "Valor no existe en la tabla relacionada"; }
-                    row[ci] = cc.rows.b;
+                    FKset(cc, row, cc.rows.b);
                     delete cc.rows.b; delete cc.rows.s;
                 }
             }
