@@ -448,19 +448,21 @@ function WHERE(table, conditions) {
     table = tablestr(table); if(!table) { throw "Tabla no existe"; }
     conditions.forEach(function(c) { c[0] = colstr(table, c[0]); if(!c[0]) { throw "Columna no existe"; } });
     var rs = [];
-    var cc = table.constraints.find(function(c) {
-        return c[3][0] < 3 && c.ccols.every(function(cc) { return conditions.some(function(con) { return con[0] === cc[1]; }); });
-    });
+    var cc = table.constraints.find(c => c[3][0] < 3 && c.ccols.every(cc => conditions.some(con => con[0] === cc[1])));
     if(cc) {
         var row = [];
-        for(var i = 0; i < cc.ccols.length; i++) {
-            row[cddf(cc.ccols[i][1])] = conditions.find(function(con) { return con[0] === cc.ccols[i][1]; })[1];
-        }
+        for(var i = 0; i < cc.ccols.length; i++) { row[cddf(cc.ccols[i][1])] = conditions.find(con => con[0] === cc.ccols[i][1])[1]; }
         iscon(cc.rows.indexOf(row) >= 0 ? cc.rows.b : null);
     } else { table.rows.forEach(iscon); }
     //if (con) { return rs[0]; }
     return rs;
-    function iscon(r) { if(!r) { rs.push(null); } else if(conditions.every(function(c) { return r[cddf(c[0])] === c[1]; })) { rs.push(r); } }
+    function iscon(r) {
+        if(!r) { rs.push(null); } else if(conditions.every(function(c) {
+            var a = r[cddf(c[0])];
+            if(c[0].FK && Array.isArray(a)) { a = a[cddf(c[0].FK)]; }
+            return a === c[1];
+        })) { rs.push(r); }
+    }
 }
 function INSERT(table, cols, vals) {
     table = tablestr(table); if(!table) { throw "Tabla no existe"; }
