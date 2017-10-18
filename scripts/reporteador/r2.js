@@ -395,7 +395,7 @@ function ADDCONSTRAINT(table, name, type, cols, reftable, refcols, expre = null)
     if(reftable) {
         refcols.forEach(function(c, i) {
             if(typeof c === "string") { c = WHERE(t[0], [[t[0].cols[1], reftable], [t[0].cols[2], refcols[i]]])[0]; if(!c) { throw "refcol not found"; } refcols[i] = c; }
-            if(!refcols[i].constraints.find(function(cc) { return cc[3][0] < 3; })) { throw "FK contraint is not unique"; }
+            if(!refcols[i].constraints.find(cc => cc[3][0] <= 2)) { throw "FK contraint is not unique"; }
         });
     }
     var constr = INSERT(t[4], t[4].cols.slice(1), [table, name, type]);
@@ -404,10 +404,7 @@ function ADDCONSTRAINT(table, name, type, cols, reftable, refcols, expre = null)
         table.PK = constr;
     }
     else if(type[0] === 2) { constr.rows = new rows; }
-    else if(type[0] === 3) {
-        constr.rows = reftable.constraints
-            .find(function(c) { return c[3][0] <= 2 && c.ccols.every(function(cc) { return refcols.some(function(rc) { return rc === cc[1]; }); }); }).rows;
-    }
+    else if(type[0] === 3) { constr.rows = reftable.constraints.find(c => c[3][0] <= 2 && c.ccols.every(cc => refcols.some(rc => rc === cc[1]))).rows; }
     constr.ccols = cols.map(function(c, i) {
         var c1 = [constr, c[0], c[1] = type[0] > 2 ? null : c[1], refcols ? refcols[i] : null, expre];
         c = INSERT(t[5], t[5].cols, c1);
@@ -417,7 +414,7 @@ function ADDCONSTRAINT(table, name, type, cols, reftable, refcols, expre = null)
         return c;
     });
     if(type[0] <= 2) { constr.rows.constr = constr; }
-    cols.forEach(function(c, i) { c[0].constraints.push(constr); });
+    cols.forEach(c => c[0].constraints.push(constr));
     table.constraints.push(constr);
     return constr;
 }
@@ -448,7 +445,7 @@ function WHERE(table, conditions) {
     table = tablestr(table); if(!table) { throw "Tabla no existe"; }
     conditions.forEach(function(c) { c[0] = colstr(table, c[0]); if(!c[0]) { throw "Columna no existe"; } });
     var rs = [];
-    var cc = table.constraints.find(c => c[3][0] < 3 && c.ccols.every(cc => conditions.some(con => con[0] === cc[1])));
+    var cc = table.constraints.find(c => c[3][0] <= 2 && c.ccols.every(cc => conditions.some(con => con[0] === cc[1])));
     if(cc) {
         var row = [];
         for(var i = 0; i < cc.ccols.length; i++) { row[cddf(cc.ccols[i][1])] = conditions.find(con => con[0] === cc.ccols[i][1])[1]; }
@@ -458,9 +455,12 @@ function WHERE(table, conditions) {
     return rs;
     function iscon(r) {
         if(!r) { rs.push(null); } else if(conditions.every(function(c) {
-            var a = r[cddf(c[0])];
-            if(c[0].FK && Array.isArray(a)) { a = a[cddf(c[0].FK)]; }
-            return a === c[1];
+            var a = c[1], b = r[cddf(c[0])];
+            if(c[0].FK) {
+                if(Array.isArray(a)) { a = a[cddf(c[0].FK)]; }
+                if(Array.isArray(b)) { b = b[cddf(c[0].FK)]; }
+            }
+            return c[0].compare(a, b) === 0;
         })) { rs.push(r); }
     }
 }
