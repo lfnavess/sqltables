@@ -15,6 +15,34 @@ function work(data) {
     INSERT(Competencias, '"Competencia","Style"', ["Creativaidad e Innovación", "background-color:#FFF2CC;"]);
     INSERT(Competencias, '"Competencia","Style"', ["Planeación", "background-color:#FFF2CC;"]);
 
+    var CompetenciaP = CREATE_TABLE(
+        "CompetenciaP",
+        [
+            ["Pregunta", "nvarchar", 50, null, null, "NOT NULL", [[null, "PRIMARY KEY", null, null]]],
+            ["Competencia", "nvarchar", 50, null, null, "NOT NULL", [[null, "FOREING KEY", "Competencias", "Competencia"]]]
+        ]
+    );
+    INSERT(CompetenciaP, '"Competencia","Pregunta"', ["Planeación", "P06"]);
+    INSERT(CompetenciaP, '"Competencia","Pregunta"', ["Planeación", "P07"]);
+    INSERT(CompetenciaP, '"Competencia","Pregunta"', ["Planeación", "P08"]);
+    INSERT(CompetenciaP, '"Competencia","Pregunta"', ["Planeación", "P09"]);
+    INSERT(CompetenciaP, '"Competencia","Pregunta"', ["Planeación", "P10"]);
+    INSERT(CompetenciaP, '"Competencia","Pregunta"', ["Planeación", "P11"]);
+    INSERT(CompetenciaP, '"Competencia","Pregunta"', ["Planeación", "P12"]);
+    INSERT(CompetenciaP, '"Competencia","Pregunta"', ["Planeación", "P13"]);
+    INSERT(CompetenciaP, '"Competencia","Pregunta"', ["Planeación", "P14"]);
+
+    INSERT(CompetenciaP, '"Competencia","Pregunta"', ["Trabajo en Equipo", "P15"]);
+    INSERT(CompetenciaP, '"Competencia","Pregunta"', ["Trabajo en Equipo", "P16"]);
+    INSERT(CompetenciaP, '"Competencia","Pregunta"', ["Trabajo en Equipo", "P17"]);
+    INSERT(CompetenciaP, '"Competencia","Pregunta"', ["Trabajo en Equipo", "P18"]);
+    INSERT(CompetenciaP, '"Competencia","Pregunta"', ["Trabajo en Equipo", "P19"]);
+    INSERT(CompetenciaP, '"Competencia","Pregunta"', ["Trabajo en Equipo", "P20"]);
+    INSERT(CompetenciaP, '"Competencia","Pregunta"', ["Trabajo en Equipo", "P21"]);
+    INSERT(CompetenciaP, '"Competencia","Pregunta"', ["Trabajo en Equipo", "P22"]);
+    INSERT(CompetenciaP, '"Competencia","Pregunta"', ["Trabajo en Equipo", "P23"]);
+    INSERT(CompetenciaP, '"Competencia","Pregunta"', ["Trabajo en Equipo", "P24"]);
+
 
     var mdl_feedback_item = CREATE_TABLE(
         "mdl_feedback_item",
@@ -23,7 +51,8 @@ function work(data) {
             ["position", "smallint", null, null, null, "NOT NULL", [[null, "UNIQUE", null, null]]],
             ["label", "nvarchar", 255, null, null, "NOT NULL", [[null, "UNIQUE", null, null]]],
             ["name", "nvarchar", 255, null, null, "NOT NULL", null],
-            ["typ", "nvarchar", 255, null, null, "NOT NULL", null]
+            ["typ", "nvarchar", 255, null, null, "NOT NULL", null],
+            ["Competencia", "nvarchar", 50, null, null, "NULL", [[null, "FOREING KEY", "Competencias", "Competencia"]]]
         ]
     );
 
@@ -47,60 +76,67 @@ function work(data) {
         "mdl_feedback_value",
         [
             ["completed", "bigint", null, null, null, "NOT NULL", [[null, "FOREING KEY", "mdl_feedback_completed", "id"]]],
-            ["item", "bigint", null, null, null, "NOT NULL", null],
-            ["value", "tinyint", null, null, null, "NOT NULL", null]
+            ["item", "bigint", null, null, null, "NOT NULL", [[null, "FOREING KEY", "mdl_feedback_item", "id"]]],
+            ["value", "nvarchar", 255, null, null, "NOT NULL", null],
+            ["rate", "smallint", null, null, null, "NULL", null]
         ],
-        [
-            [null, "PRIMARY KEY", [["completed"], ["item"]], null, null],
-            [null, "FOREING KEY", [["item"], ["value"]], mdl_feedback_item_value, ["item", "position"]]
-        ]
+        [[null, "PRIMARY KEY", [["completed"], ["item"]], null, null]]
     );
 
-    for(var i = 1, values, item; i < d1.length; i++) {
-        item = INSERT(mdl_feedback_item, '"id","position","label","name","typ"', [d1[i][0], d1[i][1], d1[i][2], d1[i][3], d1[i][4][0]]);
-        values = d1[i][4].split(">>>>>")[1].split("<<<<<")[0].split("|");
+    var interactions = CREATE_TABLE(
+        "interactions",
+        [
+            ["completed", "bigint", null, null, null, "NOT NULL", null],
+            ["Site", "nvarchar", 255, null, null, "NOT NULL", null],
+            ["Cargo", "nvarchar", 255, null, null, "NOT NULL", null],
+            ["Sexo", "nvarchar", 255, null, null, "NOT NULL", null],
+            ["Grado Académico", "nvarchar", 255, null, null, "NOT NULL", null],
+            ["Edad", "nvarchar", 255, null, null, "NOT NULL", null],
+            ["item", "bigint", null, null, null, "NOT NULL", null],
+            ["position", "smallint", null, null, null, "NOT NULL", null],
+            ["Competencia", "nvarchar", 50, null, null, "NOT NULL", null],
+            ["label", "nvarchar", 255, null, null, "NOT NULL", null],
+            ["name", "nvarchar", 255, null, null, "NOT NULL", null],
+            ["value", "nvarchar", 255, null, null, "NOT NULL", null],
+            ["rate", "smallint", null, null, null, "NULL", null]
+        ],
+        [[null, "PRIMARY KEY", [["completed"], ["item"]], null, null]]
+    );
+    var from = [d1, CompetenciaP, Competencias, mdl_feedback_item];
+    for(var i = 1, values, r = []; i < from[0].length; i++) {
+        r[0] = from[0][i];
+        r[1] = WHERE(from[1], [["Pregunta", r[0][2]]])[0];
+        r[2] = r[1] ? r[1][1] : null;
+        r[3] = INSERT(from[3], '"id","position","label","name","typ","Competencia"', [r[0][0], r[0][1], r[0][2], r[0][3], r[0][4][0], r[2] ? r[2][0] : null]);
+        values = r[0][4].split(">>>>>")[1].split("<<<<<")[0].split("|");
         for(var j = 0, k, v; j < values.length; j++) {
             k = values[j]; v = null;
             if(k.indexOf("####") >= 0) { k = k.split("####"); v = k[0] === "-1" ? null : k[0]; k = k[1]; }
-            INSERT(mdl_feedback_item_value, '"item","position","value","rate"', [item, j + 1, k, v]);
+            INSERT(mdl_feedback_item_value, '"item","position","value","rate"', [r[3][0], j + 1, k, v]);
         }
-        if(d1[i][4][0] === "d") {
-            insertCol(mdl_feedback_completed, [item[3], "nvarchar", 255, null, null, "NOT NULL", [[null, "DEFAULT", null, null, "new funcs.MAX(f => f[3])"]]], ci);
-        }
+        if(r[0][4][0] === "d") { insertCol(mdl_feedback_completed, [r[3][3], "nvarchar", 255, null, null, "NULL", null], ci); }
     }
-    for(var i = 1, row, completed, item, item_value; i < d2.length; i++) {
-        row = d2[i];
-        completed = WHERE(mdl_feedback_completed, [["id", parseInt(row[0])]])[0];
-        completed = completed || INSERT(mdl_feedback_completed, '"id"', row[0]);
-        item = WHERE(mdl_feedback_item, [["id", parseInt(row[1])]])[0];
-        if(item[4] === "d") {
-            var c = mdl_feedback_completed.cols.find(c => c.compare(item[3], c[2]) === 0);
-            completed[cddf(c)] = WHERE(mdl_feedback_item_value, [["item", parseInt(row[1])], ["position", parseInt(row[2])]])[0][2];
-        } else { INSERT(mdl_feedback_value, '"completed","item","value"', row); }
+    var from = [d2, mdl_feedback_completed, mdl_feedback_item, mdl_feedback_item_value, mdl_feedback_value];
+    for(var i = 1, from_r = []; i < from[0].length; i++) {
+        from_r[0] = from[0][i];
+        from_r[1] = WHERE(from[1], [["id", parseInt(from_r[0][0])]])[0];
+        from_r[1] = from_r[1] || INSERT(from[1], '"id"', from_r[0][0]);
+        from_r[2] = WHERE(from[2], [["id", parseInt(from_r[0][1])]])[0];
+        from_r[3] = WHERE(from[3], [["item", parseInt(from_r[0][1])], ["position", parseInt(from_r[0][2])]])[0];
+        if(from_r[2][4] === "d") {
+            var c = from[1].cols.find(c => c.compare(from_r[2][3], c[2]) === 0);
+            from_r[1][cddf(c)] = from_r[3][2];
+        } else { from_r[4] = INSERT(from[4], '"completed","item","value","rate"', [from_r[1][0], from_r[2][0], from_r[3][2], from_r[3][3]]); }
+    }
+    for(var i = 0, r; i < mdl_feedback_value.rows.length; i++) {
+        r = mdl_feedback_value.rows[i];
+        INSERT(
+            interactions,
+            '"completed","Site","Cargo","Sexo","Grado Académico","Edad","item","position","Competencia","label","name","value","rate"',
+            [...r[0], r[1][0], r[1][1], r[1][5][0], r[1][2], r[1][3], r[2], r[3]]
+        );
     }
 
-    var Interacciones = CREATE_TABLE(
-        "Interacciones",
-        [
-            ["Inscripcion", "int", null, null, null, "NOT NULL", null],
-            ["Categoría", "nvarchar", 50, null, null, "NOT NULL", [[null, "FOREING KEY", "Categorias", "Categoría"]]],
-            ["Pregunta", "nvarchar", 50, null, null, "NOT NULL", null],
-            ["Peso", "tinyint", null, null, null, "NOT NULL", null],
-            ["Lugar", "nvarchar", 50, null, null, "NOT NULL", null],
-            ["Nivel", "nvarchar", 50, null, null, "NULL", null],
-            ["Sexo", "nvarchar", 1, null, null, "NOT NULL", null],
-            ["Edad", "tinyint", null, null, null, "NULL", null],
-            ["Empresa", "nvarchar", 50, null, null, "NOT NULL", null],
-            ["Empresa tipo", "nvarchar", 50, null, null, "NOT NULL", null],
-            ["Banda", "nvarchar", 50, null, null, "NULL", null],
-            ["Dirección", "nvarchar", 50, null, null, "NULL", null],
-            ["Antigüedad", "tinyint", null, null, null, "NOT NULL", null]
-        ],
-        [
-            [null, "PRIMARY KEY", [["Inscripcion"], ["Pregunta"]], null, null],
-            [null, "UNIQUE", [["Pregunta"], ["Inscripcion"]], null, null]
-        ]
-    );
     var vCols = [["Categoría", 1], ["Pregunta", 1]];
     var hCols = [
         ["Sexo", 1, "background-color:#DDEBF7;"],
