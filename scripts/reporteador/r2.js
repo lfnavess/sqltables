@@ -46,7 +46,6 @@ if(!Array.prototype.insertAt) {
 if(!Array.prototype.compare) {
     Array.prototype._compare = (new Intl.Collator(undefined, { sensitivity: 'base', numeric: true })).compare;
     Array.prototype.compare = function(a = null, b = null, order = 1) {
-        var na = !a && a !== 0, nb = !b && b !== 0;
         if(Array.isArray(a) || Array.isArray(b)) {
             var l = Array.isArray(a) ? Array.isArray(b) ? a.length > b.length ? a.length : b.length : a.length : b.length;
             for(var i = 0, r = 0; i < l && !r; i++) {
@@ -58,7 +57,11 @@ if(!Array.prototype.compare) {
             }
             return r;
         }
-        return na ? nb ? 0 : 1 : nb ? -1 : this._compare(a, b) * order;
+        if(!a && a !== 0) { return !b && b !== 0 ? 0 : 1; }
+        if(!b && b !== 0) { return -1; }
+        if(!isNaN(a)) { return (!isNaN(b) ? a < b ? -1 : a > b ? 1 : 0 : -1) * order; }
+        if(!isNaN(b)) { return order; }
+        return this._compare(a.trimSingleLine(), b.trimSingleLine()) * order;
     };
 }
 class binaryArray extends Array {
@@ -168,7 +171,7 @@ class binaryArray extends Array {
         if(!b && b !== 0) { return -1; }
         if(!isNaN(a)) { return (!isNaN(b) ? a < b ? -1 : a > b ? 1 : 0 : -1) * order; }
         if(!isNaN(b)) { return order; }
-        return binaryArray.compare(a, b) * order;
+        return binaryArray.compare(a.trimSingleLine(), b.trimSingleLine()) * order;
     }
     testnull(a = null) {
         if(Array.isArray(a)) { for(var i = 0, r = 1; i < a.length && r; i++) { r = this.testnull(a[i]); } }

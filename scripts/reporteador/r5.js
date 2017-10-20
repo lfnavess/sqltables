@@ -5,15 +5,16 @@ function work(data) {
         "Competencias",
         [
             ["Competencia", "nvarchar", 50, null, null, "NOT NULL", [[null, "PRIMARY KEY", null, null]]],
+            ["position", "smallint", null, null, null, "NOT NULL", [[null, "UNIQUE", null, null]]],
             ["Style", "nvarchar", 100, null, null, "NOT NULL", null]
         ]
     );
-    INSERT(Competencias, '"Competencia","Style"', ["Comunicación", "background-color:#FFF2CC;"]);
-    INSERT(Competencias, '"Competencia","Style"', ["Trabajo en Equipo", "background-color:#FFF2CC;"]);
-    INSERT(Competencias, '"Competencia","Style"', ["Negociación", "background-color:#FFF2CC;"]);
-    INSERT(Competencias, '"Competencia","Style"', ["Liderazgo", "background-color:#FFF2CC;"]);
-    INSERT(Competencias, '"Competencia","Style"', ["Creativaidad e Innovación", "background-color:#FFF2CC;"]);
-    INSERT(Competencias, '"Competencia","Style"', ["Planeación", "background-color:#FFF2CC;"]);
+    INSERT(Competencias, '"Competencia","position","Style"', ["Comunicación", "1", "background-color:#FFF2CC;"]);
+    INSERT(Competencias, '"Competencia","position","Style"', ["Trabajo en Equipo", "2", "background-color:#FFF2CC;"]);
+    INSERT(Competencias, '"Competencia","position","Style"', ["Negociación", "3", "background-color:#FFF2CC;"]);
+    INSERT(Competencias, '"Competencia","position","Style"', ["Liderazgo", "4", "background-color:#FFF2CC;"]);
+    INSERT(Competencias, '"Competencia","position","Style"', ["Creativaidad e Innovación", "5", "background-color:#FFF2CC;"]);
+    INSERT(Competencias, '"Competencia","position","Style"', ["Planeación", "6", "background-color:#FFF2CC;"]);
 
     var CompetenciaP = CREATE_TABLE(
         "CompetenciaP",
@@ -42,7 +43,17 @@ function work(data) {
     INSERT(CompetenciaP, '"Competencia","Pregunta"', ["Trabajo en Equipo", "P22"]);
     INSERT(CompetenciaP, '"Competencia","Pregunta"', ["Trabajo en Equipo", "P23"]);
     INSERT(CompetenciaP, '"Competencia","Pregunta"', ["Trabajo en Equipo", "P24"]);
-
+    var ValueR = CREATE_TABLE(
+        "ValueR",
+        [
+            ["value", "nvarchar", 255, null, null, "NOT NULL", [[null, "PRIMARY KEY", null, null]]],
+            ["rate", "smallint", null, null, null, "NOT NULL", null]
+        ]
+    );
+    INSERT(ValueR, '"value","rate"', ["Nunca", "0"]);
+    INSERT(ValueR, '"value","rate"', ["Rara Vez", "33"]);
+    INSERT(ValueR, '"value","rate"', ["Casi Siempre", "67"]);
+    INSERT(ValueR, '"value","rate"', ["Siempre", "100"]);
 
     var mdl_feedback_item = CREATE_TABLE(
         "mdl_feedback_item",
@@ -112,6 +123,10 @@ function work(data) {
         for(var j = 0, k, v; j < values.length; j++) {
             k = values[j]; v = null;
             if(k.indexOf("####") >= 0) { k = k.split("####"); v = k[0] === "-1" ? null : k[0]; k = k[1]; }
+            else {
+                v = WHERE(ValueR, [["value", k]])[0];
+                if(v) { v = v[1]; }
+            }
             INSERT(mdl_feedback_item_value, '"item","position","value","rate"', [r[3][0], j + 1, k, v]);
         }
         if(r[0][4][0] === "d") { insertCol(mdl_feedback_completed, [r[3][3], "nvarchar", 255, null, null, "NULL", null], ci); }
@@ -137,11 +152,13 @@ function work(data) {
         );
     }
 
-    var vCols = [["Categoría", 1], ["Pregunta", 1]];
+    var vCols = [["Competencia", 1], ["name", 1]];
     var hCols = [
-        ["Sexo", 1, "background-color:#DDEBF7;"],
-        ["Edad", 1, "background-color:#FCE4D6;"],
-        ["Nivel", 1, "background-color:#EDEDED;"]
+        ["Site", 1, "background-color:#DDEBF7;"],
+        ["Cargo", 1, "background-color:#FCE4D6;"],
+        ["Sexo", 1, "background-color:#EDEDED;"],
+        ["Grado Académico", 1, "background-color:#EDEDED;"],
+        ["Edad", 1, "background-color:#EDEDED;"]
     ];
     var Resultados = CREATE_TABLE(
         "Resultados",
