@@ -107,7 +107,7 @@ function work(data) {
             ["position", "smallint", null, null, null, "NOT NULL", null],
             ["Competencia", "nvarchar", 50, null, null, "NOT NULL", null],
             ["label", "nvarchar", 255, null, null, "NOT NULL", null],
-            ["name", "nvarchar", 255, null, null, "NOT NULL", null],
+            ["Pregunta", "nvarchar", 255, null, null, "NOT NULL", null],
             ["value", "nvarchar", 255, null, null, "NOT NULL", null],
             ["rate", "smallint", null, null, null, "NULL", null]
         ],
@@ -147,7 +147,7 @@ function work(data) {
         r = mdl_feedback_value.rows[i];
         INSERT(
             interactions,
-            '"completed","Site","Cargo","Sexo","Grado Académico","Edad","item","position","Competencia","label","name","value","rate"',
+            '"completed","Site","Cargo","Sexo","Grado Académico","Edad","item","position","Competencia","label","Pregunta","value","rate"',
             [...r[0], r[1][0], r[1][1], r[1][5][0], r[1][2], r[1][3], r[2], r[3]]
         );
     }
@@ -164,10 +164,10 @@ function work(data) {
         "Resultados",
         [
             ["CR", "tinyint", null, null, null, "NOT NULL", null],
-            ["Categoría", "nvarchar", 50, null, null, "NOT NULL", null],
+            ["Competencia", "nvarchar", 50, null, null, "NOT NULL", null],
             ["Pregunta", "nvarchar", 50, null, null, "NOT NULL", null]
         ],
-        [[null, "PRIMARY KEY", [["CR"], ["Categoría"], ["Pregunta"]], null, null]]
+        [[null, "PRIMARY KEY", [["CR"], ["Competencia"], ["Pregunta"]], null, null]]
     );
 
     INSERT(Resultados, Resultados.cols, [0, 1, 1]);
@@ -189,14 +189,14 @@ function work(data) {
     };
     cols.unique = true;
     cols.push([0, 1, 2, 3]);
-    cols.push([1, 1, "Categoría", "Categoría"]);
+    cols.push([1, 1, "Competencia", "Competencia"]);
     cols.push([1, 2, "Pregunta", "Pregunta"]);
 
     function csc2(data) {
         if(cols.lastIndexOf(data) >= 0) { return cols.s; }
         else {
             cols.insertAt(data, cols.s);
-            insertCol(Resultados, [`${data[2]}|${data[3]}`, "tinyint", null, null, null, "NOT NULL", [[null, "DEFAULT", null, null, "new funcs.AVG(f => f[3])"]]], cols.s);
+            insertCol(Resultados, [`${data[2]}|${data[3]}`, "tinyint", null, null, null, "NOT NULL", [[null, "DEFAULT", null, null, "new funcs.AVG(f => f[13])"]]], cols.s);
             //for (var i = 0; i < 4; i++) { Resultados.rows[i][ci] = data[i]; }
             //Resultados.rows[4][ci] = new funcs.COUNT(true, f => f[0]);
         }
