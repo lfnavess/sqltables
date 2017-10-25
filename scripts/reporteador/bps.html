@@ -44,19 +44,15 @@
     </style>
     <script src="plugins.js"></script>
     <script src="r2.js"></script>
-    <script src="r5.js"></script>
-    <script src="r5_data.js"></script>
-    <script>
-        //fetch('json.json', { mode: "same-origin" })
-        //    .then(function(response) { return response.json(); })
-        //    .then(function(j) { work(j); });
-    </script>
+    <script src="bps.js"></script>
 </head>
 <body>
+    <input type="button" id="button" value="work" />
+    <textarea id="textarea" required></textarea>
     <script>
         (function() {
-            work();
-            //document.getElementById("button").addEventListener("click", function (e) { work(document.getElementById("textarea").value); });
+            //work();
+            document.getElementById("button").addEventListener("click", function (e) { work(document.getElementById("textarea").value); });
         })();
     </script>
 </body>

@@ -1,36 +1,15 @@
 function work(data) {
     "use strict";
     data = data.split("\n").map(a => a.split("\t"));
-    var Colaboradores = CREATE_TABLE(
-        "Colaboradores",
-        [
-            ["Colaborador ID", "nvarchar", 7, null, null, "NOT NULL", [[null, "PRIMARY KEY", null, null]]],
-            ["Colaborador", "nvarchar", 50, null, null, "NULL", null],
-            ["Email", "nvarchar", 50, null, null, "NULL", [[null, "UNIQUE", null, null]]],
-            ["Lugar", "nvarchar", 50, null, null, "NULL", null],
-            ["Empresa", "nvarchar", 50, null, null, "NULL", null],
-            ["Empresa tipo", "nvarchar", 50, null, null, "NULL", null],
-            ["Entidad", "nvarchar", 50, null, null, "NULL", null],
-            ["Centro de costos ID", "int", null, null, null, "NULL", null],
-            ["Centro de costos", "nvarchar", 50, null, null, "NULL", null],
-            ["Puesto", "nvarchar", 50, null, null, "NULL", null],
-            ["Nivel", "nvarchar", 50, null, null, "NULL", null],
-            ["Dirección", "nvarchar", 50, null, null, "NULL", null],
-            ["Dirección categoría", "nvarchar", 50, null, null, "NULL", null],
-            ["Business Partner ID", "nvarchar", 7, null, null, "NULL", null],
-            ["Business Partner", "nvarchar", 50, null, null, "NULL", null],
-            ["Jefe ID", "nvarchar", 7, null, null, "NULL", null],
-            ["Jefe", "nvarchar", 50, null, null, "NULL", null],
-            ["Jefe email", "nvarchar", 50, null, null, "NULL", null],
-            ["Director", "nvarchar", 50, null, null, "NULL", null]
-        ]
-    );
+    data.pop();
+    var ori = CREATE_TABLE("ori", data.splice(0, 1)[0].map(c => [c, "nvarchar", 200, null, null, "NULL", null]));
+    ori.rows = new rows(...data); 
     var Inscripciones = CREATE_TABLE(
         "Inscripciones",
         [
             ["Inscripción ID", "int", null, null, null, "NOT NULL", [[null, "PRIMARY KEY", null, null]]],
             ["Fecha corte", "smalldatetime", null, null, null, "NOT NULL", null],
-            ["Alumno ID", "nvarchar", 7, null, null, "NOT NULL", [[null, "FOREING KEY", Colaboradores, "Colaborador ID"]]],
+            ["Alumno ID", "nvarchar", 7, null, null, "NOT NULL", null],
             ["Curso ID", "int", null, null, null, "NOT NULL", null],
             ["Estado", "nvarchar", 50, null, null, "NOT NULL", null],
             ["Fecha inicio", "date", null, null, null, "NOT NULL", null],
@@ -39,9 +18,70 @@ function work(data) {
             ["Progreso", "tinyint", null, null, null, "NOT NULL", null],
             ["Último progreso", "smalldatetime", null, null, null, "NULL", null],
             ["Completado", "tinyint", null, null, null, "NOT NULL", null],
+            ["Estado orden", "tinyint", null, null, null, "NOT NULL", null],
             ["Fecha creado", "smalldatetime", null, null, null, "NOT NULL", null]
         ]
     );
+    var mat = [
+        ['"Inscripción ID"'],
+        ['"Fecha corte"'],
+        ['"Alumno >PPG ID"', '"Alumno ID"'],
+        ['"Curso ID"'],
+        ['"Estado"'],
+        ['"Fecha inicio"'],
+        ['"Curso >Nombre"', '"Curso"'],
+        ['"Estado2"'],
+        ['"Progreso"'],
+        ['"Último progreso"'],
+        ['"Completado"'],
+        ['"Estado orden"'],
+        ['"Fecha creado"']
+    ];
+    var dsInscripcion = mat.map(m => colde(m[1] ? m[1] : m[0], Inscripciones));
+    var osInscripcion = colconv(mat.map(m => m[0]).join(), [[ori]]);
+    for(var i = 0; i < ori.rows.length; i++){ INSERT(Inscripciones, Inscripciones.cols, osInscripcion([ori.rows[i]])); }
+    
+    var Estados = dt(Inscripciones, [['Estado', 'Estado orden']], undefined, [["COUNT", 'Inscripción ID']]);
+    
+    //var AxD = dt(Inscripciones, [[r => r[9].startOf('day')]], undefined, [["COUNT", 'Inscripción ID']], r => r[11]===1);
+    
+    function dt(table, filas, columnas, valores){
+        var table1 =  CREATE_TABLE(
+            "table1",
+            [
+                ...filas.map(c => {
+                    c = tableCol(table, c[1]);
+                    return [c[2], c[3][1], c[4], c[5], c[6], c[7] ? "NULL" : "NOT NULL", null]
+                }),
+                ...filas.map(c => {
+                    c = tableCol(table, c[0]);
+                    return [c[2], c[3][1], c[4], c[5], c[6], c[7] ? "NULL" : "NOT NULL", null]
+                }),
+                ...valores.map(c =>{
+                    var c1 = tableCol(table, c[1]);
+                    return [c1[2], c1[3][1], c1[4], c1[5], c1[6], "NOT NULL", [[null, "DEFAULT", null, null, `new funcs.${c[0]}(false, r => r[0])`]]];
+                })
+            ],
+            [[null, "PRIMARY KEY", filas.map(c => [c[1]]), null, null]]
+        );
+        var selcols = [...filas.map(c => c[1]), ...filas.map(c => c[0])];
+        var ia, ib
+        var selcolsm = r => [...filas.map(c => r[cddf(tableCol(table, c[1]))]), ...filas.map(c => r[cddf(tableCol(table, c[0]))])];
+        for(var i = 0, table_r, t1_r; i < table.rows.length; i++ ){
+            t1_r = table.rows[i];
+            var aa = selcolsm(t1_r);
+            table_r = WHERE(table1, selcols.map((c, i) => [c,aa[i]] ))[0];
+            table_r = table_r || INSERT(table1, selcols, selcolsm(t1_r));
+            for(var j = 0; j < valores.length; j++){
+                table_r[cddf(tableCol(table1, valores[j][1]))].v = t1_r;
+            }
+        }
+        return table1;
+    }
+    
+    
+    
+    
     var s = `
 		"Inscripciones"."Fecha corte",
 		"Inscripciones"."Estado",
@@ -92,22 +132,7 @@ function work(data) {
         ['"Alumno >Jefe >Email"', '"Jefe email"'],
         ['"Alumno >Director >Nombre corto"', '"Director"']
     ];
-    var mat = [
-        ['"Inscripción ID"'],
-        ['"Fecha corte"'],
-        ['"Estado"'],
-        ['"Fecha inicio"'],
-        ['"Curso >Nombre"', '"Curso"'],
-        ['"Estado2"'],
-        ['"Progreso"'],
-        ['"Último progreso"'],
-        ['"Fecha creado"'],
-        ['"Alumno >PPG ID"', '"Alumno ID"'],
-        ['"Curso ID"'],
-        ['"Completado"']
-    ];
 
-    var ori = CREATE_TABLE("ori", data.splice(0, 1)[0].map(c => [c, "nvarchar", 200, null, null, "NULL", null]));
     
     function sel(row, select_list) {
         for(var i = 0, si; i < select_list.length; i++) {
@@ -118,8 +143,6 @@ function work(data) {
     // var orisel = new Function("r", `return[${mat.map(m => colconv(m[0], ori)).join(",")}];`);
     var dcColaborador = matuser.map(m => colde(m[1] ? m[1] : m[0], Colaboradores));
     var osColaborador = colconv(matuser.map(m => m[0]).join(), [[ori]]);
-    var dsInscripcion = mat.map(m => colde(m[1] ? m[1] : m[0], Inscripciones));
-    var osInscripcion = colconv(mat.map(m => m[0]).join(), [[ori]]);
 
     function colconv(s, f) {
         var parts = [], ccc = [], o = [], isSearch;
