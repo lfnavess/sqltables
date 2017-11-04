@@ -1,0 +1,34 @@
+﻿ * {
+    box-sizing: border-box;
+}
+
+html {
+    min-height: 100%;
+}
+
+body {
+    display: inline-block;
+    min-width: 100%;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    background-color: lightgray;
+}
+
+table {
+    table-layout: fixed;
+    position: relative;
+    width: 855px;
+    margin-bottom: -4px;
+    border-collapse: collapse;
+}
+
+    table > tbody > tr {
+        background-color: white;
+    }
+
+td {
+    white-space: nowrap;
+    overflow: hidden;
+    width: 28px;
+}

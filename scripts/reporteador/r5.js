@@ -43,6 +43,53 @@ function work(data) {
     INSERT(CompetenciaP, '"Competencia","Pregunta"', ["Trabajo en Equipo", "P22"]);
     INSERT(CompetenciaP, '"Competencia","Pregunta"', ["Trabajo en Equipo", "P23"]);
     INSERT(CompetenciaP, '"Competencia","Pregunta"', ["Trabajo en Equipo", "P24"]);
+
+    INSERT(CompetenciaP, '"Competencia","Pregunta"', ["Negociación", "P25"]);
+    INSERT(CompetenciaP, '"Competencia","Pregunta"', ["Negociación", "P26"]);
+    INSERT(CompetenciaP, '"Competencia","Pregunta"', ["Negociación", "P27"]);
+    INSERT(CompetenciaP, '"Competencia","Pregunta"', ["Negociación", "P28"]);
+    INSERT(CompetenciaP, '"Competencia","Pregunta"', ["Negociación", "P29"]);
+    INSERT(CompetenciaP, '"Competencia","Pregunta"', ["Negociación", "P30"]);
+    INSERT(CompetenciaP, '"Competencia","Pregunta"', ["Negociación", "P31"]);
+    INSERT(CompetenciaP, '"Competencia","Pregunta"', ["Negociación", "P32"]);
+    INSERT(CompetenciaP, '"Competencia","Pregunta"', ["Negociación", "P33"]);
+    INSERT(CompetenciaP, '"Competencia","Pregunta"', ["Negociación", "P34"]);
+
+    INSERT(CompetenciaP, '"Competencia","Pregunta"', ["Liderazgo", "P35"]);
+    INSERT(CompetenciaP, '"Competencia","Pregunta"', ["Liderazgo", "P36"]);
+    INSERT(CompetenciaP, '"Competencia","Pregunta"', ["Liderazgo", "P37"]);
+    INSERT(CompetenciaP, '"Competencia","Pregunta"', ["Liderazgo", "P38"]);
+    INSERT(CompetenciaP, '"Competencia","Pregunta"', ["Liderazgo", "P39"]);
+    INSERT(CompetenciaP, '"Competencia","Pregunta"', ["Liderazgo", "P40"]);
+    INSERT(CompetenciaP, '"Competencia","Pregunta"', ["Liderazgo", "P41"]);
+    INSERT(CompetenciaP, '"Competencia","Pregunta"', ["Liderazgo", "P42"]);
+    INSERT(CompetenciaP, '"Competencia","Pregunta"', ["Liderazgo", "P43"]);
+    INSERT(CompetenciaP, '"Competencia","Pregunta"', ["Liderazgo", "P44"]);
+    INSERT(CompetenciaP, '"Competencia","Pregunta"', ["Liderazgo", "P45"]);
+    INSERT(CompetenciaP, '"Competencia","Pregunta"', ["Liderazgo", "P46"]);
+    INSERT(CompetenciaP, '"Competencia","Pregunta"', ["Liderazgo", "P47"]);
+    INSERT(CompetenciaP, '"Competencia","Pregunta"', ["Liderazgo", "P48"]);
+
+    INSERT(CompetenciaP, '"Competencia","Pregunta"', ["Creatividad e Innovación", "P49"]);
+    INSERT(CompetenciaP, '"Competencia","Pregunta"', ["Creatividad e Innovación", "P50"]);
+    INSERT(CompetenciaP, '"Competencia","Pregunta"', ["Creatividad e Innovación", "P51"]);
+    INSERT(CompetenciaP, '"Competencia","Pregunta"', ["Creatividad e Innovación", "P52"]);
+    INSERT(CompetenciaP, '"Competencia","Pregunta"', ["Creatividad e Innovación", "P53"]);
+    INSERT(CompetenciaP, '"Competencia","Pregunta"', ["Creatividad e Innovación", "P54"]);
+    INSERT(CompetenciaP, '"Competencia","Pregunta"', ["Creatividad e Innovación", "P55"]);
+    INSERT(CompetenciaP, '"Competencia","Pregunta"', ["Creatividad e Innovación", "P56"]);
+    INSERT(CompetenciaP, '"Competencia","Pregunta"', ["Creatividad e Innovación", "P57"]);
+
+    INSERT(CompetenciaP, '"Competencia","Pregunta"', ["Planeación", "P58"]);
+    INSERT(CompetenciaP, '"Competencia","Pregunta"', ["Planeación", "P59"]);
+    INSERT(CompetenciaP, '"Competencia","Pregunta"', ["Planeación", "P60"]);
+    INSERT(CompetenciaP, '"Competencia","Pregunta"', ["Planeación", "P61"]);
+    INSERT(CompetenciaP, '"Competencia","Pregunta"', ["Planeación", "P62"]);
+    INSERT(CompetenciaP, '"Competencia","Pregunta"', ["Planeación", "P63"]);
+    INSERT(CompetenciaP, '"Competencia","Pregunta"', ["Planeación", "P64"]);
+    INSERT(CompetenciaP, '"Competencia","Pregunta"', ["Planeación", "P65"]);
+    INSERT(CompetenciaP, '"Competencia","Pregunta"', ["Planeación", "P66"]);
+
     var ValueR = CREATE_TABLE(
         "ValueR",
         [
