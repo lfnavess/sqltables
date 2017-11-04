@@ -165,7 +165,7 @@ function work(data) {
         [
             ["CR", "tinyint", null, null, null, "NOT NULL", null],
             ["Competencia", "nvarchar", 50, null, null, "NOT NULL", null],
-            ["Pregunta", "nvarchar", 50, null, null, "NOT NULL", null]
+            ["Pregunta", "nvarchar", 255, null, null, "NOT NULL", null]
         ],
         [[null, "PRIMARY KEY", [["CR"], ["Competencia"], ["Pregunta"]], null, null]]
     );
@@ -181,8 +181,8 @@ function work(data) {
     cols.compare = function(a, b, o) {
         for(var i = 0, r = 0, ia, ib; i < ColPK.length && !r; i++) {
             r = ColPK[i];
-            ia = a ? a[r] : null;
-            ib = b ? b[r] : null;
+            ia = a || a === 0 ? Array.isArray(a) ? a[r] : a : null;
+            ib = b || b === 0 ? Array.isArray(b) ? b[r] : b : null;
             r = this.__proto__.compare(ia, ib, o);
         }
         return r;
@@ -193,33 +193,32 @@ function work(data) {
     cols.push([1, 2, "Pregunta", "Pregunta"]);
 
     function csc2(data) {
-        if(cols.lastIndexOf(data) >= 0) { return cols.s; }
-        else {
-            cols.insertAt(data, cols.s);
-            insertCol(Resultados, [`${data[2]}|${data[3]}`, "tinyint", null, null, null, "NOT NULL", [[null, "DEFAULT", null, null, "new funcs.AVG(f => f[13])"]]], cols.s);
-            //for (var i = 0; i < 4; i++) { Resultados.rows[i][ci] = data[i]; }
-            //Resultados.rows[4][ci] = new funcs.COUNT(true, f => f[0]);
-        }
+        var i = cols.lastIndexOf(data);
+        if(i >= 0) { return i; }
+        cols.insertAt(data, cols.s);
+        insertCol(Resultados, [`${data[2]}|${data[3]}`, "tinyint", null, null, null, "NOT NULL", [[null, "DEFAULT", null, null, "new funcs.AVG(f => f[12])"]]], cols.s);
+        for(var i = 0; i <= 3; i++) { Resultados.rows[i][cols.s] = data[i]; }
+        Resultados.rows[4][cols.s] = new funcs.COUNT(true, f => f[0]);
+        return cols.s;
     }
-    //csc2([2, 0, "Totales", "Totales"]);
     var rcont = rsc([4, "Totales", "1.Encuestas"]);
     var rcat = rsc([4, "Totales", "2.Promedio"]);
 
-    Resultados.cols.indexOf([2, 0, "Totales", "Totales"]);
-    var cit = csc([2, 0, "Totales", "Totales"]);
+    var cit = csc2([2, 0, "Totales", "Totales"]);
     var vcs = vCols.map(c => c[0]);
-    var ñ = '5,"Categoría","Pregunta"'; ñ = function(f) { return [5, f[1], f[2]]; };
-    hCols = hCols.map((c, i, n) => { n = cddf(tableCol(Interacciones, c[0])); return f => [3, i, c[0], f[n]]; });
-    for(var i = 1, length = data.length - 1, row, p, ci, j; i < length; i++) {
-        row = INSERT(Interacciones, data[0], data[i]);
+    var ñ = '5,"Competencia","Pregunta"'; ñ = function(f) { return [5, f[8], f[10]]; };
+    hCols = hCols.map((c, i, n) => { n = cddf(tableCol(interactions, c[0])); return f => [3, i, c[0], f[n]]; });
+    for(var i = 0, row, p, ci, j; i < interactions.rows.length; i++) {
+        row = interactions.rows[i];
         p = rsc(ñ(row));
         p[cit].v = rcat[cit].v = rcont[cit].v = row;
         for(j = 0; j < hCols.length; j++) {
-            ci = csc(hCols[j](row));
+            ci = csc2(hCols[j](row));
             p[ci].v = rcat[ci].v = rcont[ci].v = row;
         }
     }
     Resultados.rows.removeAt(2, 0);
+
     var table = document.createElement("table"); document.body.appendChild(table);
     var tbody = document.createElement("tbody"); table.appendChild(tbody);
     var prevci = [], prevri = []; var twi = 0;
@@ -233,7 +232,7 @@ function work(data) {
         if(ri < 4) { tr.style.fontWeight = "bold"; }
         r.forEach(function(c, ci) {
             var c2 = c;
-            c = c !== null && typeof c === "object" ? ci < 2 ? c[0] : c.v.toFixed(0) : c;
+            c = c !== null && typeof c === "object" ? ci < 2 ? c[0] : c.v || c.v === 0 ?  c.v.toFixed(0) : c.v : c;
             if(ri === 0) {
                 var wi = ci === 1 ? 200 : 28;
                 if(prevri[ri] && prevri[ri].innerText.trimSingleLine() === c) {
@@ -307,8 +306,8 @@ function work(data) {
         return ci;
     }
     function rsc(row) {
-        var s = WHERE(Resultados, [["CR", row[0]], ["Categoría", row[1]], ["Pregunta", row[2]]])[0];
-        return s || INSERT(Resultados, ["CR", "Categoría", "Pregunta"], row);
+        var s = WHERE(Resultados, [["CR", row[0]], ["Competencia", row[1]], ["Pregunta", row[2]]])[0];
+        return s || INSERT(Resultados, ["CR", "Competencia", "Pregunta"], row);
     }
     function indexCol(a, e) {
         if(!e && e !== 0) { e = Resultados.cols.length - 1; }

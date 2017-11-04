@@ -174,7 +174,10 @@ class binaryArray extends Array {
         return binaryArray.compare(a.trimSingleLine(), b.trimSingleLine()) * order;
     }
     testnull(a = null) {
-        if(Array.isArray(a)) { for(var i = 0, r = 1; i < a.length && r; i++) { r = this.testnull(a[i]); } }
+        if(Array.isArray(a)) {
+            for(var i = 0, r = false; i < a.length && !r; i++) { r = this.testnull(a[i]); }
+            return r;
+        }
         return this.compare(a, null) === 0;
     }
     flip(s, e) {
@@ -270,7 +273,13 @@ var funcs = {
         get v() { return this._v; }
     },
     COUNT: class COUNT {
-        constructor(unique, expresion) { this.e = expresion; this.rs = new binaryArray; this.rs.unique = true; this._v = null; this.u = unique ? [] : null; }
+        constructor(unique, expresion) {
+            this.e = expresion; this.rs = new binaryArray; this.rs.unique = true; this._v = null;
+            if(unique) {
+                this.u = new binaryArray;
+                this.u.unique = true;
+            }
+        }
         set v(f) {
             this.rs.push(f);
             f = this.e(f);
@@ -342,7 +351,7 @@ CREATE_TABLE(
     [
         ["ConstraintID", "int", null, null, "IDENTITY", "NOT NULL", null],
         ["Table", "int", null, null, null, "NOT NULL", null],
-        ["constraint_name", "nvarchar", 50, null, null, "NOT NULL", null],
+        ["constraint_name", "nvarchar", 100, null, null, "NOT NULL", null],
         ["CONSTRAINTTYPE", "int", null, null, null, "NOT NULL", null]
     ]
 );
