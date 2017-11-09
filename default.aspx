@@ -12,15 +12,25 @@
     <script src="scripts/reporteador/plugins.js"></script>
     <script src="scripts/reporteador/r2.js"></script>
     <script src="scripts/reporteador/r5.js"></script>
-    <script src="scripts/reporteador/r5_data.js"></script>
 </head>
 <body>
     <form id="form1" runat="server">
     <script>
-        (function() {
-            work();
-            //document.getElementById("button").addEventListener("click", function (e) { work(document.getElementById("textarea").value); });
-        })();
+        var d1, d2;
+
+        fetch("default.aspx/getTable", {
+            cache: "no-store", mode: "cors", method: "POST", headers: { 'Content-Type': "application/json", 'Accept': "application/json" }, body: JSON.stringify({ json: JSON.stringify({ name: "lfn_feedback_item" }) })
+        })
+            .then(function(response) { if(!response.ok) { throw "error"; } return response.json(); })
+            .then(function(data) { try { d1 = JSON.parse(data.d).rows; second() } catch(e) { throw data.d; } });
+
+        function second() {
+            fetch("default.aspx/getTable", {
+                cache: "no-store", mode: "cors", method: "POST", headers: { 'Content-Type': "application/json", 'Accept': "application/json" }, body: JSON.stringify({ json: JSON.stringify({ name: "lfn_feedback_value" }) })
+            })
+                .then(function(response) { if(!response.ok) { throw "error"; } return response.json(); })
+                .then(function(data) { try { d2 = JSON.parse(data.d).rows; work(); } catch(e) { throw data.d; } });
+        }
     </script>
     </form>
 </body>

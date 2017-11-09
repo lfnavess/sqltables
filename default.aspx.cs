@@ -7,7 +7,7 @@ using SDSc = System.Data.SqlClient;
 public partial class SICC_v1_default : System.Web.UI.Page {
     static SICC_v1_default() {
         thistables.table(new table() {
-            name = "mlfn_feedback_item",
+            name = "lfn_feedback_item",
             update = false,
             insert = false,
             delete = false,
@@ -258,7 +258,7 @@ public partial class SICC_v1_default : System.Web.UI.Page {
         public returnval merge(returnval val) {
             if (val.rows == null && val.childs == null) {
                 SD.DataTable DataTable;
-                using (SDSc.SqlConnection SqlConnection = new SDSc.SqlConnection(System.Configuration.ConfigurationManager.ConnectionStrings["reportesConnectionString"].ConnectionString)) {
+                using (SDSc.SqlConnection SqlConnection = new SDSc.SqlConnection(System.Configuration.ConfigurationManager.ConnectionStrings["moodleConnectionString1"].ConnectionString)) {
                     DataTable = new SD.DataTable();
                     (new SDSc.SqlDataAdapter(new SDSc.SqlCommand() {
                         CommandText = string.Format(
@@ -275,7 +275,7 @@ public partial class SICC_v1_default : System.Web.UI.Page {
                 val.rows = new List<object[]>();
                 foreach (SD.DataRow DataRow in DataTable.Rows) { val.rows.Add(DataRow.ItemArray); }
             } else {
-                using (SDSc.SqlConnection SqlConnection = new SDSc.SqlConnection(System.Configuration.ConfigurationManager.ConnectionStrings["reportesConnectionString"].ConnectionString)) {
+                using (SDSc.SqlConnection SqlConnection = new SDSc.SqlConnection(System.Configuration.ConfigurationManager.ConnectionStrings["moodleConnectionString1"].ConnectionString)) {
                     SqlConnection.Open();
                     SDSc.SqlTransaction SqlTransaction = SqlConnection.BeginTransaction();
                     try {

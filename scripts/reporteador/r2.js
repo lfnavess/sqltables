@@ -250,7 +250,7 @@ var funcs = {
             if(f === null) { return; }
             if(this._v === null || compare(f, this._v) > 0) { this._v = f; }
         }
-        get v() { return this._v; }
+        get v() { return this._v || this._v === 0 ? this._v.toFixed(0) : this._v; }
     },
     MIN: class MIN {
         constructor(expresion) { this.e = expresion; this.rs = []; this._v = null; }
@@ -260,7 +260,7 @@ var funcs = {
             if(f === null) { return; }
             if(compare(f, this._v) < 0) { this._v = f; }
         }
-        get v() { return this._v; }
+        get v() { return this._v || this._v === 0 ? this._v.toFixed(0) : this._v; }
     },
     AVG: class AVG {
         constructor(expresion) { this.e = expresion; this.rs = []; this.s = 0; this.c = 0; this._v = null; }
@@ -270,7 +270,7 @@ var funcs = {
             if(f === null) { return; }
             this.s += f; this.c++; this._v = this.s / this.c;
         }
-        get v() { return this._v; }
+        get v() { return this._v || this._v === 0 ? this._v.toFixed(0) : this._v; }
     },
     COUNT: class COUNT {
         constructor(unique, expresion) {
@@ -289,7 +289,7 @@ var funcs = {
                 if(this.u.indexOf(f) < 0) { this.u.insertAt(f, this.u.s); this._v++; }
             } else { this._v++; }
         }
-        get v() { return this._v; }
+        get v() { return this._v || this._v === 0 ? this._v.toFixed(0) : this._v; }
     }
 };
 

@@ -1,6 +1,7 @@
 function work(data) {
     "use strict";
     //data = data.split("\n").map(function(a) { return a.split("\t"); });
+
     var Competencias = CREATE_TABLE(
         "Competencias",
         [
@@ -13,7 +14,7 @@ function work(data) {
     INSERT(Competencias, '"Competencia","position","Style"', ["Trabajo en Equipo", "2", "background-color:#FFF2CC;"]);
     INSERT(Competencias, '"Competencia","position","Style"', ["Negociación", "3", "background-color:#FFF2CC;"]);
     INSERT(Competencias, '"Competencia","position","Style"', ["Liderazgo", "4", "background-color:#FFF2CC;"]);
-    INSERT(Competencias, '"Competencia","position","Style"', ["Creativaidad e Innovación", "5", "background-color:#FFF2CC;"]);
+    INSERT(Competencias, '"Competencia","position","Style"', ["Creatividad e Innovación", "5", "background-color:#FFF2CC;"]);
     INSERT(Competencias, '"Competencia","position","Style"', ["Planeación", "6", "background-color:#FFF2CC;"]);
 
     var CompetenciaP = CREATE_TABLE(
@@ -161,7 +162,7 @@ function work(data) {
         [[null, "PRIMARY KEY", [["completed"], ["item"]], null, null]]
     );
     var from = [d1, CompetenciaP, Competencias, mdl_feedback_item];
-    for(var i = 1, values, r = []; i < from[0].length; i++) {
+    for(var i = 0, values, r = []; i < from[0].length; i++) {
         r[0] = from[0][i];
         r[1] = WHERE(from[1], [["Pregunta", r[0][2]]])[0];
         r[2] = r[1] ? r[1][1] : null;
@@ -179,10 +180,10 @@ function work(data) {
         if(r[0][4][0] === "d") { insertCol(mdl_feedback_completed, [r[3][3], "nvarchar", 255, null, null, "NULL", null], ci); }
     }
     var from = [d2, mdl_feedback_completed, mdl_feedback_item, mdl_feedback_item_value, mdl_feedback_value];
-    for(var i = 1, from_r = []; i < from[0].length; i++) {
+    for(var i = 0, from_r = []; i < from[0].length; i++) {
         from_r[0] = from[0][i];
         from_r[1] = WHERE(from[1], [["id", parseInt(from_r[0][0])]])[0];
-        from_r[1] = from_r[1] || INSERT(from[1], '"id"', from_r[0][0]);
+        from_r[1] = from_r[1] || INSERT(from[1], '"id"', [from_r[0][0]]);
         from_r[2] = WHERE(from[2], [["id", parseInt(from_r[0][1])]])[0];
         from_r[3] = WHERE(from[3], [["item", parseInt(from_r[0][1])], ["position", parseInt(from_r[0][2])]])[0];
         if(from_r[2][4] === "d") {
@@ -279,7 +280,7 @@ function work(data) {
         if(ri < 4) { tr.style.fontWeight = "bold"; }
         r.forEach(function(c, ci) {
             var c2 = c;
-            c = c !== null && typeof c === "object" ? ci < 2 ? c[0] : c.v || c.v === 0 ?  c.v.toFixed(0) : c.v : c;
+            c = c !== null && typeof c === "object" ? ci < 2 ? c[0] : c.v : c;
             if(ri === 0) {
                 var wi = ci === 1 ? 200 : 28;
                 if(prevri[ri] && prevri[ri].innerText.trimSingleLine() === c) {
