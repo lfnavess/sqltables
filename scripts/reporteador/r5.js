@@ -95,11 +95,14 @@ function work(data) {
         "ValueR",
         [
             ["value", "nvarchar", 255, null, null, "NOT NULL", [[null, "PRIMARY KEY", null, null]]],
-            ["rate", "smallint", null, null, null, "NOT NULL", null]
+            ["rate", "smallint", null, null, null, "NULL", null]
         ]
     );
     INSERT(ValueR, '"value","rate"', ["Nunca", "0"]);
+    INSERT(ValueR, '"value","rate"', ["Pocas Veces", "33"]);
     INSERT(ValueR, '"value","rate"', ["Rara Vez", "33"]);
+    INSERT(ValueR, '"value","rate"', ["Desconozco", null]);
+    INSERT(ValueR, '"value","rate"', ["Generalmente", "67"]);
     INSERT(ValueR, '"value","rate"', ["Casi Siempre", "67"]);
     INSERT(ValueR, '"value","rate"', ["Siempre", "100"]);
 
@@ -311,7 +314,10 @@ function work(data) {
             if(ri >= 2 && ci === 1) {
                 td.style.backgroundColor = prevri[ri].style.backgroundColor;
             }
-            if(ri > 2 && ci > 1) { td.style.textAlign = "center"; td.style.backgroundColor = getColorForPercentage(c / 100); }
+            if(ri > 2 && ci > 1) {
+                td.style.textAlign = "center";
+                if(c || c === 0) { td.style.backgroundColor = getColorForPercentage(c / 100); }
+            }
             if(ri >= 4 && ci === 0) {
                 for(var i = 0, ss = c2[1].split(";").map(s => s.split(":")); i < ss.length && ss[i][0]; i++) { td.style[ss[i][0]] = ss[i][1]; }
             }
